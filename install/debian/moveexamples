@@ -1,0 +1,55 @@
+#!/bin/sh
+
+set -xe
+
+EXAMPLE_TEMP=$1
+DOC_DIR=$2
+VERSION=$3
+
+move_examples()
+{
+	local pkgName=$1
+	local pkgContent=$2
+    # Make examples dir
+	DOC_INSTALL_DIR="${DOC_DIR}/${pkgName}/${VERSION}"
+    EXAMPLE_INSTALL_DIR="${DOC_INSTALL_DIR}/examples"
+    install -d -m 755 "${EXAMPLE_INSTALL_DIR}"
+    for package in ${pkgContent}
+    do
+		PKG_TEMP_DIR="${EXAMPLE_TEMP}/fpc-${package}-${VERSION}"
+		test -d "${PKG_TEMP_DIR}" || continue
+        PKG_EXAMPLES_DIR="${EXAMPLE_INSTALL_DIR}/${package}"
+        if test -d "${PKG_TEMP_DIR}/examples"
+		then
+            echo "Moving examples of ${package}"
+            # Move dir renaming it
+            mv -v -f "${PKG_TEMP_DIR}/examples" "${PKG_EXAMPLES_DIR}"
+            # Remove empty directories:
+            rmdir --ignore-fail-on-non-empty "${PKG_EXAMPLES_DIR}"
+        fi
+        if ! rmdir "${PKG_TEMP_DIR}" 2> /dev/null
+		then
+			# Directory still exists ==> contains docs
+            echo "Moving docs of ${package}"
+            # Move dir renaming it
+            mv -v -f -t "${DOC_INSTALL_DIR}" "${PKG_TEMP_DIR}"/*
+            rmdir "${PKG_TEMP_DIR}"
+        fi
+    done
+    # Remove empty directories:
+    # rmdir "${EXAMPLE_INSTALL_DIR}"
+}
+
+echo '**** Copying examples ****'
+PACKAGE_LIST='debian/fp-'*'.install.in'
+
+for PACKAGE_FILE in ${PACKAGE_LIST}
+do
+    PACKAGE_NAME=`basename "${PACKAGE_FILE}" '.install.in'`
+    PACKAGE_CONTENT=`grep '/usr/lib/fpc' "${PACKAGE_FILE}" | sed -e 's@.*/\([^/]\)/\?@\1@'`
+	echo '    **** PACKAGE_NAME = "'${PACKAGE_NAME}'"'
+	echo '    **** PACKAGE_CONTENT = "'${PACKAGE_CONTENT}'"'
+    move_examples "${PACKAGE_NAME}" "${PACKAGE_CONTENT}"
+done
+
+echo '**** Examples copied ****'

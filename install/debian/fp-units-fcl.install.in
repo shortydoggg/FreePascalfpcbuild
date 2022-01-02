@@ -1,0 +1,16 @@
+/usr/share/doc/fp-units-fcl
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-base
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-db
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-extra
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-fpcunit
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-image
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-js
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-net
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-passrc
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-registry
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-res
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-web
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-xml
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-async
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-json
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fcl-process

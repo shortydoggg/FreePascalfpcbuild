@@ -1,0 +1,25 @@
+#!/bin/sh
+
+set -e
+
+if [ $# -lt 1 ] || [ $# -gt 2 ]
+then
+  echo "Usage: $0 <version>"
+  exit 1
+fi
+
+NEWVER="$1"
+if [ $# -eq 1 ]
+then
+	FPCMAKE=`which fpcmake`
+else
+	FPCMAKE="$2"
+fi
+
+find -name Makefile.fpc\
+	-exec sed -i -e 's/^version=.*/version='"${NEWVER}"'/' '{}' ';'\
+	-exec "${FPCMAKE}" -q -Tall '{}' ';'
+
+find -name Makefile.fpc.fpcmake\
+	-exec sed -i -e 's/^version=.*/version='"${NEWVER}"'/' '{}' ';'
+

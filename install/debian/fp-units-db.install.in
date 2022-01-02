@@ -1,0 +1,10 @@
+/usr/share/doc/fp-units-db
+/usr/lib/fpc/${VERSION}/units/${TARGET}/dblib
+/usr/lib/fpc/${VERSION}/units/${TARGET}/mysql
+/usr/lib/fpc/${VERSION}/units/${TARGET}/ibase
+/usr/lib/fpc/${VERSION}/units/${TARGET}/postgres
+/usr/lib/fpc/${VERSION}/units/${TARGET}/oracle
+/usr/lib/fpc/${VERSION}/units/${TARGET}/odbc
+/usr/lib/fpc/${VERSION}/units/${TARGET}/gdbm
+/usr/lib/fpc/${VERSION}/units/${TARGET}/sqlite
+/usr/lib/fpc/${VERSION}/units/${TARGET}/pxlib

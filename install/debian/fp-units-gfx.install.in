@@ -1,0 +1,14 @@
+/usr/lib/fpc/${VERSION}/units/${TARGET}/hermes
+/usr/lib/fpc/${VERSION}/units/${TARGET}/opencl
+/usr/lib/fpc/${VERSION}/units/${TARGET}/opengl
+/usr/lib/fpc/${VERSION}/units/${TARGET}/xforms
+/usr/lib/fpc/${VERSION}/units/${TARGET}/svgalib
+/usr/lib/fpc/${VERSION}/units/${TARGET}/ggi
+/usr/lib/fpc/${VERSION}/units/${TARGET}/imagemagick
+/usr/lib/fpc/${VERSION}/units/${TARGET}/libgd
+/usr/lib/fpc/${VERSION}/units/${TARGET}/libpng
+/usr/lib/fpc/${VERSION}/units/${TARGET}/graph
+/usr/lib/fpc/${VERSION}/units/${TARGET}/cairo
+/usr/lib/fpc/${VERSION}/units/${TARGET}/ptc
+/usr/lib/fpc/${VERSION}/units/${TARGET}/rsvg
+/usr/share/doc/fp-units-gfx

@@ -1,0 +1,1853 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--  
+
+   $Id: linux.xml,v 1.1 2004/10/22 20:45:36 michael Exp $ 
+   This file is part of the FPC documentation. 
+   Copyright (C) 1997, by Michael Van Canneyt 
+ 
+   The FPC documentation is free text; you can redistribute it and/or 
+   modify it under the terms of the GNU Library General Public License as 
+   published by the Free Software Foundation; either version 2 of the 
+   License, or (at your option) any later version. 
+ 
+   The FPC Documentation is distributed in the hope that it will be useful, 
+   but WITHOUT ANY WARRANTY; without even the implied warranty of 
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+   Library General Public License for more details. 
+ 
+   You should have received a copy of the GNU Library General Public 
+   License along with the FPC documentation; see the file COPYING.LIB.  If not, 
+   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, 
+   Boston, MA 02111-1307, USA. 
+ -->
+<fpdoc-descriptions>
+<package name="rtl">
+<module name="Linux">
+<short>Linux-specific operating system calls.</short>
+<descr>
+<p>
+The <file>linux</file> unit contains Linux specific operating system calls.
+</p>
+<p>
+The platform independent functionality of the FPC 1.0.X version of the 
+<file>linux</file> unit has been split out over the 
+<link id="#rtl.unix">unix</link>, <link id="#rtl.baseunix">baseunix</link> and
+<link id="#rtl.unixutil">unixutil</link> units.
+</p>
+<p>
+The X86-specific parts have been moved to the <link id="#rtl.x86">X86</link>
+unit.
+</p>
+</descr>
+
+<!-- record type Visibility: default -->
+<element name="TSysinfo">
+<short>Record with system information, used by the <link id="SysInfo"/> call.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysinfo.uptime">
+<short>Number of seconds since boot.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysinfo.loads">
+<short>1, 5 and 15 minute load averages.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysinfo.totalram">
+<short>total amount of main memory.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysinfo.freeram">
+<short>amount of free memory.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysinfo.sharedram">
+<short>amount of shared memory.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysinfo.bufferram">
+<short>amount of memory used by buffers.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysinfo.totalswap">
+<short>total amount of swapspace.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysinfo.freeswap">
+<short>amount of free swapspace.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysinfo.procs">
+<short>number of current processes.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysinfo.s">
+<short>?</short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PSysInfo">
+<short>Pointer to <link id="TSysInfo"/> record.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="Sysinfo">
+<short>Return kernel system information</short>
+<descr>
+<p>
+<var>SysInfo</var> returns system information in <var>Info</var>. Returned information
+in <var>Info</var> includes:
+</p>
+<dl>
+<dt>uptime</dt><dd>Number of seconds since boot.</dd>
+<dt>loads</dt><dd>1, 5 and 15 minute load averages.</dd>
+<dt>totalram</dt><dd>total amount of main memory.</dd>
+<dt>freeram</dt><dd>amount of free memory.</dd>
+<dt>sharedram</dt><dd>amount of shared memory.</dd>
+<dt>bufferram</dt><dd>amount of memory used by buffers.</dd>
+<dt>totalswap</dt><dd>total amount of swapspace.</dd>
+<dt>freeswap</dt><dd>amount of free swapspace.</dd>
+<dt>procs</dt><dd>number of current processes.</dd>
+</dl>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="#rtl.baseunix.fpUname"/>
+</seealso>
+<example file="linuxex/ex64"/>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CSIGNAL">
+<short><link id="Clone"/> option: Signal mask to be sent at exit</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_VM">
+<short><link id="Clone"/> option: VM shared between processes</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_FS">
+<short><link id="Clone"/> option: fs info shared between processes</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_FILES">
+<short><link id="Clone"/> option: open files shared between processes</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_SIGHAND">
+<short><link id="Clone"/> option: signal handlers shared between processes</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_PID">
+<short><link id="Clone"/> option: PID shared between processes</short>
+</element>
+
+<!-- function type Visibility: default -->
+<element name="TCloneFunc">
+<short>Clone function prototype.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="Clone">
+<short>Clone current process (create new thread)</short>
+<descr>
+<p>
+<var>Clone</var>
+creates a child process which is a copy of the parent process, just
+like <link id="#rtl.baseunix.FpFork">FpFork</link> does. In difference with <var>Fork</var>, however, the child
+process shares some parts of it's execution context with its parent, so it
+is suitable for the implementation of threads: many instances of a program
+that share the same memory.
+</p>
+<p>
+When the child process is created, it starts executing the function
+<var>Func</var>, and passes it <var>Args</var>. The return value of <var>Func</var> is 
+either the explicit return value of the function, or the exit code of
+the child process.
+</p>
+<p>
+The <var>sp</var> pointer points to the memory reserved as stack space for the
+child process. This address should be the top of the memory block to be used
+as stack.
+</p>
+<p>
+The <var>Flags</var> determine the behaviour of the <var>Clone</var> call. The low
+byte of the Flags contains the number of the signal that will be  sent to 
+the parent when  the child dies. 
+This may be bitwise OR'ed with the following constants:
+</p>
+<dl>
+<dt>CLONE_VM</dt>
+<dd>Parent and child share the same memory space, including
+memory (un)mapped with subsequent <var>mmap</var> calls.</dd>
+<dt>CLONE_FS</dt>
+<dd>Parent and child have the same view of the filesystem;
+the <var>chroot</var>, <var>chdir</var> and <var>umask</var> calls affect both processes.</dd>
+<dt>CLONE_FILES</dt>
+<dd>the file descriptor table of parent and child is shared.</dd>
+<dt>CLONE_SIGHAND</dt>
+<dd>the parent and child share the same table of signal
+handlers. The signal masks are different, though.</dd>
+<dt>CLONE_PID</dt>
+<dd>PArent and child have the same process ID.</dd>
+</dl>
+<p>
+Clone returns the process ID in the parent process, and -1 if an error
+occurred.
+</p>
+</descr>
+<errors>
+<p>
+On error, -1 is returned to the parent, and no child is created.
+</p>
+<dl>
+<dt>sys_eagain</dt><dd>Too many processes are running.</dd>
+<dt>sys_enomem</dt><dd>Not enough memory to create child process.</dd>
+</dl>
+</errors>
+<seealso>
+<link id="#rtl.baseunix.FpFork"/>
+</seealso>
+<example file="linuxex/ex71"/>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="ctypes">
+<short>Support for some basic C types</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="EPOLLIN">
+<short><var>event_wait</var> input file descriptor ready event</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="EPOLLOUT">
+<short><var>event_wait</var> output file descriptor ready event</short>
+</element>
+<!-- constant Visibility: default -->
+<element name="EPOLLPRI">
+<short><var>event_wait</var> high priority data available on input file descriptor</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="EPOLLERR">
+<short><var>event_wait</var> error condition on file descriptor</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="EPOLLHUP">
+<short><var>event_wait</var> hang up event</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="EPOLLET">
+<short>Set <var>event_wait</var> edge trigger behaviour on file descriptor</short>
+</element>
+
+<element name="EPOLLONESHOT">
+<short>Set single-shot behaviour on <var>epoll_wait</var>.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="EPOLL_CTL_ADD">
+<short>Add filedescriptor to list of events</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="EPOLL_CTL_MOD">
+<short>Modify event for filedescriptor</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="EPOLL_CTL_DEL">
+<short>Delete event for filedescriptor</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="GIO_FONT">
+<short>IOCTL: Get font in expanded form.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PIO_FONT">
+<short>IOCTL: Use font in expanded form.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="GIO_FONTX">
+<short>IOCTL: Get font in <var>consolefontdesc</var> record.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PIO_FONTX">
+<short>IOCTL: Set font in <var>consolefontdesc</var> record.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PIO_FONTRESET">
+<short>IOCTL: Reset to default font</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="GIO_CMAP">
+<short>IOCTL: Get colour palette on VGA+</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PIO_CMAP">
+<short>IOCTL: Set colour palette on VGA+</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KIOCSOUND">
+<short>IOCTL: start/stop sound generation (0 for off)</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDMKTONE">
+<short>IOCTL: generate tone</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDGETLED">
+<short>IOCTL: return current led state</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDSETLED">
+<short>IOCTL: set led state</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDGKBTYPE">
+<short>IOCTL: get keyboard type</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDADDIO">
+<short>IOCTL: add i/o port as valid</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDDELIO">
+<short>IOCTL: delete i/o port as valid</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDENABIO">
+<short>IOCTL: enable i/o to video board</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDDISABIO">
+<short>IOCTL: disable i/o to video board</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDSETMODE">
+<short>IOCTL: set text/graphics mode</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDGETMODE">
+<short>IOCTL: get current mode</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDMAPDISP">
+<short>IOCTL: map display into address space</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDUNMAPDISP">
+<short>IOCTL: unmap display from address space</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="GIO_SCRNMAP">
+<short>IOCTL: get screen mapping from kernel</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PIO_SCRNMAP">
+<short>IOCTL: put screen mapping table in kernel</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="GIO_UNISCRNMAP">
+<short>IOCTL: get full Unicode screen mapping</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PIO_UNISCRNMAP">
+<short>IOCTL: set full Unicode screen mapping</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="GIO_UNIMAP">
+<short>IOCTL: get unicode-to-font mapping from kernel</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PIO_UNIMAP">
+<short>IOCTL: put unicode-to-font mapping in kernel</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="PIO_UNIMAPCLR">
+<short>IOCTL: clear table, possibly advise hash algorithm</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDGKBDIACR">
+<short>IOCTL: read kernel accent table</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDSKBDIACR">
+<short>IOCTL: write kernel accent table</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDGETKEYCODE">
+<short>IOCTL: read kernel keycode table entry</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDSETKEYCODE">
+<short>IOCTL: write kernel keycode table entry</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDSIGACCEPT">
+<short>IOCTL: accept kbd generated signals</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KDFONTOP">
+<short>IOCTL: font operations</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KB_84">
+<short>IOCTL: Keyboard types: 84 keys</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KB_101">
+<short>IOCTL: Keyboard types: 101 keys</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KB_OTHER">
+<short>IOCTL: Keyboard types: other type</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="LED_SCR">
+<short>IOCTL: LED_SCR : scroll lock led</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="LED_NUM">
+<short>IOCTL: LED_SCR : Num lock led</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="LED_CAP">
+<short>IOCTL: LED_CAP : caps lock led</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KD_TEXT">
+<short>IOCTL: Tty modes: Text mode</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KD_GRAPHICS">
+<short>IOCTL: Tty modes: graphics mode</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KD_TEXT0">
+<short>IOCTL: Tty modes: Text mode (obsolete)</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="KD_TEXT1">
+<short>IOCTL: Tty modes: Text mode (obsolete)</short>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="EPoll_Data">
+<short>Epoll data call structure</short>
+<descr>
+Data structure used in EPOLL IOCTL call.
+</descr>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="EPoll_Data.ptr">
+<short>Pointer to data</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="EPoll_Data.fd">
+<short>File descriptor</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="EPoll_Data.u32">
+<short>Unsigned 32-bit integer</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="EPoll_Data.u64">
+<short>Unsigned 64-bit integer</short>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="TEPoll_Data">
+<short>Alias for <link id="#rtl.linux.EPoll_Data">EPoll_Data</link> type</short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PEPoll_Data">
+<short>Pointer to <link id="#rtl.linux.EPoll_Data">EPoll_Data</link> record</short>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="EPoll_Event">
+<short>Structure used in <link id="#rtl.linux.epoll_ctl">epoll_ctl</link> call.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="EPoll_Event.Events">
+<short>Events to monitor</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="EPoll_Event.Data">
+<short>User data</short>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="TEPoll_Event">
+<short>Alias for <link id="#rtl.linux.EPoll_Event">EPoll_Event</link> type</short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PEpoll_Event">
+<short>Pointer to <link id="#rtl.linux.EPoll_Event">EPoll_Event</link> type</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="epoll_create">
+<short>Create new epoll file descriptor</short>
+<descr>
+<p>
+<var>epoll_create</var> creates a new epoll file descriptor. The <var>size</var>
+argument indicates to the kernel approximately how many structures should be allocated,
+but is by no means an upper limit.
+</p>
+<p>
+On success, a file descriptor is returned that can be used in subsequent 
+<link id="epoll_ctl"/> or <link id="epoll_wait"/> calls, and should be closed
+using the <link id="#rtl.baseunix.fpClose">fpClose</link> call. 
+</p>
+</descr>
+<errors>
+On error, -1 is returned, and <link id="#rtl.baseunix.fpgeterrno">errno</link> is set. 
+</errors>
+<seealso>
+<link id="epoll_ctl"/>
+<link id="epoll_wait"/>
+<link id="#rtl.baseunix.fpClose">fpClose</link>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="epoll_ctl">
+<short>Modify an epoll file descriptor</short>
+<descr>
+<p>
+<var>epoll_ctl</var> performs the <var>op</var> operation on epoll file descriptor
+<var>epfd</var>. The operation will be monitored on file descriptor <var>fd</var>, and is
+optionally controlled by <var>event</var>.
+</p>
+<p>
+<var>op</var> can be one of the following values:
+</p>
+<dl>
+<dt>EPOLL_CTL_ADD</dt><dd><printshort id="EPOLL_CTL_ADD"/></dd>
+<dt>EPOLL_CTL_MOD</dt><dd><printshort id="EPOLL_CTL_MOD"/></dd>
+<dt>EPOLL_CTL_DEL</dt><dd><printshort id="EPOLL_CTL_DEL"/></dd>
+</dl>
+<p>
+The <var>events</var> field in  <var>event_data</var> is a bitmask of one or more of the following values:</p>
+<dl>
+<dt>EPOLLIN</dt><dd>The file is ready for read operations</dd>
+<dt>EPOLLOUT</dt><dd>The file is ready for write operations.</dd>
+<dt>EPOLLPRI</dt><dd>Urgent data is available for read operations.</dd>
+<dt>EPOLLERR</dt><dd>An error condition is signaled on the file descriptor.</dd>
+<dt>EPOLLHUP</dt><dd>A Hang up happened on the file descriptor.</dd>
+<dt>EPOLLET</dt><dd>Set the Edge Triggered behaviour for the file descriptor.</dd>
+<dt>EPOLLONESHOT</dt><dd>Set One-Shot behaviour for the file descriptor. The event will be triggered only once.</dd>
+</dl>
+</descr>
+<errors>
+On error -1 is returned, and errno is set accordingly.
+</errors>
+<seealso>
+<link id="epoll_create"/>
+<link id="epoll_wait"/>
+<link id="#rtl.baseunix.fpClose">fpClose</link>
+</seealso>
+</element>
+
+<element name="epoll_wait">
+<short>Wait for an event on an epoll file descriptor.</short>
+<descr>
+<p>
+<var>epoll_wait</var> waits for <var>timeout</var> milliseconds for an event to occur on epoll file descriptor <var>epfd</var>. If <var>timeout</var> is -1, it waits indefinitely, if <var>timeour</var> is zero, it does not wait, but returns immediately, even if no events were detected.
+</p>
+
+<p>On return, data for at most <var>maxevents</var> will be returned in the memory pointed to by <var>events</var>. The function returns the number of file descriptors for which
+events were reported. This can be zero if the timeout was reached.</p>
+</descr>
+<errors>
+On error -1 is returned, and errno is set accordingly.
+</errors>
+<seealso>
+<link id="epoll_create"/>
+<link id="epoll_ctl"/>
+<link id="#rtl.baseunix.fpClose">fpClose</link>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_PTRACE">
+<short>Clone options: if parent is traced, trace child also</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_VFORK">
+<short>Clone options: suspend parent till child execs</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_PARENT">
+<short>Clone options: Set child parent to parent of calling process.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_THREAD">
+<short>Clone options: Set child in thread group of calling process.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_NEWNS">
+<short>Clone options: Start child in new (filesystem) namespace.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_SYSVSEM">
+<short>Clone option: Caller and child share the same semaphore undo values</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_SETTLS">
+<short>Clone option: The newtls parameter is the TLS descriptor of the child</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_PARENT_SETTID">
+<short>Clone option: Store child thread ID in memory in both parent and child.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_CHILD_CLEARTID">
+<short>Clone option: Erase child thread ID in child memory space when child exits.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_DETACHED">
+<short>Clone option: Start clone detached.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_UNTRACED">
+<short>Clone option: Do not allow a ptrace call on this clone.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_CHILD_SETTID">
+<short>Clone option: Store child thread ID in child memory.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLONE_STOPPED">
+<short>Clone option: Start child in stopped state.</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_WAIT">
+<short>Futex option: Wait on futex till wake call arrives.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_WAKE">
+<short>Futex option: wakes any waiting processes on this futex</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_FD">
+<short>Futex option: Associate file descriptor with futex.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_REQUEUE">
+<short>Futex option: requeue waiting processes on other futex.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_CMP_REQUEUE">
+<short>Futex option: requeue waiting processes on other futex, but check it's value first</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_WAKE_OP">
+<short>Futex option: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_LOCK_PI">
+<short>Futex option: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_UNLOCK_PI">
+<short>Futex option: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_TRYLOCK_PI">
+<short>Futex option: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_SET">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_ADD">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_OR">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_ANDN">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_XOR">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_OPARG_SHIFT">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_CMP_EQ">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_CMP_NE">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_CMP_LT">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_CMP_LE">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_CMP_GT">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FUTEX_OP_CMP_GE">
+<short>Futex operation: Undocumented</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="FUTEX_OP">
+<short>Futex operation:</short>
+<descr>
+<p>
+<var>FUTEX_OP</var> Performs an operation on a futex:
+</p>
+<pre>
+FUTEX_OP := ((op and $F) shl 28) or  
+            ((cmp and $F) shl 24) or 
+            ((oparg and $FFF) shl 12) 
+            or (cmparg and $FFF);
+</pre>
+</descr>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MODIFY_LDT_CONTENTS_DATA">
+<short>Modify_ldt option: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MODIFY_LDT_CONTENTS_STACK">
+<short>Modify_ldt option: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MODIFY_LDT_CONTENTS_CODE">
+<short>Modify_ldt option: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="UD_SEG_32BIT">
+<short>TLS segment descriptor : Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="UD_CONTENTS_DATA">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="UD_CONTENTS_STACK">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="UD_CONTENTS_CODE">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="UD_READ_EXEC_ONLY">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="UD_LIMIT_IN_PAGES">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="UD_SEG_NOT_PRESENT">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="UD_USEABLE">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="UD_LM">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="user_desc">
+<short>TLS segment descriptor</short>
+<descr>
+<var>user_desc</var> is the TLS (Thread Local Storage) segment descriptor
+used in the <var>Clone</var> call. It should not be used, as it contains
+highly kernel-specific data.
+</descr>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="user_desc.entry_number">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="user_desc.base_addr">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="user_desc.limit">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="user_desc.flags">
+<short>TLS segment descriptor: Undocumented</short>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="TUser_Desc">
+<short>Alias for <var>user_desc</var> record</short>
+<descr>
+<var>TUser_Desc</var> is an alias for the <link id="user_desc"/> type.
+</descr>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PUser_Desc">
+<short>Pointer to <var>User_Desc</var> record</short>
+<descr>
+<var>PUser_Desc</var> is a pointer to the <link id="user_desc"/> type.
+</descr>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysInfo.pad">
+<short>Alignment padding</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysInfo.totalhigh">
+<short>Total amount of high memory</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysInfo.freehigh">
+<short>Total free amount of high memory in bytes</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysInfo.mem_unit">
+<short>Memory unit size in bytes</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TSysInfo._f">
+<short>Alignment adding</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MAP_GROWSDOWN">
+<short>Memory map grows down, like stack</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MAP_DENYWRITE">
+<short>Read-only</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MAP_EXECUTABLE">
+<short>Memory area is marked as executable</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MAP_LOCKED">
+<short>Memory pages are locked</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MAP_NORESERVE">
+<short>Do not check for reservations</short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="Puser_cap_header">
+<short>Pointer to <link id="#rtl.linux.user_cap_header">user_cap_header</link> record</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="user_cap_header">
+<short>Root user capabilities header</short>
+<descr>
+<var>user_cap_header</var> describes the root user capabilities for the
+current thread, as set by <link id="capget"/> and <link id="capset"/>
+</descr>
+<seealso>
+<link id="capget"/>
+<link id="capset"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="user_cap_header.version">
+<short>Version of protocol</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="user_cap_header.pid">
+<short>Thread ID to apply/get capabilities from</short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="Puser_cap_data">
+<short>Pointer to <link id="#rtl.linux.user_cap_data">user_cap_data</link> record</short>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="user_cap_data">
+<short>Capability description record</short>
+<descr>
+<var>user_cap_data</var> describes the set of capabilities for the
+indicated thread. 
+</descr>
+<seealso>
+<link id="user_cap_header"/>
+<link id="capget"/>
+<link id="capset"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="user_cap_data.effective">
+<short>Capabilities effectively used by the kernel</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="user_cap_data.permitted">
+<short>Limiting set of capabilities</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="user_cap_data.inheritable">
+<short>Capabilities that will be inherited across exec calls.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="capget">
+<short>Return the capabilities for the indicated thread</short>
+<descr>
+<p>
+<var>capget</var> returns the capabilities of the indicated thread in <var>header</var>.
+The thread is identified by the process ID, or -1 for all caller (and child) process
+ID's.
+</p>
+<p>
+Refer to the Linux man pages (7 capabilities) for more info.
+</p>
+</descr>
+<errors>
+On success, zero is returned, on error -1 is returned, and fperrno is set to
+the error.
+</errors>
+<seealso>
+<link id="capset"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="capset">
+<short>Set the capabilities for the indicated thread</short>
+<descr>
+<p>
+<var>capget</var> sets the capabilities of the indicated thread in
+<var>header</var>.
+The thread is identified by the process ID, or -1 for all caller (and child)
+process ID's.
+</p>
+<p>
+Refer to the Linux man pages (7 capabilities) for more info.
+</p>
+</descr>
+<errors>
+On success, zero is returned, on error -1 is returned, and fperrno is set to
+the error.
+</errors>
+<seealso>
+<link id="capget"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_CHOWN">
+<short>Perform chown operation</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_DAC_OVERRIDE">
+<short>Bypass file operation (rwx) checks</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_DAC_READ_SEARCH">
+<short>Bypass file read-only operation checks</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_FOWNER">
+<short>Bypass owner ID checks</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_FSETID">
+<short>Do not clear SUID/GUID bits on modified files</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_FS_MASK">
+<short>?</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_KILL">
+<short>Bypass permission checks for sending signals</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SETGID">
+<short>Allow GID manipulations</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SETUID">
+<short>Allow process ID manipulations</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SETPCAP">
+<short>Allow to set other process' capabilities</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_LINUX_IMMUTABLE">
+<short>Allow setting ext2 file attributes</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_NET_BIND_SERVICE">
+<short>Allow binding to ports less than 1024</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_NET_BROADCAST">
+<short>Allow socket broadcast operations</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_NET_ADMIN">
+<short>Allow network operations (e.g. setting socket options)</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_NET_RAW">
+<short>Allow use of RAW and PACKET sockets</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_IPC_LOCK">
+<short>Allow memory locking calls</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_IPC_OWNER">
+<short>Bypass permission checks on IPC operations</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SYS_MODULE">
+<short>Allow loading/unloading of kernel modules</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SYS_RAWIO">
+<short>Allow raw I/O port operations</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SYS_CHROOT">
+<short>Allow chroot calls.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SYS_PTRACE">
+<short>Allow ptrace calls</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SYS_PACCT">
+<short>Allow acct calls</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SYS_ADMIN">
+<short>Allow various system administration calls</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SYS_BOOT">
+<short>Allow reboot calls</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SYS_NICE">
+<short>Allowing raising process and thread priorities</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SYS_RESOURCE">
+<short>Allow use of special resources or raising of resource limits</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SYS_TIME">
+<short>Allow system or real-time clock modification</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_SYS_TTY_CONFIG">
+<short>Allow vhangup calls</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_MKNOD">
+<short>Allow creation of special files through mknod calls</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_LEASE">
+<short>Allow file leases</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_AUDIT_WRITE">
+<short>Allow writing to kernel audit log</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CAP_AUDIT_CONTROL">
+<short>Allow manipulation of kernel auditing features</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="LINUX_CAPABILITY_VERSION">
+<short>Current capability version in use by kernel</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="SPLICE_F_MOVE">
+<short>Move pages instead of copying</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="SPLICE_F_NONBLOCK">
+<short>Don't block on pipe splicing operations</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="SPLICE_F_MORE">
+<short>Expect more data</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="SPLICE_F_GIFT">
+<short>Pages spliced in are a gift</short>
+</element>
+
+<element name="POLLMSG">
+<short>Unused in Linux</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="POLLREMOVE">
+<short>Undocumented Linux extension of Poll</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="POLLRDHUP">
+<short>Peer Shutdown/closed writing half of connection</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="SYNC_FILE_RANGE_WAIT_BEFORE">
+<short>Wait for write-out of previously-submitted specified pages before writing more data.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="SYNC_FILE_RANGE_WRITE">
+<short>Initiate  write  of all dirty pages in the specified range.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="SYNC_FILE_RANGE_WAIT_AFTER">
+<short>Wait upon write-out of specified pages in the range after performing any write.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="sync_file_range">
+<short>Force committing of data to disk</short>
+<descr>
+<p>
+<var>sync_file_range</var> forces the Linux kernel to write any data pages
+of a specified file (file descriptor <var>fd</var>) to disk. The range of
+the file is specified by the offset <var>offset</var> and the number of
+bytes <var>nbytes</var>. <var>Options</var> is an OR-ed combination of
+</p>
+<dl>
+<dt>SYNC_FILE_RANGE_WAIT_BEFORE</dt><dd><printshort id="SYNC_FILE_RANGE_WAIT_BEFORE"/></dd>
+<dt>SYNC_FILE_RANGE_WRITE</dt><dd><printshort id="SYNC_FILE_RANGE_WRITE"/></dd>
+<dt>SYNC_FILE_RANGE_WAIT_AFTER</dt><dd><printshort id="SYNC_FILE_RANGE_WAIT_AFTER"/></dd>
+</dl>
+<p>
+If none is specified, the operation does nothing.
+</p>
+</descr>
+<errors>
+On return -1 is returned and fperrno is set to the actual error code. See
+the Linux man page for more on the error codes.
+</errors>
+<seealso>
+<link id="fdatasync"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fdatasync">
+<short>Synchronize the data in memory with the data on storage device</short>
+<descr>
+<var>fdatasync</var> does the same as <var>fpfsync</var> but does not flush
+the metadata, unless it is vital to the correct reading/writing of the file.
+In practice, this means that unless the file size changed, the file
+metadata will not be synced.
+</descr>
+<seealso>
+<link id="#rtl.unix.fsync"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="futex">
+<short>Perform a futex operation</short>
+<descr>
+<p>
+<var>futex</var> performs an operation on a memory futex as described in the
+kernel manual page for futex. The mutex is located at <var>uaddr</var>, the
+operation <var>op</var> is one of the following constants:
+</p>
+<dl>
+<dt>FUTEX_WAIT</dt><dd><printshort id="FUTEX_WAIT"/></dd>
+<dt>FUTEX_WAKE</dt><dd><printshort id="FUTEX_WAIT"/></dd>
+<dt>FUTEX_FD</dt><dd><printshort id="FUTEX_FD"/></dd>  
+<dt>FUTEX_REQUEUE</dt><dd><printshort id="FUTEX_REQUEUE"/></dd>  
+<dt>FUTEX_CMP_REQUEUE</dt><dd><printshort id="FUTEX_CMP_REQUEUE"/></dd>  
+</dl>
+<p>
+The value to check for is indicated in <var>val</var>, and a timeout can be
+specified in <var>timeout</var>. The optional arguments <var>addr2</var> and
+<var>val3</var> are used only with the <var>FUTEX_REQUEUE</var> and
+<var>FUTEX_CMP_REQUEUE</var> operations.
+</p>
+<p>
+In case of an error, -1 is return. All other return values must be
+interpreted according to the operation performed.
+</p>
+<p>
+This call directly interfaces with the Linux kernel, more information can be found
+in the kernel manual pages. 
+</p>
+</descr>
+<errors>
+On error, -1 is returned. Use <link id="#rtl.baseunix.fpgeterrno"/> to get the error code.
+</errors>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="sched_yield">
+<short>Yield the processor to another thread.</short>
+<descr>
+<var>sched_yield</var> yields the processor to another thread. The current
+thread is put at the back of its queue. If there is only 1 thread in the
+application, the thread continues to run. The call always returns zero.
+</descr>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_CLOEXEC">
+<short>Inotify close on exec flag.</short>
+<descr>
+<var>IN_CLOEXEC</var> can be set to indicate that the inotify file handle
+must be closed on exec.
+</descr>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_NONBLOCK">
+<short>Do not block on read</short>
+<descr>
+<var>IN_NONBLOCK</var> can be set to indicate that the inotify file handle
+should not block read operations.
+</descr>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="inotify_event">
+<short>INotify event structure</short>
+<descr>
+<p>
+<var>inotify_event</var> is the structure used to report changes in a directory.
+When reading a inotify file descriptor, one or more <var>inotify_event</var>
+records can be read from the file descriptor.
+</p>
+</descr>
+<seealso>
+<link id="baseunix.fpread"/>
+<link id="sysutils.FileRead"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="inotify_event.wd">
+<short>Watch descriptor (as returned by <var>inotify_add_watch</var>)</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="inotify_event.mask">
+<short>Event mask</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="inotify_event.cookie">
+<short>Cookie, used to pair move events</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="inotify_event.len">
+<short>Length of name</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="inotify_event.name">
+<short>Filename for which a change is reported</short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="Pinotify_event">
+<short>Pointer to <link id="#rtl.linux.inotify_event">inotify_event</link> structure.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_ACCESS">
+<short>Data was read from file.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_MODIFY">
+<short>Data was written to file.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_ATTRIB">
+<short>File attributes changed.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_CLOSE_WRITE">
+<short>File opened for write was closed</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_CLOSE_NOWRITE">
+<short>File opened for read was closed</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_OPEN">
+<short>File was opened</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_MOVED_FROM">
+<short>File was moved away from watched directory</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_MOVED_TO">
+<short>File was moved into watched directory</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_CLOSE">
+<short>File was closed (read or write)</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_MOVE">
+<short>File was moved (in or out of directory)</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_CREATE">
+<short>A file was created in the directory.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_DELETE">
+<short>A file was deleted from the directory.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_DELETE_SELF">
+<short>Directory or file under observation was deleted.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_MOVE_SELF">
+<short>Directory or file under observation was moved.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_UNMOUNT">
+<short>File system on which file resides was unmounted. Only reported.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_Q_OVERFLOW">
+<short>Queue overflowed. Only reported.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_IGNORED">
+<short>Watch was ignored (removed). Only reported.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_ONLYDIR">
+<short>Only watch filename if it is a directory.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_DONT_FOLLOW">
+<short>Do not follow symlinks</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_MASK_ADD">
+<short>Add events to existing watch (OR-ing the sets) if one exists.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_ISDIR">
+<short>Event subject is a directory (reported only)</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_ONESHOT">
+<short>Only report one event, then remove the watch.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="IN_ALL_EVENTS">
+<short>All possible events OR-ed together.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="inotify_init">
+<short>Initialize a new inotify file descriptor</short>
+<descr>
+<var>inotify_init</var> initializes a new <var>INotify</var> file descriptor.
+No options can be specified. On return, the file descriptor is returned.
+</descr>
+<errors>
+On Error, -1 is returned. <var>fpgeterrno</var> can be used to get more
+detailed error information
+</errors>
+<seealso>
+<link id="inotify_init1"/>
+<link id="inotify_add_watch"/>
+<link id="inotify_rm_watch"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="inotify_init1">
+<short>Initialize a new inotify file descriptor with extra options.</short>
+<descr>
+<p>
+<var>inotify_init1</var> initializes a new <var>INotify</var> file
+descriptor.
+The following options can be OR-ed and passed in flags:
+</p>
+<dl>
+<dt>IN_NONBLOCK</dt><dd><printshort id="IN_NONBLOCK"/></dd>
+<dt>IN_CLOEXEC</dt><dd><printshort id="IN_CLOEXEC"/></dd>
+</dl>
+</descr>
+<errors>
+On Error, -1 is returned. <var>fpgeterrno</var> can be used to get more
+detailed error information.
+</errors>
+<seealso>
+<link id="inotify_init"/>
+<link id="inotify_add_watch"/>
+<link id="inotify_rm_watch"/> 
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="inotify_add_watch">
+<short>Add a watch to a notify file descriptor</short>
+<descr>
+<p>
+<var>inotify_add_watch</var> can be used to add a watch to an initialized
+inotify file descriptor (<var>fd</var>). The file or directory to watch can
+be specified in the <var>name</var> parameter, and the events that must be
+reported can be specified in <var>mask</var>. The following flags can be
+specified:
+</p>
+<dl>
+<dt><var>IN_ACCESS</var></dt><dd>Data was read from file.</dd>
+<dt><var>IN_MODIFY</var></dt><dd>Data was written to file.</dd>
+<dt><var>IN_ATTRIB</var></dt><dd>File attributes changed.</dd>
+<dt><var>IN_CLOSE_WRITE</var></dt><dd>File opened for write was closed</dd>
+<dt><var>IN_CLOSE_NOWRITE</var></dt><dd>File opened for read was closed</dd>
+<dt><var>IN_CLOSE</var></dt><dd>File was closed (read or write)</dd>
+<dt><var>IN_OPEN</var></dt><dd>File was opened</dd>
+<dt><var>IN_MOVED_FROM</var></dt><dd>File was moved away from watched directory</dd>
+<dt><var>IN_MOVED_TO</var></dt><dd>File was moved into watched directory</dd>
+<dt><var>IN_MOVE</var></dt><dd>File was moved (in or out of directory)</dd>
+<dt><var>IN_CREATE</var></dt><dd>A file was created in the directory.</dd>
+<dt><var>IN_DELETE</var></dt><dd>A file was deleted from the directory.</dd>
+<dt><var>IN_DELETE_SELF</var></dt><dd>Directory or file under observation was deleted.</dd>
+<dt><var>IN_MOVE_SELF</var></dt><dd>Directory or file under observation was moved.</dd>
+<dt><var>IN_ALL_EVENTS</var></dt><dd>All possible events OR-ed together.</dd>
+</dl>
+<p>
+These events can be OR-ed with some flags, controlling the behaviour of the watch:
+</p>
+<dl>
+<dt><var>IN_ONLYDIR</var></dt><dd>Only watch filename if it is a directory.</dd>
+<dt><var>IN_ISDIR</var></dt><dd>Event occurred against directory.</dd>
+<dt><var>IN_DONT_FOLLOW</var></dt><dd>Do not follow symlinks</dd>
+<dt><var>IN_MASK_ADD</var></dt><dd>Add events to existing watch (OR-ing the sets) if one exists.</dd>
+<dt><var>IN_ONESHOT</var></dt><dd>Only report one event, then remove the watch.</dd>
+</dl>
+<p>
+On return, the function returns a watch descriptor, which will be reported in
+the <link id="inotify_event"/> structure's <var>wd</var>.
+</p>
+</descr>
+<errors>
+On Error, -1 is returned. <var>fpgeterrno</var> can be used to get more
+detailed error information.
+</errors>
+<seealso>
+<link id="inotify_init"/>
+<link id="inotify_init1"/>
+<link id="inotify_rm_watch"/> 
+<link id="inotify_event"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="inotify_rm_watch">
+<short>Remove watch from Inotify file descriptor.</short>
+<descr>
+<var>inotify_rm_watch</var> removes watch descriptor <var>wd</var>  from
+inotify descriptor <var>fd</var>. On success, 0 is returned.
+</descr>
+<errors>
+On Error, -1 is returned. <var>fpgeterrno</var> can be used to get more
+detailed error information.
+</errors>
+<seealso>
+<link id="inotify_init"/>
+<link id="inotify_init1"/> 
+<link id="inotify_add_watch"/>
+<link id="inotify_event"/>    
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLOCK_REALTIME">
+<short>System wide real-time clock. Can only be set by root.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLOCK_MONOTONIC">
+<short>Monotonic system time since some undetermined start point. Can change if time is set.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLOCK_PROCESS_CPUTIME_ID">
+<short>Processs-specific high-resolution timer from the CPU.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLOCK_THREAD_CPUTIME_ID">
+<short>Thread-specific high-resolution timer from the CPU.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLOCK_MONOTONIC_RAW">
+<short>Like <var>CLOCK_MONOTONIC</var>, not subject to NTP adjustments</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLOCK_REALTIME_COARSE">
+<short>Less precise (but faster) version of <var>CLOCK_REALTIME</var></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLOCK_MONOTONIC_COARSE">
+<short>Less precise (but faster) version of <var>CLOCK_MONOTONIC</var></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLOCK_SGI_CYCLE">
+<short>High resolution timer</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MAX_CLOCKS">
+<short>Maximum number of clocks in the system</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLOCKS_MASK">
+<short>Mask for supported clocks</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CLOCKS_MONO">
+<short>Monotonic clocks mask</short>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="clockid_t">
+<short>Clock id type</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="clock_getres">
+<short>Get clock resolution</short>
+<descr>
+<var>clock_getres</var> returns the resolution of the clock specified in
+<var>clk_id</var> in the <var>res</var> structure. It can be <var>Nil</var>.
+if the clock exists and the resolution can be retrieved, <var>0</var> is
+returned.
+</descr>
+<errors>
+On Error, -1 is returned. <var>fpgeterrno</var> can be used to get more
+detailed error information.
+</errors>
+<seealso>
+<link id="clock_gettime"/>
+<link id="clock_settime"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="clock_gettime">
+<short>Get the time of a clock</short>
+<descr>
+<var>clock_gettime</var> returns the current time of the clock specified in
+<var>clk_id</var> in the <var>tp</var> structure. If the clock exists and 
+the time can be retrieved, <var>0</var> is returned.
+</descr>
+<errors>
+On Error, -1 is returned. <var>fpgeterrno</var> can be used to get more
+detailed error information.
+</errors>
+<seealso>
+<link id="clock_getres"/>
+<link id="clock_settime"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="clock_settime">
+<short>Set the time of a clock</short>
+<descr>
+<var>clock_settime</var> sets the current time of the clock specified in
+<var>clk_id</var>. The time is specified in the <var>tp</var> structure. If the clock exists and 
+the time can be retrieved, <var>0</var> is returned. The resolution is
+truncated to the resolution supported by the specified clock. Note that not
+all clocks can be set.
+</descr>
+<errors>
+On Error, -1 is returned. <var>fpgeterrno</var> can be used to get more
+detailed error information.
+</errors>
+<seealso>
+<link id="clock_getres"/>
+<link id="clock_gettime"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="setregid">
+<short>Set Real and Effective Group ID</short>
+<descr>
+<var>setregid</var> sets the real group ID to <var>rgid</var> and the
+effective group ID to <var>egid</var>. Passing a value of -1 tells the
+system not to change that value.
+</descr>
+<errors>
+On Error, -1 is returned. <var>fpgeterrno</var> can be used to get more
+detailed error information.
+</errors>
+<seealso>
+<link id="setreuid"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="setreuid">
+<descr>
+<var>setreuid</var> sets the real user ID to <var>ruid</var> and the
+effective user ID to <var>euid</var>. Passing a value of -1 tells the
+system not to change that value.
+</descr>
+<errors>
+On Error, -1 is returned. <var>fpgeterrno</var> can be used to get more
+detailed error information.
+</errors>
+<seealso>
+<link id="setregid"/>
+</seealso>
+</element>
+
+</module> <!-- Linux -->
+</package>
+</fpdoc-descriptions>

@@ -1,0 +1,44 @@
+\begin{diagram}{Generic class types}{genclasstype}
+\begin{mysyntdiag}
+\synt{generic\ type} \lit*{generic} \synt{identifier} 
+\verb+ < +  \synt{template\ list} \verb+ > +  \lit* = \synt{generic\ type} \lit* ;
+\end{mysyntdiag}
+\begin{mysyntdiag}
+\synt{template\ list} 
+\begin{rep}[b]
+\synt{identifier\ list}\\
+\lit* ;
+\end{rep}
+\end{mysyntdiag}
+\begin{mysyntdiag}
+\synt{identifier\ list} 
+\begin{rep}[b]
+\synt{identifier}\\
+\lit* ,
+\end{rep} 
+\begin{stack}\\
+\lit* : 
+\begin{stack}
+\begin{rep}[b]
+\synt{type\ identifier}\\
+,
+\end{rep}\\
+\lit*{class}\\
+\lit*{interface}\\
+\lit*{object}\\
+\lit*{record}
+\end{stack}
+\end{stack}
+\end{mysyntdiag}
+\begin{mysyntdiag}
+\synt{generic\ type}
+\begin{stack} 
+\synt{class\ type} \\
+\synt{object\ type} \\
+\synt{interface\ type} \\
+\synt{procedural\ type} \\
+\synt{record\ type} \\
+\synt{array\ type}
+\end{stack}
+\end{mysyntdiag}
+\end{diagram}

@@ -1,0 +1,14 @@
+\begin{psyntax}{Hint directives}{hintdirective}
+\synt{hint\ directive}  
+\begin{stack} \\
+\lit*{Deprecated} 
+  \begin{stack}
+    \\ 
+    \synt{string\ constant}
+  \end{stack}
+\\
+\lit*{Experimental} \\
+\lit*{Platform} \\
+\lit*{Unimplemented}
+\end{stack}
+\end{psyntax}

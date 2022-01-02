@@ -1,0 +1,19 @@
+\begin{diagram}{Raise statement}{classreftype}
+\begin{mysyntdiag}
+\synt{raise\ statement}
+\lit*{raise}
+\begin{stack}\\ 
+  \synt{exception\ instance} 
+  \begin{stack}\\
+     \synt{exception\ address}
+  \end{stack}
+\end{stack}
+\end{mysyntdiag}
+\begin{mysyntdiag}
+\synt{exception\ address}
+\lit*{at} \synt{exception\ address}
+\begin{stack}
+\\ \lit*{,} \synt{address\ expression}
+\end{stack}
+\end{mysyntdiag}
+\end{diagram}

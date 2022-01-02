@@ -1,0 +1,9 @@
+/usr/share/doc/fp-units-base
+/usr/lib/fpc/${VERSION}/units/${TARGET}/fpmkunit
+/usr/lib/fpc/${VERSION}/units/${TARGET}/paszlib
+/usr/lib/fpc/${VERSION}/units/${TARGET}/pasjpeg
+/usr/lib/fpc/${VERSION}/units/${TARGET}/ncurses
+/usr/lib/fpc/${VERSION}/units/${TARGET}/x11
+/usr/lib/fpc/${VERSION}/units/${TARGET}/regexpr
+/usr/lib/fpc/${VERSION}/units/${TARGET}/hash
+/usr/lib/fpc/${VERSION}/units/${TARGET}/uuid

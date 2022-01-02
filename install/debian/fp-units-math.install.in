@@ -1,0 +1,5 @@
+/usr/lib/fpc/${VERSION}/units/${TARGET}/gmp
+/usr/lib/fpc/${VERSION}/units/${TARGET}/numlib
+/usr/lib/fpc/${VERSION}/units/${TARGET}/proj4
+/usr/lib/fpc/${VERSION}/units/${TARGET}/symbolic
+/usr/share/doc/fp-units-math

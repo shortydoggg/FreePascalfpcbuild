@@ -1,0 +1,730 @@
+Source: fpc
+Section: devel
+Priority: optional
+Maintainer: Carlos Laviola <claviola@debian.org>
+Uploaders: Abou Al Montacir <abou.almontacir@sfr.fr>,
+ Paul Gevers <elbrus@debian.org>,
+ Peter Michael Green <plugwash@debian.org>,
+ Torsten Werner <twerner@debian.org>
+Standards-Version: 3.9.5
+Build-Depends: debhelper (>= 7), fp-compiler, fp-units-base, fp-units-fcl, fp-utils, mawk | awk, libncurses-dev, binutils, ghostscript, po-debconf
+Build-Depends-Indep: hevea, rdfind, symlinks
+Vcs-Git: git://anonscm.debian.org/pkg-pascal/fpc.git
+Vcs-Browser: http://anonscm.debian.org/gitweb/?p=pkg-pascal/fpc.git
+Homepage: http://www.freepascal.org/
+
+Package: fpc${PACKAGESUFFIX}
+Architecture: all
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (>= ${binary:Version}), fp-compiler${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-base${PACKAGESUFFIX} (>= ${binary:Version}), fp-ide${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-fcl${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-fv${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-gtk${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-gtk2${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-gnome1${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-db${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-gfx${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-net${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-misc${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-multimedia${PACKAGESUFFIX} (>= ${binary:Version}), fp-units-math${PACKAGESUFFIX} (>= ${binary:Version})
+Recommends: fp-utils${PACKAGESUFFIX}
+Suggests: lazarus, fp-docs${PACKAGESUFFIX} (>= ${source:Upstream-Version})
+Provides: fpc
+Breaks: fpc (<= 2.4.0-3)
+Replaces: fpc (<= 2.4.0-3)
+Description: Free Pascal - SDK${PACKAGESUFFIX} suite
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ Extensions have been added to the language, such as function overloading,
+ creation and linking of shared libraries, and Delphi language extensions
+ including classes, exceptions, ANSI strings, and open arrays.
+ .
+ This metapackage pulls in all the FPC packages provided for this
+ architecture. Experienced users may instead prefer to install the particular
+ packages they require by hand.
+
+Package: fpc-source${PACKAGESUFFIX}
+Architecture: all
+Depends: ${misc:Depends}
+Provides: fpc-source
+Breaks: fpc-source (<= 2.4.0-3)
+Replaces: fpc-source (<= 2.4.0-3)
+Description: Free Pascal - SDK source code
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains Free Pascal's own source code. It is meant to be used by
+ the Lazarus IDE.
+
+Package: fp-compiler${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version}), binutils
+Recommends: fp-utils${PACKAGESUFFIX} (>= ${binary:Version})
+Suggests: fp-docs${PACKAGESUFFIX} (>= ${source:Upstream-Version}), mingw32-binutils
+Provides: fp-compiler
+Breaks: fp-compiler (<= 2.4.0-3), fp-utils-2.4.4 (<= 2.4.4-2), fp-utils-2.4.2 (<= 2.4.2-3)
+Replaces: fp-compiler (<= 2.4.0-3), fp-utils-2.4.4 (<= 2.4.4-1)
+Description: Free Pascal - compiler
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ Extensions have been added to the language, such as function overloading,
+ creation and linking of shared libraries, and Delphi language extensions
+ including classes, exceptions, ANSI strings, and open arrays.
+ .
+ This package contains the command line compiler.
+
+Package: fp-ide${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version}), ${shlibs:Depends}
+Recommends: fp-utils${PACKAGESUFFIX} (>= ${binary:Version})
+Suggests: fp-docs${PACKAGESUFFIX} (>= ${source:Upstream-Version})
+Provides: fp-ide
+Breaks: fp-ide (<= 2.4.0-3)
+Replaces: fp-ide (<= 2.4.0-3)
+Description: Free Pascal - IDE
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ Extensions have been added to the language, such as function overloading,
+ creation and linking of shared libraries, and Delphi language extensions
+ including classes, exceptions, ANSI strings, and open arrays.
+ .
+ This package contains the Integrated Development Environment (IDE). The IDE
+ has an internal compiler.
+
+Package: fp-utils${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, ${shlibs:Depends}
+Recommends: fp-compiler${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-utils
+Breaks: fp-utils (<= 2.4.0-3), fp-compiler (<= 2.4.0-3), fp-units-gfx (<= 2.4.2-2), fp-units-gfx-2.4.2 (<= 2.4.2-2)
+Replaces: fp-utils (<= 2.4.0-3), fp-compiler (<= 2.4.0-3)
+Description: Free Pascal - utilities
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains some handy utilities for use with the Free Pascal
+ Compiler:
+  * data2inc   convert binary/text data to include files;
+  * fpcmake    create Makefile from Makefile.fpc;
+  * h2pas      convert .h files to Pascal units;
+  * plex/pyacc Pascal Lex and Yacc implementations;
+  * ppdep      create a dependency file for use with Makefiles;
+  * ppudump    dump the information stored in a .ppu (unit) file;
+  * ppufiles   show needed files for units;
+  * ppumove    place multiple units in a shared library;
+  * ptop       beautify source.
+
+Package: fp-docs${PACKAGESUFFIX}
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}
+Provides: fp-docs
+Breaks: fp-docs (<= 2.4.0-3)
+Replaces: fp-docs (<= 2.4.0-3)
+Description: Free Pascal - documentation
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package provides documentation for the Free Pascal Compiler in HTML
+ format.
+
+Package: fp-units-rtl${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}
+Recommends: fp-compiler${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-rtl, fpc-abi${PACKAGESUFFIX}
+Breaks: fp-units-rtl (<= 2.4.0-3)
+Replaces: fp-units-rtl (<= 2.4.0-3)
+Description: Free Pascal - runtime libraries
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains the RunTime Libraries for the Free Pascal Compiler.
+
+Package: fp-units-base${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-base
+Breaks: fp-units-base (<= 2.4.0-3)
+Replaces: fp-units-base (<= 2.4.0-3)
+Description: Free Pascal - base units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains Free Pascal units for common libraries (some of which
+ are also required by the Free Component Library): NCurses, X11 (Xlib,
+ Xutil), and ZLib.
+
+Package: fp-units-fcl${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version}), fp-units-base${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-fcl
+Breaks: fp-units-fcl (<= 2.4.0-3)
+Replaces: fp-units-fcl (<= 2.4.0-3)
+Description: Free Pascal - Free Component Library
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains the Free Component Library for the Free Pascal Compiler.
+
+Package: fp-units-fv${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-fv
+Breaks: fp-units-fv (<= 2.4.0-3)
+Replaces: fp-units-fv (<= 2.4.0-3)
+Description: Free Pascal - Free Vision units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains the Free Vision units for the Free Pascal Compiler
+ (which provide a framework for developing text user interfaces).
+
+Package: fp-units-gtk${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version}), fp-units-fcl${PACKAGESUFFIX} (= ${binary:Version}), libgtk2.0-dev
+Provides: fp-units-gtk
+Breaks: fp-units-gtk (<= 2.4.0-3)
+Replaces: fp-units-gtk (<= 2.4.0-3)
+Description: Free Pascal - GTK+ 1.2 units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains Free Pascal units and examples to create
+ programs with GTK+ 1.2.
+
+Package: fp-units-gtk2${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version}), fp-units-fcl${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-gtk2
+Breaks: fp-units-gtk2 (<= 2.4.0-3)
+Replaces: fp-units-gtk2 (<= 2.4.0-3)
+Description: Free Pascal - GTK+ 2.x units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains Free Pascal units and examples to create
+ programs with GTK+ 2.x.
+
+Package: fp-units-gnome1${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version}), fp-units-gtk${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-gnome1
+Breaks: fp-units-gnome1 (<= 2.4.0-3)
+Replaces: fp-units-gnome1 (<= 2.4.0-3)
+Description: Free Pascal - GNOME 1 units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains Free Pascal units and examples to create
+ programs for GNOME 1.
+
+Package: fp-units-db${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-db
+Breaks: fp-units-db (<= 2.4.0-3)
+Replaces: fp-units-db (<= 2.4.0-3)
+Description: Free Pascal - database-library units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains Free Pascal units with bindings for GDBM, Interbase,
+ MySQL, PostgreSQL, ODBC, Oracle, and SQLite.
+
+Package: fp-units-gfx${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version}), fp-units-base${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-gfx
+Recommends: libcairo2-dev,
+ libforms-dev,
+ libgd-dev,
+ libggi2-dev,
+ libgl1-mesa-dev,
+ libgraphviz-dev,
+ libpng-dev,
+ libxxf86dga-dev,
+ libxxf86vm-dev,
+Breaks: fp-units-gfx (<= 2.4.0-3)
+Replaces: fp-units-gfx (<= 2.4.0-3)
+Description: Free Pascal - graphics-library units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains Free Pascal units with bindings for cairo, forms, ggi,
+ graph, libgd, libpng, opengl, and svgalib.
+ .
+ SVGALib is no longer packaged by Debian and should be installed manually by
+ users who want to link against it.
+
+Package: fp-units-net${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-net
+Breaks: fp-units-net (<= 2.4.0-3)
+Replaces: fp-units-net (<= 2.4.0-3)
+Description: Free Pascal - networking units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains Free Pascal units for creating network tools: D-Bus,
+ httpd-1.3, httpd-2.0, httpd-2.2, ldap, libasync, libcurl, netdb, openssl,
+ and pcap.
+
+Package: fp-units-math${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-math
+Breaks: fp-units-math (<= 2.4.0-3)
+Replaces: fp-units-math (<= 2.4.0-3), fp-units-misc (<= 2.2.4-4)
+Description: Free Pascal - math units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains Free Pascal math interfacing units for:
+  * gmp (the GNU Multiple Precision arithmetic library);
+  * numlib (numerical computing);
+  * proj4 (cartographic projections);
+  * symbolic (symbolic computing).
+
+Package: fp-units-misc${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-misc
+Breaks: fp-units-misc (<= 2.4.0-3)
+Replaces: fp-units-misc (<= 2.4.0-3)
+Description: Free Pascal - miscellaneous units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains miscellaneous Free Pascal units: fppkg (the FPC
+ packaging system), PasZLib (a Pascal-only zlib implementation), and Utmp.
+
+Package: fp-units-multimedia${PACKAGESUFFIX}
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version}), libogg-dev, libvorbis-dev, a52dec-dev, libdts-dev, libmad0-dev, libmodplug-dev, libsdl-mixer1.2-dev
+Provides: fp-units-multimedia
+Breaks: fp-units-multimedia (<= 2.4.0-3)
+Replaces: fp-units-multimedia (<= 2.4.0-3), fp-units-gfx (<= 2.2.4-3)
+Description: Free Pascal - multimedia units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains Free Pascal multimedia units: a52, dts, mad, modplug,
+ oggvorbis, and openal.
+
+Package: fp-units-i386${PACKAGESUFFIX}
+Architecture: i386
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version})
+Provides: fp-units-i386
+Breaks: fp-units-i386 (<= 2.4.0-3)
+Replaces: fp-units-i386 (<= 2.4.0-3)
+Description: Free Pascal - Kylix compatibility units
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This package contains the deprecated Free Pascal libc unit for the i386
+ architecture (used for compatibility with Borland's Kylix).
+
+##################### backward compatibility meta packages#####################
+
+Package: fpc
+Architecture: all
+Depends: ${misc:Depends}, fpc${PACKAGESUFFIX} (= ${binary:Version})
+Recommends: fp-utils${PACKAGESUFFIX}
+Description: Free Pascal - SDK suite dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ Extensions have been added to the language, such as function overloading,
+ creation and linking of shared libraries, and Delphi language extensions
+ including classes, exceptions, ANSI strings, and open arrays.
+ .
+ This dependency package always depends on the latest available version of
+ the metapackage pulling in all the FPC packages provided for this
+ architecture. Experienced users may instead prefer to install the particular
+ packages they require by hand.
+
+Package: fpc-source
+Architecture: all
+Depends: ${misc:Depends}, fpc-source${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - SDK source code dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing Free Pascal's own source code. It is meant to be used by
+ the Lazarus IDE.
+
+Package: fp-compiler
+Architecture: any
+Depends: ${misc:Depends}, fp-compiler${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - compiler dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ Extensions have been added to the language, such as function overloading,
+ creation and linking of shared libraries, and Delphi language extensions
+ including classes, exceptions, ANSI strings, and open arrays.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing the command line compiler.
+
+Package: fp-ide
+Architecture: any
+Depends: ${misc:Depends}, fp-ide${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - IDE dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ Extensions have been added to the language, such as function overloading,
+ creation and linking of shared libraries, and Delphi language extensions
+ including classes, exceptions, ANSI strings, and open arrays.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing the Integrated Development Environment (IDE). The IDE
+ has an internal compiler.
+
+Package: fp-utils
+Architecture: any
+Depends: ${misc:Depends}, fp-utils${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - utilities dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing some handy utilities for use with the Free Pascal
+ Compiler:
+  * data2inc   convert binary/text data to include files;
+  * fpcmake    create Makefile from Makefile.fpc;
+  * h2pas      convert .h files to Pascal units;
+  * plex/pyacc Pascal Lex and Yacc implementations;
+  * ppdep      create a dependency file for use with Makefiles;
+  * ppudump    dump the information stored in a .ppu (unit) file;
+  * ppufiles   show needed files for units;
+  * ppumove    place multiple units in a shared library;
+  * ptop       beautify source.
+
+Package: fp-docs
+Section: doc
+Architecture: all
+Depends: ${misc:Depends}, fp-docs${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - documentation dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing documentation for the Free Pascal Compiler in HTML
+ format.
+
+Package: fp-units-rtl
+Architecture: any
+Depends: ${misc:Depends}, fp-units-rtl${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - runtime libraries dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing the RunTime Libraries for the Free Pascal Compiler.
+
+Package: fp-units-base
+Architecture: any
+Depends: ${misc:Depends}, fp-units-base${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - base units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing Free Pascal units for common libraries (some of which
+ are also required by the Free Component Library): NCurses, X11 (Xlib,
+ Xutil), and ZLib.
+
+Package: fp-units-fcl
+Architecture: any
+Depends: ${misc:Depends}, fp-units-fcl${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - Free Component Library dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing the Free Component Library for the Free Pascal Compiler.
+
+Package: fp-units-fv
+Architecture: any
+Depends: ${misc:Depends}, fp-units-fv${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - Free Vision units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing the Free Vision units for the Free Pascal Compiler
+ (which provide a framework for developing text user interfaces).
+
+Package: fp-units-gtk
+Architecture: any
+Depends: ${misc:Depends}, fp-units-gtk${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - GTK+ 1.2 units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing Free Pascal units and examples to create
+ programs with GTK+ 1.2.
+
+Package: fp-units-gtk2
+Architecture: any
+Depends: ${misc:Depends}, fp-units-gtk2${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - GTK+ 2.x units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing Free Pascal units and examples to create
+ programs with GTK+ 2.x.
+
+Package: fp-units-gnome1
+Architecture: any
+Depends: ${misc:Depends}, fp-units-gnome1${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - GNOME 1 units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing Free Pascal units and examples to create
+ programs for GNOME 1.
+
+Package: fp-units-db
+Architecture: any
+Depends: ${misc:Depends}, fp-units-db${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - database-library units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing Free Pascal units with bindings for GDBM, Interbase,
+ MySQL, PostgreSQL, ODBC, Oracle, and SQLite.
+
+Package: fp-units-gfx
+Architecture: any
+Depends: ${misc:Depends}, fp-units-gfx${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - graphics-library units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing Free Pascal units with bindings for cairo, forms, ggi,
+ graph, libgd, libpng, opengl, and svgalib.
+ .
+ SVGALib is no longer packaged by Debian and should be installed manually by
+ users who want to link against it.
+
+Package: fp-units-net
+Architecture: any
+Depends: ${misc:Depends}, fp-units-net${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - networking units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing Free Pascal units for creating network tools: D-Bus,
+ httpd-1.3, httpd-2.0, httpd-2.2, ldap, libasync, libcurl, netdb, openssl,
+ and pcap.
+
+Package: fp-units-math
+Architecture: any
+Depends: ${misc:Depends}, fp-units-math${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - math units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing Free Pascal math interfacing units for:
+  * gmp (the GNU Multiple Precision arithmetic library);
+  * numlib (numerical computing);
+  * proj4 (cartographic projections);
+  * symbolic (symbolic computing).
+
+Package: fp-units-misc
+Architecture: any
+Depends: ${misc:Depends}, fp-units-misc${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - miscellaneous units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing miscellaneous Free Pascal units: fppkg (the FPC
+ packaging system), PasZLib (a Pascal-only zlib implementation), and Utmp.
+
+Package: fp-units-multimedia
+Architecture: any
+Depends: ${misc:Depends}, fp-units-multimedia${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - multimedia units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing Free Pascal multimedia units: a52, dts, mad, modplug,
+ oggvorbis, and openal.
+
+Package: fp-units-i386
+Architecture: i386
+Depends: ${misc:Depends}, fp-units-i386${PACKAGESUFFIX} (= ${binary:Version})
+Description: Free Pascal - Kylix compatibility units dependency package
+ The Free Pascal Compiler is an Object Pascal compiler supporting both Delphi
+ and Turbo Pascal 7.0 dialects, as well as Mac Pascal dialects. It provides a
+ completely portable RunTime Library (RTL) available on many platforms and
+ compatible with Turbo Pascal, along with a platform-independent class-based
+ Free Component Library (FCL) adding many Delphi extensions and interfacing
+ with many popular open source libraries.
+ .
+ This dependency package always depends on the latest available version of
+ the package containing the deprecated Free Pascal libc unit for the i386
+ architecture (used for compatibility with Borland's Kylix).

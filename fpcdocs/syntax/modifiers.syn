@@ -1,0 +1,36 @@
+\begin{diagram}{Modifiers}{modifiers}
+\begin{mysyntdiag}
+\synt{modifiers}
+\begin{rep}[b]
+; 
+ \begin{stack} 
+ \lit*{public} 
+    \begin{stack}
+      \\ \lit*{name} \synt{string\ constant} 
+    \end{stack} \\
+ \lit*{export} \\
+ \lit*{alias} \lit* : \synt{string\ constant}\\
+ \lit*{interrupt} \\
+ \lit*{iochecks} \\
+ \synt{call\ modifiers}
+\end{stack}
+\end{rep}
+\end{mysyntdiag}
+\begin{mysyntdiag}
+\synt{call\ modifiers}
+\begin{stack}
+\lit*{cdecl}\\
+\lit*{inline}\\
+\lit*{local} \\
+\lit*{nostackframe}\\
+\lit*{overload}\\
+\lit*{pascal}\\
+\lit*{register}\\
+\lit*{safecall}\\
+\lit*{saveregisters}\\
+\lit*{softfloat}\\
+\lit*{stdcall}\\
+\lit*{varargs}
+\end{stack}
+\end{mysyntdiag}
+\end{diagram}

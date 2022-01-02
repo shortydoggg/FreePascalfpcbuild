@@ -1,0 +1,1038 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="fcl">
+
+<!--
+  ====================================================================
+    CustApp
+  ====================================================================
+-->
+
+<module name="CustApp">
+<short>Custom application class</short>
+<descr>
+<p>
+The <file>CustApp</file> unit implements the <link id="TCustomApplication"/>
+class, which serves as the common ancestor to many kinds of
+<var>TApplication</var> classes: a GUI application in the LCL, a CGI
+application in FPCGI, a daemon application in daemonapp. It introduces
+some properties to describe the environment in which the application is
+running (environment variables, program command-line parameters) and
+introduces some methods to initialize and run a program, as well as
+functionality to handle exceptions.
+</p>
+<p>Typical use of a descendent class is to introduce a global variable
+<var>Application</var> and use the following code:
+</p>
+<code>
+  Application.Initialize;
+  Application.Run;
+</code>
+<p>
+Since normally only a single instance of this class is created, and it is
+a <var>TComponent</var> descendent, it can be used as an owner for many 
+components, doing so will ensure these components will be freed when the
+application terminates.
+</p>
+</descr>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="SysUtils">
+<short>Exception support and string formatting.</short>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="Classes">
+<short><var>TComponent</var> support</short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TExceptionEvent">
+<short>Exception handling event prototype</short>
+<descr>
+<var>TExceptionEvent</var> is the prototype for the exception  handling
+events in <var>TCustomApplication</var>. 
+</descr>
+<seealso>
+<link id="TCustomApplication.HandleException"/>
+<link id="TCustomApplication.ShowException"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TExceptionEvent.Sender">
+<short><var>TCustomApplication</var> instance.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TExceptionEvent.E">
+<short>Exception instance that should be handled.</short>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.CustApp.TCustomApplication
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="TCustomApplication">
+<short>Ancestor class for <var>TApplication</var> classes.</short>
+<descr>
+<p>
+<var>TCustomApplication</var> is the ancestor class for classes that whish
+to implement a global application class instance. It introduces several
+application-wide functionalities.
+</p>
+<ul>
+<li>Exception handling in <link id="TCustomApplication.HandleException">HandleException</link>,
+ <link id="TCustomApplication.ShowException">ShowException</link>, 
+<link id="TCustomApplication.OnException">OnException</link> and
+<link id="TCustomApplication.StopOnException">StopOnException</link>.</li>
+<li>Command-line parameter parsing in <link
+id="TCustomApplication.FindOptionIndex">FindOptionIndex</link>, 
+<link id="TCustomApplication.GetOptionValue">GetOptionValue</link>,
+<link id="TCustomApplication.CheckOptions">CheckOptions</link> 
+and <link id="TCustomApplication.HasOption">HasOption</link>
+</li>
+<li>
+Environment variable handling in <link
+id="TCustomApplication.GetEnvironmentList">GetEnvironmentList</link> and
+<link
+id="TCustomApplication.EnvironmentVariable">EnvironmentVariable</link>.
+</li>
+</ul>
+<p>
+Descendent classes need to override the <var>DoRun</var> protected method to implement the
+functionality of the program.
+</p>
+</descr>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TCustomApplication.Create">
+<short>Create a new instance of the <var>TCustomApplication</var> class</short>
+<descr>
+<var>Create</var> creates a new instance of the
+<var>TCustomApplication</var> class. It sets some defaults for the various 
+properties, and then calls the inherited <var>Create</var>.
+</descr>
+<seealso>
+<link id="TCustomApplication.Destroy"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.Create.AOwner">
+<short>Owner component. Usually Nil.</short>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TCustomApplication.Destroy">
+<short>Destroys the <var>TCustomApplication</var> instance.</short>
+<descr>
+<var>Destroy</var> simply calls the inherited <var>Destroy</var>.
+</descr>
+<seealso>
+<link id="TCustomApplication.Create"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomApplication.HandleException">
+<short>Handle an exception.</short>
+<descr>
+<p><var>HandleException</var> is called (or can be called) to 
+handle the exception <var>Sender</var>. If the exception is not of class
+<var>Exception</var> then the default handling of exceptions in the
+<file>SysUtils</file> unit is called.
+</p>
+<p>
+If the exception is of class <var>Exception</var> and the <link
+id="TCustomApplication.Onexception">OnException</link> handler 
+is set, the handler is called with the exception object and
+<var>Sender</var> argument.
+</p>
+<p>
+If the <var>OnException</var> handler is not set, then the exception is
+passed to the <link id="TCustomApplication.ShowException">ShowException</link> 
+routine, which can be overridden by descendent application classes to 
+show the exception in a way that is fit for the particular class of
+application. (a GUI application might show the exception in a message
+dialog.
+</p>
+<p>
+When the exception is handled in the above manner, and the <link
+id="TCustomApplication.StopOnException">StopOnException</link> property is
+set to <var>True</var>, the <link id="TCustomApplication.Terminated">Terminated</link>
+property is set to <var>True</var>, which will cause the <link
+id="TCustomApplication.Run">Run</link> loop to stop, and the application
+will exit.
+</p>
+</descr>
+<seealso>
+<link id="TCustomApplication.ShowException">ShowException</link>
+<link id="TCustomApplication.StopOnException">StopOnException</link>
+<link id="TCustomApplication.Terminated">Terminated</link>
+<link id="TCustomApplication.Run">Run</link>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.HandleException.Sender">
+<short>Sender class calling this routine</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomApplication.Initialize">
+<short>Initialize the application</short>
+<descr>
+<p>
+<var>Initialize</var> can be overridden by descendent applications to 
+perform any initialization after the class was created. It can be used
+to react to properties being set at program startup. End-user code
+should call <var>Initialize</var> prior to calling <var>Run</var>
+</p>
+<p>
+In <var>TCustomApplication</var>, <var>Initialize</var> sets
+<var>Terminated</var> to <var>False</var>.
+</p>
+</descr>
+<seealso>
+<link id="TCustomApplication.Run"/>
+<link id="TCustomApplication.Terminated"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomApplication.Run">
+<short>Runs the application.</short>
+<descr>
+<var>Run</var> is the start of the user code: when called, it starts a loop
+and repeatedly calls <var>DoRun</var> until <var>Terminated</var> is set to
+<var>True</var>. If an exception is raised during the execution of
+<var>DoRun</var>, it is caught and handled to <link
+id="TCustomApplication.HandleException"/>. If <link
+id="TCustomApplication.StopOnException"/> is set to <var>True</var> (which
+is <em>not</em> the default), <var>Run</var> will exit, and the application 
+will then terminate. The default is to call <var>DoRun</var> again, which
+is useful for applications running a message loop such as services and GUI
+applications.
+</descr>
+<seealso>
+<link id="TCustomApplication.HandleException"/>
+<link id="TCustomApplication.StopException"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomApplication.ShowException">
+<short>Show an exception to the user</short>
+<descr>
+<p>
+<var>ShowException</var> should be overridden by descendent classes to
+show an exception message to the user. The default behaviour is to call
+the <link id="#rtl.sysutils.ShowException">ShowException</link> procedure
+in the <file>SysUtils</file> unit.
+</p>
+<p>Descendent classes should do something appropriate for their context:
+GUI applications can show a message box, daemon applications can write the
+exception message to the system log, web applications can send a 500 error
+response code.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="#rtl.sysutils.ShowException">ShowException</link>
+<link id="TCustomApplication.HandleException"/>
+<link id="TCustomApplication.StopException"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.ShowException.E">
+<short>Exception object to show</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomApplication.Terminate">
+<short>Terminate the application.</short>
+<descr>
+<p>
+<var>Terminate</var> sets the <var>Terminated</var> property to
+<var>True</var>. By itself, this does not terminate the application.
+Instead, descendent classes should in their <var>DoRun</var> method,
+check the value of the <link id="TCustomApplication.Terminated">Terminated</link> property
+and properly shut down the application if it is set to <var>True</var>.
+</p>
+<p>
+When <var>AExitCode</var> is specified, it will passed to <link
+id="System.ExitCode"/>, and when the program is halted, that is the exit
+code of the program as returned to the OS. If the application is terminated
+due to an exception, <link id="TCustomApplication.ExceptionExitCode">ExceptionExitCode</link> will be used as the value for this argument.
+</p>
+</descr>
+<seealso>
+<link id="TCustomApplication.Terminated"/>
+<link id="TCustomApplication.Run"/>
+<link id="TCustomApplication.ExceptionExitCode">ExceptionExitCode</link>
+<link id="System.ExitCode"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomApplication.FindOptionIndex">
+<short>Return the index of an option.</short>
+<descr>
+<p>
+<var>FindOptionIndex</var> will return the index of the option <var>S</var>
+or the long option <var>LongOpt</var>. Neither of them should include the
+switch character. If no such option was specified, -1 is returned. If either
+the long or short option was specified, then the position on the
+command-line is returned.
+</p>
+<p>
+Depending on the value of the 
+<link id="TCustomApplication.CaseSensitiveOptions">CaseSensitiveOptions</link>
+property, the search is performed case sensitive or case insensitive.
+</p>
+<p>
+Options are identified as command-line parameters which start with 
+<link id="TCustomApplication.OptionChar">OptionChar</link> (by default the
+dash ('-') character).
+</p>
+</descr>
+<seealso>
+<link id="TCustomApplication.HasOption">HasOption</link>
+<link id="TCustomApplication.GetOptionValue">GetOptionValue</link>
+<link id="TCustomApplication.CheckOptions">CheckOptions</link>
+<link id="TCustomApplication.CaseSensitiveOptions">CaseSensitiveOptions</link>
+<link id="TCustomApplication.OptionChar">OptionChar</link>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TCustomApplication.FindOptionIndex.Result">
+<short>Position on commandline of option.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.FindOptionIndex.S">
+<short>Short option to search for.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.FindOptionIndex.Longopt">
+<short>Long option to search for.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomApplication.GetOptionValue">
+<short>Return the value of a command-line option.</short>
+<descr>
+<p>
+<var>GetOptionValue</var> returns the value of an option. Values are
+specified in the usual GNU option format, either of 
+</p>
+<pre>
+--longopt=Value
+</pre>
+<p>
+or 
+</p>
+<pre>
+-c Value
+</pre>
+<p>is supported.</p>
+<p>
+The function returns the specified value, or the empty string if none was
+specified.
+</p>
+<p>
+Depending on the value of the 
+<link id="TCustomApplication.CaseSensitiveOptions">CaseSensitiveOptions</link>
+property, the search is performed case sensitive or case insensitive.
+</p>
+<p>
+Options are identified as command-line parameters which start with 
+<link id="TCustomApplication.OptionChar">OptionChar</link> (by default the
+dash ('-') character).
+</p>
+<p>
+If an option can appear multiple times, use <link id="TCustomApplication.GetOptionValues"/>
+to retrieve all values. This function only returns the value of the first
+occurrence of an option.
+</p>
+</descr>
+<seealso>
+<link id="TCustomApplication.FindOptionIndex">FindOptionIndex</link>
+<link id="TCustomApplication.HasOption">HasOption</link>
+<link id="TCustomApplication.CheckOptions">CheckOptions</link>
+<link id="TCustomApplication.CaseSensitiveOptions">CaseSensitiveOptions</link>
+<link id="TCustomApplication.OptionChar">OptionChar</link>
+<link id="TCustomApplication.GetOptionValues"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TCustomApplication.GetOptionValue.Result">
+<short>Option value, or empty string.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.GetOptionValue.S">
+<short>Long option string</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.GetOptionValue.C">
+<short>Short option character</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomApplication.HasOption">
+<short>Check whether an option was specified.</short>
+<descr>
+<p>
+<var>HasOption</var> returns <var>True</var> if the specified option
+was given on the command line. Either the short option character
+<var>C</var> or the long option <var>S</var> may be used. Note that both
+options (requiring a value) and switches can be specified.
+</p>
+<p>
+Depending on the value of the 
+<link id="TCustomApplication.CaseSensitiveOptions">CaseSensitiveOptions</link>
+property, the search is performed case sensitive or case insensitive.
+</p>
+<p>
+Options are identified as command-line parameters which start with 
+<link id="TCustomApplication.OptionChar">OptionChar</link> (by default the
+dash ('-') character).
+</p>
+</descr>
+<seealso>
+<link id="TCustomApplication.FindOptionIndex">FindOptionIndex</link>
+<link id="TCustomApplication.GetOptionValue">GetOptionValue</link>
+<link id="TCustomApplication.CheckOptions">CheckOptions</link>
+<link id="TCustomApplication.CaseSensitiveOptions">CaseSensitiveOptions</link>
+<link id="TCustomApplication.OptionChar">OptionChar</link>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TCustomApplication.HasOption.Result">
+<short><var>True</var> if the option <var>S</var> or <var>C</var> was
+specified on the command-line.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.HasOption.S">
+<short>Long option string</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.HasOption.C">
+<short>Short option character.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomApplication.CheckOptions">
+<short>Check whether all given options on the command-line are valid.</short>
+<descr>
+<p>
+<var>CheckOptions</var> scans the command-line and checks whether the
+options given are valid options. It also checks whether options that require
+a valued are indeed specified with a value.
+</p>
+<p>
+The <var>ShortOptions</var> contains a string with valid short option
+characters. Each character in the string is a valid option character. If a
+character is followed by a colon (:), then a value must be specified. If it is
+followed by 2 colon characters (::) then the value is optional.
+</p>
+<p>
+<var>LongOpts</var> is a list of strings (which can be specified as an 
+array, a <var>TStrings</var> instance or a string with whitespace-separated
+values) of valid long options.
+</p>
+<p>
+When the function returns, if <var>Opts</var> is non-<var>Nil</var>, the
+ <var>Opts</var> stringlist is filled with the passed valid options. 
+If <var>NonOpts</var> is non-nil, it is filled with any non-option 
+strings that were passed on the command-line.
+</p>
+<p>
+The function returns an empty string if all specified options were valid
+options, and whether options requiring a value have a value. If an error was
+found during the check, the return value is a string describing the error.
+</p>
+<p>
+Options are identified as command-line parameters which start with 
+<link id="TCustomApplication.OptionChar">OptionChar</link> (by default the
+dash ('-') character).
+</p>
+<p>
+if <var>AllErrors</var> is <var>True</var> then all errors are returned,
+separated by a <link id="#rtl.system.sLineBreak">sLineBreak</link> character.
+</p>
+</descr>
+<errors>
+If an error was found during the check, the return value is a string describing the error(s).
+</errors>
+<seealso>
+<link id="TCustomApplication.FindOptionIndex">FindOptionIndex</link>
+<link id="TCustomApplication.GetOptionValue">GetOptionValue</link>
+<link id="TCustomApplication.HasOption">HasOption</link>
+<link id="TCustomApplication.CaseSensitiveOptions">CaseSensitiveOptions</link>
+<link id="TCustomApplication.OptionChar">OptionChar</link>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TCustomApplication.CheckOptions.Result">
+<short>Empty string or error-message</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.CheckOptions.ShortOptions">
+<short>List of valid short options.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.CheckOptions.Longopts">
+<short>List of valid long options.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.CheckOptions.Opts">
+<short>Valid options passed to the program.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.CheckOptions.NonOpts">
+<short>Non-option strings passed to the program.</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TCustomApplication.CheckOptions.AllErrors">
+<short>Should all errors be returned, or just the first one?</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomApplication.GetEnvironmentList">
+<short>Return a list of environment variables.</short>
+<descr>
+<var>GetEnvironmentList</var> returns a list of environment variables in
+<var>List</var>. They are in the form <var>Name=Value</var>, one per item
+in <var>list</var>. If <var>NamesOnly</var> is <var>True</var>, then only
+the names are returned.
+</descr>
+<seealso>
+<link id="TCustomApplication.EnvironmentVariable">EnvironmentVariable</link>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.GetEnvironmentList.List">
+<short>List to return environment strings in.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.GetEnvironmentList.NamesOnly">
+<short>If <var>True</var>, only environment variable names will be returned.</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.ExeName">
+<short>Name of the executable.</short>
+<descr>
+<p>
+<var>ExeName</var> returns the full name of the executable binary
+(path+filename). This is equivalent to <var>Paramstr(0)</var> 
+</p>
+<p>
+Note that some operating systems do not return the full pathname of the
+binary.
+</p>
+</descr>
+<seealso>
+<link id="#rtl.system.paramstr">ParamStr</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.HelpFile">
+<short>Location of the application help file.</short>
+<descr>
+<var>HelpFile</var> is the location of the application help file.
+It is a simple string property which can be set by an IDE such as Lazarus,
+and is mainly provided for compatibility with Delphi's
+<var>TApplication</var> implementation.
+</descr>
+<seealso>
+<link id="TCustomApplication.Title"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.Terminated">
+<short>Was <var>Terminate</var> called or not</short>
+<descr>
+<var>Terminated</var> indicates whether 
+<link id="TCustomApplication.Terminate">Terminate</link> was called or not.
+Descendent classes should check <var>Terminated</var> at regular intervals
+in their implementation of <var>DoRun</var>, and if it is set to
+<var>True</var>, should exit gracefully the <var>DoRun</var> method.
+</descr>
+<seealso>
+<link id="TCustomApplication.Terminate">Terminate</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.Title">
+<short>Application title</short>
+<descr>
+<var>Title</var> is a simple string property which can be set to any
+string describing the application. It does nothing by itself, and is mainly
+introduced for compatibility with Delphi's <var>TApplication</var> 
+implementation.
+</descr>
+<seealso>
+<link id="TCustomApplication.HelpFile">HelpFile</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.OnException">
+<short>Exception handling event</short>
+<descr>
+<p>
+<var>OnException</var> can be set to provide custom handling of events,
+instead of the default action, which is simply to show the event using
+<link id="TCustomApplication.ShowEvent">ShowEvent</link>.
+</p>
+<p>
+If set, <var>OnException</var> is called by the 
+<link id="TCustomApplication.HandleEvent">HandleEvent</link> routine. Do not
+use the <var>OnException</var> event directly, instead call
+<var>HandleEvent</var>
+</p>
+</descr>
+<seealso>
+<link id="TCustomApplication.ShowEvent">ShowEvent</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.ConsoleApplication">
+<short>Is the application a console application or not</short>
+<descr>
+<var>ConsoleApplication</var> returns <var>True</var> if the application is
+compiled as a console application (the default) or <var>False</var> if not.
+The result of this property is determined at compile-time by the settings of
+the compiler: it returns the value of the <link
+id="#rtl.system.IsConsole">IsConsole</link> constant.
+</descr>
+<seealso>
+<link id="#rtl.system.IsConsole">IsConsole</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.Location">
+<short>Application location</short>
+<descr>
+<var>Location</var> returns the directory part of the application binary.
+This property works on most platforms, although some platforms do not
+allow to retrieve this information (Mac OS under certain circumstances). 
+See the discussion of <link id="#rtl.system.paramstr">Paramstr</link> in the
+RTL documentation.
+</descr>
+<seealso>
+<link id="#rtl.system.paramstr">Paramstr</link>
+<link id="TCustomApplication.Params">Params</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.Params">
+<short>Command-line parameters</short>
+<descr>
+<var>Params</var> gives access to the command-line parameters. They contain
+the value of the <var>Index</var>-th parameter, where <var>Index</var> runs
+from 0 to <link id="TCustomApplication.ParamCount">ParamCount</link>.
+It is equivalent to calling <link id="#rtl.system.paramstr">ParamStr</link>.
+</descr>
+<seealso>
+<link id="TCustomApplication.ParamCount">ParamCount</link>
+<link id="#rtl.system.paramstr">Paramstr</link>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.Params.Index">
+<short>Index of parameter to retrieve</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.ParamCount">
+<short>Number of command-line parameters</short>
+<descr>
+<var>ParamCount</var> returns the number of command-line parameters that
+were passed to the program. The actual parameters can be retrieved with the
+<link id="TCustomApplication.Params">Params</link> property.
+</descr>
+<seealso>
+<link id="TCustomApplication.Params">Params</link>
+<link id="#rtl.system.paramstr">Paramstr</link>
+<link id="#rtl.system.paramcount">ParamCount</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.EnvironmentVariable">
+<short>Environment variable access</short>
+<descr>
+<p>
+<var>EnvironmentVariable</var> gives access to the environment
+variables of the application: It returns the value of the environment
+variable <var>EnvName</var>, or an empty string if no such value is
+available.
+</p>
+<p>To use this property, the name of the environment variable must be known.
+To get a list of available names (and values), 
+<link id="TCustomApplication.GetEnvironmentList">GetEnvironmentList</link>
+can be used.
+</p>
+</descr>
+<seealso>
+<link id="TCustomApplication.GetEnvironmentList">GetEnvironmentList</link>
+<link id="TCustomApplication.Params"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.EnvironmentVariable.envName">
+<short>Name of variable to retrieve</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.OptionChar">
+<short>Command-line switch character</short>
+<descr>
+<var>OptionChar</var> is the character used for command line switches. By
+default, this is the dash ('-') character, but it can be set to any other
+non-alphanumerical character (although no check is performed on this).
+</descr>
+<seealso>
+<link id="TCustomApplication.FindOptionIndex">FindOptionIndex</link>
+<link id="TCustomApplication.GetOptionValue">GetOptionValue</link>
+<link id="TCustomApplication.HasOption">HasOption</link>
+<link id="TCustomApplication.CaseSensitiveOptions">CaseSensitiveOptions</link>
+<link id="TCustomApplication.CheckOptions">CheckOptions</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.CaseSensitiveOptions">
+<short>Are options interpreted case sensitive or not</short>
+<descr>
+<var>CaseSensitiveOptions</var> determines whether <link
+id="TCustomApplication.FindOptionIndex">FindOptionIndex</link>
+and <link id="TCustomApplication.CheckOptions">CheckOptions</link> 
+perform searches in a case sensitive manner or not. By default, the search
+is case-sensitive. Setting this property to <var>False</var> makes the
+search case-insensitive.
+</descr>
+<seealso>
+<link id="TCustomApplication.FindOptionIndex">FindOptionIndex</link>
+<link id="TCustomApplication.GetOptionValue">GetOptionValue</link>
+<link id="TCustomApplication.HasOption">HasOption</link>
+<link id="TCustomApplication.OptionChar">OptionChar</link>
+<link id="TCustomApplication.CheckOptions">CheckOptions</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.StopOnException">
+<short>Should the program loop stop on an exception</short>
+<descr>
+<var>StopOnException</var> controls the behaviour of the <link
+id="TCustomApplication.Run">Run</link> and <link
+id="TCustomApplication.HandleException">HandleException</link>
+procedures in case of an unhandled exception in the <var>DoRun</var> code. If 
+<var>StopOnException</var> is <var>True</var> then <link
+id="TCustomApplication.Terminate">Terminate</link> will be called after 
+the exception was handled.
+</descr>
+<seealso>
+<link id="TCustomApplication.Run">Run</link>
+<link id="TCustomApplication.HandleException">HandleException</link>
+<link id="TCustomApplication.Terminate">Terminate</link>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomApplication.Log">
+<short>Write a message to the event log</short>
+<descr>
+<p>
+<var>Log</var> is meant for all applications to have a default logging
+mechanism. By default it does not do anything, descendent classes should
+override this method to provide appropriate logging: they should write the
+message <var>Msg</var> with type <var>EventType</var> to some log mechanism
+such as <link id="#fcl.eventlog.TEventLog"/>
+</p>
+<p>
+The second form using <var>Fmt</var> and <var>Args</var> will format the
+message using the provided arguments prior to logging it.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="#rtl.sysutils.TEventType"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.Log.EventType">
+<short>Type of event</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomApplication.Log.Msg">
+<short>Message to log</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="CustomApplication">
+<short>Global application instance</short>
+<descr>
+<var>CustomApplication</var> contains the global application instance. All
+descendents of <link id="TCustomApplication"/> should, in addition to
+storing an instance pointer in some variable (most likely called
+"Application") store the instance pointer in this variable. This ensures
+that, whatever kind of application is being created, user code can access
+the application object.
+</descr>
+<seealso>
+<link id="TCustomApplication"/>
+</seealso>
+</element>
+
+<!-- set type Visibility: default -->
+<element name="TEventLogTypes">
+<short>Set of <var>TEventLogType</var></short>
+<descr>
+<var>TEventLogTypes</var> is a set of <link
+id="#rtl.sysutils.TEventType">TEventType</link>,
+used in <link id="TCustomApplication.EventLogFilter"/> to filter events that
+are sent to the system log.
+</descr>
+<seealso>
+<link id="#rtl.sysutils.TEventType"/>
+<link id="TCustomApplication.EventLogFilter"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.EventLogFilter">
+<short>Event to filter events, before they are sent to the system log</short>
+<descr>
+<var>EventLogFilter</var> can be set to a set of event types that should be
+logged to the system log. If the set is empty, all event types are sent to
+the system log. If the set is non-empty, the <link
+id="TCustomApplication.Log"/> routine will check if the log event type is in
+the set, and if not, will not send the message to the system log.
+</descr>
+<seealso>
+<link id="TCustomApplication.Log"/>
+</seealso>
+</element>
+
+<!-- array type Visibility: default -->
+<element name="TStringArray">
+<short>Helper type: Array of strings</short>
+<descr>
+<var>TStringArray</var> is an array of strings, used in the <link id="TCustomApplication.GetOptionValues"/> call.
+</descr>
+<seealso>
+<link id="TCustomApplication.GetOptionValues"/> 
+</seealso>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TCustomApplication.Terminate.AExitCode">
+<short>Exit code for the program</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TCustomApplication.FindOptionIndex.StartAt">
+<short>Index to start searching for option.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomApplication.GetOptionValues">
+<short>Get the values for an option that may be specified multiple times</short>
+<descr>
+<p>
+<var>GetOptionValues</var> returns all values specified by command-line option
+switches <var>C</var> or <var>S</var>. For each occurrence of the
+command-line option <var>C</var> or <var>S</var>, the associated value is added to the array.
+</p>
+<p>
+<link id="TCustomApplication.GetOptionValue"/> will only return the first occurrence of a value.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TCustomApplication.GetOptionValue"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: public -->
+<element name="TCustomApplication.GetOptionValues.Result">
+<short>All values specified using <var>C</var> or <var>S</var> switched.</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TCustomApplication.GetOptionValues.C">
+<short>Short form of the command-line switch</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TCustomApplication.GetOptionValues.S">
+<short>Long form of the command-line switch</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomApplication.GetNonOptions">
+<short>Get all non-switch options</short>
+<descr>
+<p>
+<var>GetNonOptions</var> returns the items on the command-line that are not associated with a
+switch. It checks the command-line for allowed switches as they are
+indicated by <var>ShortOptions</var> and <var>Longopts</var>. The format is
+identical to <link id="TCustomApplication.Checkoptions"/>.
+This is useful for an application which accepts a command form such as <var>svn</var>:
+</p>
+<pre>
+svn commit [options] files
+</pre>
+<p>
+In the above example, "commit" and "files" would be returned by <var>GetNonOptions</var>
+</p>
+<p>
+The non-options are returned in the form of a string array, or a stringlist
+instance can be passed in <var>NonOptions</var>. Either will be filled with the
+non-options on return.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TCustomApplication.HasOption"/>
+<link id="TCustomApplication.Checkoptions"/>
+<link id="TCustomApplication.GetOptionValue"/>
+<link id="TCustomApplication.GetOptionValues"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: public -->
+<element name="TCustomApplication.GetNonOptions.Result">
+<short>The list of non-options</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TCustomApplication.GetNonOptions.ShortOptions">
+<short>List of short options</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TCustomApplication.GetNonOptions.Longopts">
+<short>List of long options</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TCustomApplication.GetNonOptions.NonOptions">
+<short>Non options in the form of a string list</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TCustomApplication.Log.Fmt">
+<short>Format string</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TCustomApplication.Log.Args">
+<short>Formatting arguments</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.ExceptionExitCode">
+<short>ExitCode to use then terminating the program due to an exception</short>
+<descr>
+<var>ExceptionExitCode</var> is the exit code that will be passed to
+<link id="TCustomApplication.Terminate"/>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.SingleInstance">
+<short>Single instance used to control single application instance behaviour</short>
+<descr>
+<var>SingleInstance</var> is used when <link id="SingleInstanceEnabled"/> is set to <var>True</var>.
+It can be used to send a message to an already running instance, or to check for messages if the 
+current instance is the sole ("server") instance running.
+</descr>
+<seealso>
+<link id="TCustomApplication.SingleInstanceClass"/>
+<link id="TCustomApplication.SingleInstanceEnabled"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.SingleInstanceClass">
+<short>Class to use when creating single instance</short>
+<descr>
+<var>SingleInstanceClass</var> can be used to set the class used to
+instantiate <link
+id="TCustomApplication.SingleInstance">SingleInstance</link>.
+The default class is determined by the global singleinstance default class
+as specified in <link id="singleinstance.DefaultSingleInstanceClass"/>.
+</descr>
+<seealso>
+<link id="TCustomApplication.SingleInstance"/>
+<link id="singleinstance.DefaultSingleInstanceClass"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomApplication.SingleInstanceEnabled">
+<short>Enable single application instance control.</short>
+<descr>
+<var>SingleInstanceEnabled</var>  can be set to <var>true</var> to start
+single-instance application control. This will instantiate <link id="TCustomApplication.SingleInstance"/>
+using <link id="TCustomApplication.SingleInstanceClass"/> and starts the
+check to wee whether this application is a client or server instance.
+</descr>
+<seealso>
+<link id="TCustomApplication.SingleInstance"/>
+<link id="TCustomApplication.SingleInstanceClass"/>
+</seealso>
+</element>
+
+</module> <!-- CustApp -->
+
+</package>
+</fpdoc-descriptions>

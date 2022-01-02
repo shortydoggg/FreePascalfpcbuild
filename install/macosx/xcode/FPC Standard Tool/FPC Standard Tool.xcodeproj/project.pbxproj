@@ -1,0 +1,353 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		8DD76FB00486AB0100D96B5E /* «PROJECTNAME».1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6A0FF2C0290799A04C91782 /* «PROJECTNAME».1 */; };
+		DD369A0D09F64EFB0071E9DB /* «PROJECTNAME».pas in Sources */ = {isa = PBXBuildFile; fileRef = DD369A0C09F64EFB0071E9DB /* «PROJECTNAME».pas */; };
+		DD369A9809F651920071E9DB /* EmptyPlaceHolderUnit.pas in Sources */ = {isa = PBXBuildFile; fileRef = DD369A9709F651920071E9DB /* EmptyPlaceHolderUnit.pas */; };
+		DD5DA3E30A605494007E4C04 /* libfpc.a in Frameworks */ = {isa = PBXBuildFile; fileRef = DD5DA3BF0A6052D2007E4C04 /* libfpc.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXBuildRule section */
+		DD369A9D09F651AF0071E9DB /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			fileType = sourcecode.pascal;
+			isEditable = 1;
+			outputFiles = (
+				"$(DERIVED_SOURCES_DIR)-$(CURRENT_VARIANT)/$(CURRENT_ARCH)/$(INPUT_FILE_BASE).s",
+			);
+			script = "";
+		};
+		DD7C455F0A6E7E1C003FA52B /* PBXBuildRule */ = {
+			isa = PBXBuildRule;
+			compilerSpec = com.apple.compilers.proxy.script;
+			filePatterns = "*.inc";
+			fileType = pattern.proxy;
+			isEditable = 1;
+			outputFiles = (
+			);
+			script = "";
+		};
+/* End PBXBuildRule section */
+
+/* Begin PBXContainerItemProxy section */
+		DD5DA3CF0A605388007E4C04 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 08FB7793FE84155DC02AAC07 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = DD5DA3BE0A6052D2007E4C04;
+			remoteInfo = fpc;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8DD76FAF0486AB0100D96B5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				8DD76FB00486AB0100D96B5E /* «PROJECTNAME».1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		8DD76FB20486AB0100D96B5E /* «PROJECTNAME» */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "«PROJECTNAME»"; sourceTree = BUILT_PRODUCTS_DIR; };
+		C6A0FF2C0290799A04C91782 /* «PROJECTNAME».1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = "«PROJECTNAME».1"; sourceTree = "<group>"; };
+		DD369A0C09F64EFB0071E9DB /* «PROJECTNAME».pas */ = {isa = PBXFileReference; fileEncoding = 12; lastKnownFileType = sourcecode.pascal; path = "«PROJECTNAME».pas"; sourceTree = "<group>"; };
+		DD369A9709F651920071E9DB /* EmptyPlaceHolderUnit.pas */ = {isa = PBXFileReference; fileEncoding = 12; lastKnownFileType = sourcecode.pascal; path = EmptyPlaceHolderUnit.pas; sourceTree = "<group>"; };
+		DD5DA3BF0A6052D2007E4C04 /* libfpc.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libfpc.a; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DD76FAD0486AB0100D96B5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD5DA3E30A605494007E4C04 /* libfpc.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* «PROJECTNAME» */ = {
+			isa = PBXGroup;
+			children = (
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6A0FF2B0290797F04C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = "«PROJECTNAME»";
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				DD369A0C09F64EFB0071E9DB /* «PROJECTNAME».pas */,
+				DD369A9709F651920071E9DB /* EmptyPlaceHolderUnit.pas */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8DD76FB20486AB0100D96B5E /* «PROJECTNAME» */,
+				DD5DA3BF0A6052D2007E4C04 /* libfpc.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6A0FF2B0290797F04C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				C6A0FF2C0290799A04C91782 /* «PROJECTNAME».1 */,
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8DD76FA90486AB0100D96B5E /* «PROJECTNAME» */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "«PROJECTNAME»" */;
+			buildPhases = (
+				8DD76FAB0486AB0100D96B5E /* Sources */,
+				8DD76FAD0486AB0100D96B5E /* Frameworks */,
+				8DD76FAF0486AB0100D96B5E /* CopyFiles */,
+			);
+			buildRules = (
+				DD7C455F0A6E7E1C003FA52B /* PBXBuildRule */,
+				DD369A9D09F651AF0071E9DB /* PBXBuildRule */,
+			);
+			dependencies = (
+				DD5DA3D00A605388007E4C04 /* PBXTargetDependency */,
+			);
+			name = "«PROJECTNAME»";
+			productInstallPath = "$(HOME)/bin";
+			productName = "«PROJECTNAME»";
+			productReference = 8DD76FB20486AB0100D96B5E /* «PROJECTNAME» */;
+			productType = "com.apple.product-type.tool";
+		};
+		DD5DA3BE0A6052D2007E4C04 /* fpc */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = DD5DA3C60A6052EE007E4C04 /* Build configuration list for PBXNativeTarget "fpc" */;
+			buildPhases = (
+				DD5DA3C00A6052E6007E4C04 /* Build libfpc.a */,
+				DDD9D7270BE0E228008CF256 /* Compile Pascal Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = fpc;
+			productName = fpc;
+			productReference = DD5DA3BF0A6052D2007E4C04 /* libfpc.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "«PROJECTNAME»" */;
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* «PROJECTNAME» */;
+			projectDirPath = "";
+			targets = (
+				8DD76FA90486AB0100D96B5E /* «PROJECTNAME» */,
+				DD5DA3BE0A6052D2007E4C04 /* fpc */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		DD5DA3C00A6052E6007E4C04 /* Build libfpc.a */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Build libfpc.a";
+			outputPaths = (
+				"$(TARGET_BUILD_DIR)/libfpc.a",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Build libfpc.a\n# 9 July 2006 (Jonas Maebe)\n#   * original version\n# 15 September 2006 (Erling Johansen)\n#   * simplified\n# 26 April 2007 (Jonas Maebe)\n#  * added support for ppc64/x86_64 (future proofing)\n# 4 August 2007 (Jonas Maebe)\n#  * call ranlib after ar so the toc of the library is up-to-date\n\nrm -f \"$TARGET_TEMP_DIR\"/*.a\nnarch=\n\nfor arch in $ARCHS\ndo\n\tcase $arch in\n\t\tppc) fpc_arch=ppc; fpc_rtl=powerpc ;;\n\t\ti386) fpc_arch=386; fpc_rtl=i386 ;;\n\t\tppc64) fpc_arch=ppc64; fpc_rtl=powerpc64 ;;\n\t\tx86_64) fpc_arch=x64; fpc_rtl=x86_64 ;;\n\t\t*) continue\n\tesac\n\tif test -e /usr/local/bin/ppc${fpc_arch}\n\tthen\n\t\tupath=/usr/local/lib/fpc/`/usr/local/bin/ppc${fpc_arch} -iV`/units/${fpc_rtl}-darwin\n\t\tar -q \"$TARGET_TEMP_DIR\"/libfpc${narch}.a `ls \"$upath\"/*/*.o | grep -v 'darwin/fv/'`\n\t\tranlib \"$TARGET_TEMP_DIR\"/libfpc${narch}.a\n\t\tnarch=${narch}x\n\telse\n\t\techo error: can\\'t build libfpc.a for $arch \\(ppc${fpc_arch} not found\\)\n\tfi\ndone\n\nif test ${#narch} -gt 1\nthen\n\tlipo -create \"$TARGET_TEMP_DIR\"/libfpc*.a -output \"$TARGET_BUILD_DIR\"/libfpc.a\n\trm -f \"$TARGET_TEMP_DIR\"/*.a\nelse\n\tmv \"$TARGET_TEMP_DIR\"/libfpc.a \"$TARGET_BUILD_DIR\"\nfi\n";
+		};
+		DDD9D7270BE0E228008CF256 /* Compile Pascal Sources */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Compile Pascal Sources";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Compile Pascal Sources\n# 15sep06,ejo  written.\n# 26 April 2007 - Jonas Maebe\n#  * support for ppc64 and x86_64\n#  * don't run when cleaning (in case running scripts when cleaning is ever fixed by Apple)\n#  * split the options in FPC_COMMON_OPTIONS (common to all configurations) and FPC_CFG_SPECIFIC_OPTIONS (per configuration)\n\nif [ x\"$ACTION\" != \"xbuild\" ]; then\n  # in case running scripts during cleaning gets fixed\n  exit 0\nfi\n\nif test ! -e \"$FPC_MAIN_FILE\"\nthen\n\techo error: FPC_MAIN_FILE not found \\($FPC_MAIN_FILE\\)\n\texit 2\nfi\n\nfor variant in $BUILD_VARIANTS\ndo\n\tfor arch in $ARCHS\n\tdo\n\t\tcase $arch in\n\t\t\ti386) fpc_arch=386;;\n\t\t\tppc) fpc_arch=ppc;;\n              ppc64) fpc_arch=ppc64;;\n              x86_64) fpc_arch=x64;;\n\t\t\t*) continue\n\t\tesac\n\n\t\tif test -e /usr/local/bin/ppc${fpc_arch}\n\t\tthen\n\t\t\tapp_target_temp_dir=$CONFIGURATION_TEMP_DIR/`basename \"$PROJECT_TEMP_DIR\"`\n\t\t\tout_dir=$app_target_temp_dir/`basename \"$DERIVED_SOURCES_DIR\"`-$variant/$arch\n\t\t\tmkdir -p \"$out_dir\"\n\t\t\tcd \"$out_dir\"\n\n\t\t\techo /usr/local/bin/ppc${fpc_arch} -a -s -vbr -FE. $FPC_COMMON_OPTIONS $FPC_SPECIFIC_OPTIONS '\\' >ppccmd.sh\n\t\t\techo -Fi\\\"`dirname \"$FPC_MAIN_FILE\"`\\\" '\\' >>ppccmd.sh\n\t\t\techo $FPC_UNIT_PATHS '\\' >>ppccmd.sh\n\t\t\techo \\\"$FPC_MAIN_FILE\\\" >>ppccmd.sh\n\n\t\t\t/bin/sh ppccmd.sh\n\t\telse\n\t\t\techo $FPC_MAIN_FILE:1: error: 1: can\\'t compile for $arch \\(ppc${fpc_arch} not found\\)\n\t\t\texit 2\n\t\tfi\n\tdone\ndone\n";
+		};
+/* End PBXShellScriptBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DD76FAB0486AB0100D96B5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				DD369A0D09F64EFB0071E9DB /* «PROJECTNAME».pas in Sources */,
+				DD369A9809F651920071E9DB /* EmptyPlaceHolderUnit.pas in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		DD5DA3D00A605388007E4C04 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = DD5DA3BE0A6052D2007E4C04 /* fpc */;
+			targetProxy = DD5DA3CF0A605388007E4C04 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB928608733DD80010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = "$(HOME)/bin";
+				LIBRARY_SEARCH_PATHS = "";
+				MACH_O_TYPE = mh_execute;
+				OTHER_LDFLAGS = "-dynamic";
+				PRODUCT_NAME = "«PROJECTNAME»";
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		1DEB928708733DD80010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(NATIVE_ARCH)";
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = "$(HOME)/bin";
+				LIBRARY_SEARCH_PATHS = "";
+				MACH_O_TYPE = mh_execute;
+				OTHER_LDFLAGS = "-dynamic";
+				PRODUCT_NAME = "«PROJECTNAME»";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		1DEB928A08733DD80010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FPC_COMMON_OPTIONS = "-Mmacpas -Sgi";
+				FPC_MAIN_FILE = "$(PROJECT_DIR)/$(PROJECT_NAME).pas";
+				FPC_RTL_UNITS_BASE = /usr/local/lib/fpc/;
+				FPC_SPECIFIC_OPTIONS = "-ghlttt -O-1 -CRriot";
+				FPC_UNIT_PATHS = "-Fu\"$(PROJECT_DIR)/Source\"";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Debug;
+		};
+		1DEB928B08733DD80010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				FPC_COMMON_OPTIONS = "-Mmacpas -Sgi";
+				FPC_MAIN_FILE = "$(PROJECT_DIR)/$(PROJECT_NAME).pas";
+				FPC_RTL_UNITS_BASE = /usr/local/lib/fpc/;
+				FPC_SPECIFIC_OPTIONS = "-Ci- -Cr- -Co- -O3 -Xs ";
+				FPC_UNIT_PATHS = "-Fu\"$(PROJECT_DIR)/Source\"";
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = /Developer/SDKs/MacOSX10.4u.sdk;
+			};
+			name = Release;
+		};
+		DD5DA3C70A6052EE007E4C04 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = fpc;
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		DD5DA3C80A6052EE007E4C04 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/lib;
+				PREBINDING = NO;
+				PRODUCT_NAME = fpc;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB928508733DD80010E9CD /* Build configuration list for PBXNativeTarget "«PROJECTNAME»" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB928608733DD80010E9CD /* Debug */,
+				1DEB928708733DD80010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		1DEB928908733DD80010E9CD /* Build configuration list for PBXProject "«PROJECTNAME»" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB928A08733DD80010E9CD /* Debug */,
+				1DEB928B08733DD80010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		DD5DA3C60A6052EE007E4C04 /* Build configuration list for PBXNativeTarget "fpc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				DD5DA3C70A6052EE007E4C04 /* Debug */,
+				DD5DA3C80A6052EE007E4C04 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

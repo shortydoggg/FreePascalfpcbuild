@@ -1,0 +1,538 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!--  
+
+   $Id: dynlibs.xml,v 1.2 2005/05/06 22:34:52 michael Exp $ 
+   This file is part of the FPC documentation. 
+   Copyright (C) 1997, by Michael Van Canneyt 
+ 
+   The FPC documentation is free text; you can redistribute it and/or 
+   modify it under the terms of the GNU Library General Public License as 
+   published by the Free Software Foundation; either version 2 of the 
+   License, or (at your option) any later version. 
+ 
+   The FPC Documentation is distributed in the hope that it will be useful, 
+   but WITHOUT ANY WARRANTY; without even the implied warranty of 
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU 
+   Library General Public License for more details. 
+ 
+   You should have received a copy of the GNU Library General Public 
+   License along with the FPC documentation; see the file COPYING.LIB.  If not, 
+   write to the Free Software Foundation, Inc., 59 Temple Place - Suite 330, 
+   Boston, MA 02111-1307, USA. 
+ -->
+<fpdoc-descriptions>
+<package name="rtl">
+<module name="dynlibs">
+<short>Cross-platform support for dynamically loadable libraries</short>
+<descr>
+<p>
+The <file>Dynlibs</file> unit provides support for dynamically loading
+shared libraries. It is available only on those platforms that support
+shared libraries. The functionality available here may only be a part of
+the functionality available on each separate platform, in the interest of
+portability.
+</p>
+<p>
+On unix platforms, using this unit will cause the program to be linked to
+the C library, as most shared libraries are implemented in C and the
+dynamical linker too.
+</p>
+</descr>
+
+<!-- alias type Visibility: default -->
+<element name="TLibHandle">
+<short>Library handle type</short>
+<descr>
+<var>TLibHandle</var> should be considered an opaque type. It is defined
+differently on various platforms. The definition shown here depends on the
+platform for which the documentation was generated.
+</descr>
+<seealso>
+<link id="LoadLibrary"/>
+<link id="UnloadLibrary"/>
+</seealso>
+</element>
+
+<element name="HMODULE">
+<short>Alias for <link id="#rtl.dynlibs.TLibHandle">TLibHandle</link> type.</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="NilHandle">
+<short>Correctly typed Nil handle - returned on error by <link id="LoadLibrary"/></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="LoadLibrary">
+<short>Load a dynamic library and return a handle to it.</short>
+<descr>
+<p>
+<var>LoadLibrary</var> loads a dynamic library in file <var>Name</var> 
+and returns a handle to it. If the library cannot be loaded, 
+<link id="NilHandle"/> is returned.
+</p>
+<p>
+No assumptions should be made about the location of the loaded library if a
+relative pathname is specified. The behaviour is dependent on the platform.
+Therefore it is best to specify an absolute pathname if possible.
+</p>
+</descr>
+<errors>
+On error, <link id="NilHandle"/> is returned.
+</errors>
+<seealso>
+<link id="UnloadLibrary"/>
+<link id="GetProcedureAddress"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="GetProcedureAddress">
+<short>Get the address of a procedure or symbol in a dynamic library.</short>
+<descr>
+<p>
+<var>GetProcedureAddress</var> returns a pointer to the location in memory
+of the symbol <var>ProcName</var> or ordinal value <var>Ordinal</var>
+in the dynamically loaded library
+specified by it's handle <var>lib</var>.  If the symbol cannot be found or
+the handle is invalid, <var>Nil</var> is returned.
+</p>
+<p>
+On Windows, only an exported  procedure or
+function can be searched this way. On Unix platforms the location of any
+exported symbol can be retrieved this way.
+</p>
+<p>
+Only windows and OS/2 support getting the address of a function using an
+ordinal value.
+</p>
+</descr>
+<errors>
+If the symbol cannot be found, <var>Nil</var> is returned.
+</errors>
+<seealso>
+<link id="LoadLibrary"/> 
+<link id="UnLoadLibrary"/> 
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UnloadLibrary">
+<short>Unload a previously loaded library</short>
+<descr>
+<var>UnloadLibrary</var> unloads a previously loaded library (specified by
+the handle <var>lib</var>). The call returns <var>True</var> if succesful,
+<var>False</var> otherwisa.
+</descr>
+<errors>
+On error, <var>False</var> is returned.
+</errors>
+<seealso>
+<link id="LoadLibrary"/> 
+<link id="GetProcedureAddress"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="FreeLibrary">
+<short>For compatibility with Delphi/Windows: Unload a library</short>
+<descr>
+<var>FreeLibrary</var> provides the same functionality as <link
+id="UnloadLibrary"/>, and is provided for compatibility with Delphi.
+</descr>
+<seealso>
+<link id="UnloadLibrary"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="GetProcAddress">
+<short>For compatibility with Delphi/Windows: Get the address of a procedure</short>
+<descr>
+<var>GetProcAddress</var> provides the same functionality as <link
+id="GetProcedureAddress"/>, and is provided for compatibility with Delphi.
+</descr>
+<seealso>
+<link id="GetProcedureAddress"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="SafeLoadLibrary">
+<short>Saves the control word and loads a library</short>
+<descr>
+<var>SafeLoadLibary</var> saves the FPU control word, and calls <link
+id="LoadLibrary"/> with library name <var>Name</var>. After that function
+has returned, the FPU control word is saved again. (only on Intel i386 CPUS).
+</descr>
+<seealso>
+<link id="LoadLibrary"/>
+</seealso>
+</element>
+
+<element name="SharedSuffix">
+<short>Extension of shared library</short>
+<descr>
+<var>SharedSuffix</var> contains the extension of a shared library
+(dynamically loadable library) on the current platform. It does not
+contain the . (dot) character.  This can be used to determine the name
+of a shared library in a platform independent way.
+</descr>
+<seealso>
+<link id="HModule"/>
+<link id="TLibHandle"/>
+</seealso>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PLibHandler">
+<short>Pointer to a <link id="#rtl.dynlibs.TLibHandler">TLibHandler</link> record.</short>
+<seealso>
+<link id="TLibHandler"/>
+</seealso>
+</element>
+
+<!-- function type Visibility: default -->
+<element name="TLibEventLoading">
+<short>Library loading event handler prototype.</short>
+<descr>
+<var>TLibEventLoading</var> is the prototype for an event handler (callback)
+called when a library is being loaded. The function is passed the
+<var>User</var> parameter passed when calling <link id="InitializeLibrary"/>
+and a pointer to the <var>TLibHandler</var> record used when loading the
+library.
+</descr>
+<seealso>
+<link id="InitializeLibrary"/>
+<link id="TryInitializeLibrary"/>
+<link id="TLibHandler"/>
+<link id="TLibEventUnloading"/>
+<link id="ReleaseLibrary"/>
+</seealso>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TLibEventUnloading">
+<short>Library unloading event handler prototype.</short>
+<descr>
+<var>TLibEventUnloading</var> is the prototype for an event handler (callback)
+called when a library is being unloaded. 
+The function is passed the pointer to the <var>TLibHandler</var> record used when
+unloading the library using <link id="ReleaseLibrary"/>
+</descr>
+<seealso>
+<link id="ReleaseLibrary"/>
+<link id="InitializeLibrary"/>
+<link id="TryInitializeLibrary"/>
+<link id="TLibHandler"/>
+<link id="TLibEventLoading"/>
+</seealso>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PPLibSymbol">
+<short>Pointer to a <link id="#rtl.dynlibs.PLibSymbol">PLibSymbol</link> type.</short>
+<seealso>
+<link id="PLibSymbol"/>
+<link id="TLibSymbol"/>
+</seealso>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PLibSymbol">
+<short>Pointer to a <link id="#rtl.dynlibs.TLibSymbol">TLibSymbol</link> type.</short>
+<seealso>
+<link id="PPLibSymbol"/>
+<link id="TLibSymbol"/>
+</seealso>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TLibSymbol">
+<short>Library symbol description</short>
+<descr>
+<var>TLibSymbol</var> describes a symbol address (<var>Name</var>) to be loaded from a
+library, and the location to write the address (usually a procedural type
+variable). The address of the library symbol will be written to the location
+pointed to by <var>pvar</var>. The <var>weak</var> field signals whether the
+<link id="InitializeLibrary"/> should report an error if the symbol is not
+found. Set to <var>True</var> means not to report an error, <var>False</var>
+will cause an error to be reported.
+</descr>
+<seealso>
+<link id="TLibHandler"/>
+<link id="InitializeLibrary"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibSymbol.pvar">
+<short>Location where to store the symbol address.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibSymbol.name">
+<short>Name of the symbol to be loaded.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibSymbol.weak">
+<short><var>False</var> to report an error if the symbol is not found.</short>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TLibHandler">
+<short>Library initialization descriptor</short>
+<descr>
+<var>TLibHandler</var> is used to describe the loading of a library: the
+name of the library, the symbols to be loaded from the library.
+</descr>
+<seealso>
+<link id="InitializeLibrary"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibHandler.InterfaceName">
+<short>Name by which the library is known.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibHandler.Defaults">
+<short>list of filenames to try and load the library from</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibHandler.Filename">
+<short>Filename of the actually (currently) loaded library.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibHandler.Handle">
+<short>Low-level library handle</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibHandler.Loading">
+<short>Loading event, called after the library was loaded.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibHandler.Unloading">
+<short>Unloading event, called before the library will be unloaded</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibHandler.SymCount">
+<short>Number of symbols to load from the library</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibHandler.Symbols">
+<short>Pointer to an array of symbols to load from the library.</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibHandler.ErrorMsg">
+<short>Message describing last error during load/unload</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TLibHandler.RefCount">
+<short>Reference count for this library</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="LibraryHandler">
+<short>Initialize a <var>TLibHandler</var> structure</short>
+<descr>
+<var>LibraryHandler</var> initializes a new <var>TLibHandler</var> record: it
+initializes all fields from the parameters that are passed to it, and zeroes
+out the other fields. It returns the initialized record.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TLibHandler"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="TryInitializeLibrary">
+<short>Try to load a library and initialize a set of symbols</short>
+<descr>
+<p>
+<var>TryInitializeLibrary</var> will attempt to load the library described
+in <var>Handler</var>, and will attempt to load it from <var>FileName</var>
+or <var>FileNames</var> if an array of names is provided.
+When the library is loaded, the addresses of the symbols defined in
+<var>Handler.Symbols</var> will be loaded and written to the indicated
+location.
+</p>
+<p>
+The function returns the reference count of the library (number of times a
+load was attempted), or -1 on error. An error may occur if the library
+cannot be loaded or when some required symbols could not be found.
+</p>
+</descr>
+<errors>
+On error, -1 is returned. 
+</errors>
+<seealso>
+<link id="InitializeLibrary"/>
+<link id="ReleaseLibrary"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="InitializeLibrary">
+<short>Load a library and initialize a set of symbols</short>
+<descr>
+<p>
+<var>InitializeLibrary</var> will attempt to load the library described
+in <var>Handler</var>, and will attempt to load it from <var>FileName</var>  
+or <var>FileNames</var> if an array of names is provided.   
+When the library is loaded, the addresses of the symbols
+defined in <var>Handler.Symbols</var> will be loaded and written to the indicated
+location.
+</p>
+<p>
+The function returns the reference count of the library (number of times a
+load was attempted), or raises an exception on error. An error may occur if the library
+cannot be loaded or when some required symbols could not be found.
+</p>
+</descr>
+<errors>
+On error, a <var>EInOutError</var> exception is raised.
+</errors>
+<seealso>
+<link id="TryInitializeLibrary"/>
+<link id="ReleaseLibrary"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="ReleaseLibrary">
+<short>Unload a library</short>
+<descr>
+<var>ReleaseLibrary</var> will decrease the reference count on
+<var>Handler</var> and if it reaches zero, the library is unloaded.
+</descr>
+<seealso>
+<link id="InitializeLibrary"/>
+<link id="TryInitializeLibrary"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="AppendLibraryError">
+<short>Append an error to the list of library errors.</short>
+<descr>
+<var>AppendLibraryError</var> appends <var>Msg</var> to the
+<var>ErrorMsg</var> field of <var>Handler</var>, with a newline if a message
+was already present.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="GetLastLibraryError"/>
+<link id="RaiseLibraryException"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="GetLastLibraryError">
+<short>Return the library errors</short>
+<descr>
+<var>GetLastLibraryError</var> returns the <var>Handler.ErrorMsg</var>
+field, and empties the field.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="AppendLibraryError"/>
+<link id="RaiseLibraryException"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="RaiseLibraryException">
+<short>Raise an <var>EInOutError</var> exception</short>
+<descr>
+<var>RaiseLibraryException</var> raises an <var>EInOutError</var> exception 
+using the error message found in <var>Handler</var>. If no message is found, 
+a default message is used.
+</descr>
+<seealso>
+<link id="GetLastLibraryError"/>
+<link id="AppendLibraryError"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="LoadLibrarySymbols">
+<short>Load symbol addresses from a library</short>
+<descr>
+<var>LoadLibrarySymbols</var> loads the addresses of <var>Count</var> symbols described in
+<var>Symbols</var>, using the library handle <var>Lib</var>. It returns
+<var>True</var> if all symbols were loaded successfully.
+If a symbol definition cannot be loaded, a pointer to the definition will be stored in
+the location pointed to by <var>ErrorSym</var>, and <var>False</var> will be
+returned.
+</descr>
+<errors>
+On error, <var>False</var> is returned, and <var>ErrorSym</var> will point
+to the missing symbol.
+</errors>
+<seealso>
+<link id="ClearLibrarySymbols"/>
+<link id="TLibSymbol"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="ClearLibrarySymbols">
+<short>Clear all library symbols</short>
+<descr>
+<var>ClearLibrarySymbols</var> clears the addresses of the <var>Count</var>
+symbol definitions pointed to by <var>Symbols</var>.
+</descr>
+<seealso>
+<link id="LoadLibrarySymbols"/>
+<link id="TLibSymbol"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="GetLoadErrorStr">
+<short>Return a textual description of the last load error</short>
+<descr>
+<var>GetLoadErrorStr</var> returns a textual description of the last library
+loading or unloading error.
+No other system calls may be made between the load call and the call of
+<var>GetLoadErrorStr</var>
+</descr>
+<seealso>
+<link id="LoadLibrary"/>
+</seealso>
+</element>
+
+<element name="TOrdinalEntry">
+<short>Opaque type for retrieving addresses using ordinal IDs</short>
+<descr>
+<var>TOrdinalEntry</var> is mainly used on Windows and OS/2 operating
+systems to retrieve the address of a procedure using the index (ordinal) of
+the procedure. On these operating systems, entry points can be loaded using
+name or ordinal value.
+</descr>
+<seealso>
+<link id="GetProcedureAddress"/>
+</seealso>
+</element>
+
+</module> <!-- dynlibs -->
+</package>
+</fpdoc-descriptions>

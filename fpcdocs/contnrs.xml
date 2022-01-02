@@ -1,0 +1,5301 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="fcl">
+
+<!--
+  ====================================================================
+    contnrs
+  ====================================================================
+-->
+
+<module name="contnrs">
+<short>Various general purpose classes: stack, queue, objectlists</short>
+<descr>
+<p>
+The <file>contnrs</file> unit implements various general-purpose classes:
+</p>
+<dl>
+<dt>Object lists</dt>
+<dd>
+lists that manage objects instead of pointers, and which automatically
+dispose of the objects.
+</dd>
+<dt>Component lists</dt>
+<dd>
+lists that manage components instead of pointers, and which automatically
+dispose the components.
+</dd>
+<dt>Class lists</dt>
+<dd>
+lists that manage class pointers instead of pointers.
+</dd>
+<dt>Stacks</dt>
+<dd>Stack classes to push/pop pointers or objects</dd>
+<dt>Queues</dt>
+<dd>Classes to manage a FIFO list of pointers or objects</dd>
+<dt>Hash lists</dt>
+<dd>
+General-purpose Hash lists.
+</dd>
+</dl>
+</descr>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="SysUtils">
+<short>For exception support</short>
+</element>
+
+<!-- unresolved type reference Visibility: default -->
+<element name="Classes">
+<short>For basic lists</short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TFPObjectList">
+<short><var>TFPList</var> descendent which manages objects.</short>
+<descr>
+<p>
+<var>TFPObjectList</var> is a <link id="#rtl.classes.TFPList">TFPList</link>
+based list which has as the default array property <link id="#rtl.system.TObject">TObjects</link> 
+instead of pointers. By default it also manages the objects: when an object is deleted
+or removed from the list, it is automatically freed. This behaviour can be
+disabled when the list is created. 
+</p>
+<p>
+In difference with <link id="TObjectList"/>, <var>TFPObjectList</var> offers
+no notification mechanism of list operations, allowing it to be faster than
+<var>TObjectList</var>. For the same reason, it is also not a descendent of 
+<var>TFPList</var> (although it uses one internally).
+</p>
+</descr>
+<seealso>
+<link id="#rtl.classes.TFPList"/>
+<link id="TObjectList"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFPObjectList.Create">
+<short>Create a new object list</short>
+<descr>
+<var>Create</var> instantiates a new object list. The <var>FreeObjects</var>
+parameter determines whether objects that are removed from the list should
+also be freed from memory. By default this is <var>True</var>. This
+behaviour can be changed after the list was instantiated.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPObjectList.Destroy"/>
+<link id="TFPObjectList.OwnsObjects"/>
+<link id="TObjectList"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Create.FreeObjects">
+<short>Should objects be freed when removing them from the list</short>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TFPObjectList.Destroy">
+<short>Clears the list and destroys the list instance</short>
+<descr>
+<var>Destroy</var> clears the list, freeing all objects in the list if <link
+id="TFPObjectList.OwnsObjects">OwnsObjects</link>  is <var>True</var>. 
+</descr>
+<seealso>
+<link id="TFPObjectList.OwnsObjects"/>
+<link id="TObjectList.Create"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPObjectList.Clear">
+<short>Clear all elements in the list.</short>
+<descr>
+Removes all objects from the list, freeing all objects in the list if <link
+id="TFPObjectList.OwnsObjects">OwnsObjects</link>  is <var>True</var>.
+</descr>
+<seealso>
+<link id="TObjectList.Destroy"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPObjectList.Add">
+<short>Add an object to the list.</short>
+<descr>
+<p>
+<var>Add</var> adds <var>AObject</var> to the list and returns the index of
+the object in the list. 
+</p>
+<p>
+Note that when <link id="TFPObjectList.OwnsObjects">OwnsObjects</link> is 
+<var>True</var>, an object should not be added twice to the list: this will
+result in memory corruption when the object is freed (as it will be freed
+twice). The <var>Add</var> method does not check this, however.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPObjectList.OwnsObjects"/>
+<link id="TFPObjectList.Delete"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPObjectList.Add.Result">
+<short>The index of the object in the list.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Add.AObject">
+<short>The object to add</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPObjectList.Delete">
+<short>Delete an element from the list.</short>
+<descr>
+<var>Delete</var> removes the object at index <var>Index</var> from the
+list. When <link id="TFPObjectList.OwnsObjects">OwnsObjects</link> is
+<var>True</var>, the object is also freed.
+</descr>
+<errors>
+An access violation may occur when <link id="TFPObjectList.OwnsObjects">OwnsObjects</link> is
+<var>True</var> and either the object was freed externally, or when
+the same object is in the same list twice.
+</errors>
+<seealso>
+<link id="TFPObjectList.Remove"/>
+<link id="TFPObjectList.Extract"/>
+<link id="TFPObjectList.OwnsObjects"/>
+<link id="TFPObjectList.Add"/>
+<link id="TFPObjectList.Clear"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Delete.Index">
+<short>Index of the object to delete.</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPObjectList.Exchange">
+<short>Exchange the location of two objects</short>
+<descr>
+<var>Exchange</var> exchanges the objects at indexes <var>Index1</var> and
+<var>Index2</var> in a direct operation (i.e. no delete/add is performed).
+</descr>
+<errors>
+If either <var>Index1</var> or <var>Index2</var> is invalid, an exception
+will be raised.
+</errors>
+<seealso>
+<link id="TFPObjectList.Add"/>
+<link id="TFPObjectList.Delete"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Exchange.Index1">
+<short>Location of first object</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Exchange.Index2">
+<short>Location of second object</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPObjectList.Expand">
+<short>Expand the capacity of the list.</short>
+<descr>
+<var>Expand</var> increases the capacity of the list. It calls
+<link id="#rtl.classes.tfplist.expand"/> and then returns a reference to
+itself.
+</descr>
+<errors>
+If there is not enough memory to expand the list, an exception will be
+raised.
+</errors>
+<seealso>
+<link id="TFPObjectList.Pack"/>
+<link id="TFPObjectList.Clear"/>
+<link id="#rtl.classes.tfplist.expand"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPObjectList.Expand.Result">
+<short>A reference to the expanded list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPObjectList.Extract">
+<short>Extract an object from the list</short>
+<descr>
+<p>
+<var>Extract</var> removes <var>Item</var> from the list, if it is present
+in the list. It returns <var>Item</var> if it was found, <var>Nil</var> if
+item was not present in the list. 
+</p>
+<p>
+Note that the object is not freed, and
+that only the first found object is removed from the list.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPObjectList.Pack"/>
+<link id="TFPObjectList.Clear"/>
+<link id="TFPObjectList.Remove"/>
+<link id="TFPObjectList.Delete"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPObjectList.Extract.Result">
+<short>The extracted object, or <var>Nil</var> if none was extracted.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Extract.Item">
+<short>The object to extract</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPObjectList.Remove">
+<short>Remove an item from the list.</short>
+<descr>
+<p>
+<var>Remove</var> removes <var>Item</var> from the list, if it is present
+in the list. It frees <var>Item</var> if <link id="TFPObjectList.OwnsObjects">OwnsObjects</link> is
+<var>True</var>, and returns the index of the object that was found
+in the list, or -1 if the object was not found.
+</p>
+<p>
+Note that only the first found object is removed from the list.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPObjectList.Pack"/>
+<link id="TFPObjectList.Clear"/>
+<link id="TFPObjectList.Delete"/>
+<link id="TFPObjectList.Extract"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPObjectList.Remove.Result">
+<short>Index of the removed object or -1 if none was removed.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Remove.AObject">
+<short>Object to remove from the list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPObjectList.IndexOf">
+<short>Search for an object in the list</short>
+<descr>
+<var>IndexOf</var> searches for the presence of <var>AObject</var> in the
+list, and returns the location (index) in the list. The index is 0-based,
+and -1 is returned if <var>AObject</var> was not found in the list.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPObjectList.Items"/>
+<link id="TFPObjectList.Remove"/>
+<link id="TFPObjectList.Extract"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPObjectList.IndexOf.Result">
+<short>Index of the object in the list, -1 if not present.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.IndexOf.AObject">
+<short>Object instance to search for.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPObjectList.FindInstanceOf">
+<short>Search for an instance of a certain class</short>
+<descr>
+<p>
+<var>FindInstanceOf</var> will look through the instances in the list and
+will return the first instance which is a descendent of class
+<var>AClass</var> if <var>AExact</var> is <var>False</var>. If
+<var>AExact</var> is true, then the instance should be of class
+<var>AClass</var>.
+</p>
+<p> 
+If no instance of the requested class is found, <var>Nil</var> is returned.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPObjectList.IndexOf"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPObjectList.FindInstanceOf.Result">
+<short>The first instance of the requested class.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.FindInstanceOf.AClass">
+<short>The class to look for</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.FindInstanceOf.AExact">
+<short>Should the class match exact or nor</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.FindInstanceOf.AStartAt">
+<short>Index to start the search at</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPObjectList.Insert">
+<short>Insert a new object in the list</short>
+<descr>
+<var>Insert</var> inserts <var>AObject</var> at position <var>Index</var> in
+the list. All elements in the list after this position are shifted. The
+index is zero based, i.e. an insert at position 0 will insert an object at
+the first position of the list.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPObjectList.Add"/>
+<link id="TFPObjectList.Delete"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Insert.Index">
+<short>Position Index to insert the object in</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Insert.AObject">
+<short>Object to insert in the list</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPObjectList.First">
+<short>Return the first non-nil object in the list</short>
+<descr>
+<var>First</var> returns a reference to the first non-<var>Nil</var> element in the
+list. If no non-<var>Nil</var> element is found, <var>Nil</var> is returned.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPObjectList.Last"/>
+<link id="TFPObjectList.Pack"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPObjectList.First.Result">
+<short>The first non-nil element in the list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPObjectList.Last">
+<short>Return the last non-nil object in the list.</short>
+<descr>
+<var>Last</var> returns a reference to the last non-<var>Nil</var> element
+in the list. If no non-<var>Nil</var> element is found, <var>Nil</var> is 
+returned.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPObjectList.First"/>
+<link id="TFPObjectList.Pack"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPObjectList.Last.Result">
+<short>The last non-nil object in the list.</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPObjectList.Move">
+<short>Move an object to another location in the list.</short>
+<descr>
+<p>
+<var>Move</var> moves the object at current location <var>CurIndex</var> to
+location <var>NewIndex</var>. Note that the <var>NewIndex</var> is
+determined <em>after</em> the object was removed from location
+<var>CurIndex</var>, and can hence be shifted with 1 position if
+<var>CurIndex</var> is less than <var>NewIndex</var>.
+</p>
+<p>
+Contrary to <link id="TFPObjectList.Exchange">exchange</link>, 
+the move operation is done by extracting the object from it's 
+current location and inserting it at the new location.
+</p>
+</descr>
+<errors>
+If either <var>CurIndex</var> or <var>NewIndex</var> is out of range, an
+exception may occur.
+</errors>
+<seealso>
+<link id="TFPObjectList.Exchange"/>
+<link id="TFPObjectList.Delete"/>
+<link id="TFPObjectList.Insert"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Move.CurIndex">
+<short>The current index of the object</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Move.NewIndex">
+<short>The new index of the object</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPObjectList.Assign">
+<short>Copy the contents of a list.</short>
+<descr>
+<var>Assign</var> copies the contents of <var>Obj</var> if <var>Obj</var> is
+of type <var>TFPObjectList</var>
+</descr>
+<errors>
+None.
+</errors>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Assign.Obj">
+<short>The source list to copy from.</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPObjectList.Pack">
+<short>Remove all <var>Nil</var> references from the list</short>
+<descr>
+<var>Pack</var> removes all <var>Nil</var> elements from the list.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPObjectList.First"/>
+<link id="TFPObjectList.Last"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPObjectList.Sort">
+<short>Sort the list of objects</short>
+<descr>
+<p>
+<var>Sort</var> will perform a quick-sort on the list, using
+<var>Compare</var> as the compare algorithm. This function should accept 2
+pointers and should return the following result:
+</p>
+<dl>
+<dt>less than 0</dt><dd>If the first pointer comes before the second.</dd>
+<dt>equal to 0</dt><dd>If the pointers have the same value.</dd>
+<dt>larger than 0</dt><dd>If the first pointer comes after the second.</dd>
+</dl>
+<p>
+The function should be able to deal with <var>Nil</var> values.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="#rtl.classes.TList.Sort"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Sort.Compare">
+<short>Compare function for two objects.</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPObjectList.Capacity">
+<short>Capacity of the list</short>
+<descr>
+<var>Capacity</var> is the number of elements that the list can contain
+before it needs to expand itself, i.e., reserve more memory for pointers.
+It is always equal or larger than <link id="TFPObjectList.Count">Count</link>.
+</descr>
+<seealso>
+<link id="TFPObjectList.Count"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPObjectList.Count">
+<short>Number of elements in the list.</short>
+<descr>
+<var>Count</var> is the number of elements in the list. Note that this
+includes <var>Nil</var> elements.
+</descr>
+<seealso>
+<link id="TFPObjectList.Capacity"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPObjectList.OwnsObjects">
+<short>Should the list free elements when they are removed.</short>
+<descr>
+<p>
+<var>OwnsObjects</var> determines whether the objects in the list should be
+freed when they are removed (not extracted) from the list, or when the list
+is cleared. If the property is <var>True</var> then they are freed. If the
+property is <var>False</var> the elements are not freed.
+</p>
+<p>
+The value is usually set in the constructor, and is seldom changed during
+the lifetime of the list. It defaults to <var>True</var>.
+</p>
+</descr>
+<seealso>
+<link id="TFPObjectList.Create"/>
+<link id="TFPObjectList.Delete"/>
+<link id="TFPObjectList.Remove"/>
+<link id="TFPObjectList.Clear"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPObjectList.Items">
+<short>Indexed access to the elements of the list.</short>
+<descr>
+<var>Items</var> is the default property of the list. It provides indexed
+access to the elements in the list. The index <var>Index</var> is zero
+based, i.e., runs from 0 (zero) to <var>Count-1</var>.
+</descr>
+<seealso>
+<link id="TFPObjectList.Count"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.Items.Index">
+<short>Index of the element.</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPObjectList.List">
+<short>Internal list used to keep the objects.</short>
+<descr>
+<var>List</var> is a reference to the <link
+id="#rtl.classes.tfplist">TFPList</link> instance used to manage the
+elements in the list.
+</descr>
+<seealso>
+<link id="#rtl.classes.tfplist"/>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TObjectList">
+<short>List to manage object instances.</short>
+<descr>
+<p>
+<var>TObjectList</var> is a <link id="#rtl.classes.TList">TList</link>
+descendent which has as the default array property  <link id="#rtl.system.TObject">TObjects</link> 
+instead of pointers. By default it also manages the objects: when an object is deleted
+or removed from the list, it is automatically freed. This behaviour can be
+disabled when the list is created. 
+</p>
+<p>
+In difference with <link id="TFPObjectList"/>, <var>TObjectList</var> offers
+a notification mechanism of list change operations: insert, delete. This slows down
+bulk operations, so if the notifications are not needed, <var>TFPObjectList</var>
+may be more appropriate.
+</p>
+</descr>
+<seealso>
+<link id="#rtl.classes.TList"/>
+<link id="TFPObjectList"/>
+<link id="TComponentList"/>
+<link id="TClassList"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TObjectList.create">
+<short>Create a new object list.</short>
+<descr>
+<var>Create</var> instantiates a new object list. The <var>FreeObjects</var>
+parameter determines whether objects that are removed from the list should
+also be freed from memory. By default this is <var>True</var>. This
+behaviour can be changed after the list was instantiated.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectList.Destroy"/>
+<link id="TObjectList.OwnsObjects"/>
+<link id="TFPObjectList"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectList.create.freeobjects">
+<short>Should removed items be freed from memory</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectList.Add">
+<short>Add an object to the list.</short>
+<descr>
+<p>
+<var>Add</var> overrides the <link id="#rtl.classes.TList">TList</link>
+implementation to accept objects (<var>AObject</var>) instead of pointers.
+</p>
+<p>
+The function returns the index of the position where the object was added.
+</p>
+</descr>
+<errors>
+If the list must be expanded, and not enough memory is available, an
+exception may be raised.
+</errors>
+<seealso>
+<link id="TObjectList.Insert"/>
+<link id="#rtl.classes.TList.Delete"/>
+<link id="TObjectList.Extract"/>
+<link id="TObjectList.Remove"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectList.Add.Result">
+<short>Position at which the object was added</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectList.Add.AObject">
+<short>Object to add to the list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectList.Extract">
+<short>Extract an object from the list.</short>
+<descr>
+<p>
+<var>Extract</var> removes the  object <var>Item</var> from the list if it
+is present in the list. Contrary to <link
+id="TObjectList.Remove">Remove</link>, <var>Extract</var> does not free the
+extracted element if <link id="TObjectList.OwnsObjects">OwnsObjects</link> is
+<var>True</var>
+</p>
+<p>
+The function returns a reference to the item which was removed from the
+list, or <var>Nil</var> if no element was removed.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectList.Remove"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectList.Extract.Result">
+<short>The removed element, or <var>Nil</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectList.Extract.Item">
+<short>Element to remove from the list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectList.Remove">
+<short>Remove (and possibly free) an element from the list.</short>
+<descr>
+<p>
+<var>Remove</var> removes <var>Item</var> from the list, if it is present
+in the list. It frees <var>Item</var> if <link id="TObjectList.OwnsObjects">OwnsObjects</link> is
+<var>True</var>, and returns the index of the object that was found
+in the list, or -1 if the object was not found.
+</p>
+<p>
+Note that only the first found object is removed from the list.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectList.Extract"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectList.Remove.Result">
+<short>Index of the removed object, or -1 if none was removed.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectList.Remove.AObject">
+<short>Object to remove from the list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectList.IndexOf">
+<short>Search for an object in the list</short>
+<descr>
+<p>
+<var>IndexOf</var> overrides the <link id="#rtl.classes.tlist">TList</link>
+implementation to accept an object instance instead of a pointer.
+</p>
+<p>
+The function returns the index of the first match for <var>AObject</var> in
+the list, or -1 if no match was found.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectList.FindInstanceOf"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectList.IndexOf.Result">
+<short>Position (index) at which object was found</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectList.IndexOf.AObject">
+<short>Object to search for.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectList.FindInstanceOf">
+<short>Search for an instance of a certain class</short>
+<descr>
+<p>
+<var>FindInstanceOf</var> will look through the instances in the list and
+will return the first instance which is a descendent of class
+<var>AClass</var> if <var>AExact</var> is <var>False</var>. If
+<var>AExact</var> is true, then the instance should be of class
+<var>AClass</var>.
+</p>
+<p> 
+If no instance of the requested class is found, <var>Nil</var> is returned.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectList.IndexOf"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectList.FindInstanceOf.Result">
+<short>Instance found or Nil if none was found</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectList.FindInstanceOf.AClass">
+<short>Class of which result should be a descendent</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectList.FindInstanceOf.AExact">
+<short>Should the class of the result be exactly the requested class.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectList.FindInstanceOf.AStartAt">
+<short>Index to start the search</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TObjectList.Insert">
+<short>Insert an object in the list.</short>
+<descr>
+<var>Insert</var> inserts <var>AObject</var> in the list at position
+<var>Index</var>. The index is zero-based. This method overrides the
+implementation in <link id="#rtl.classes.tlist">TList</link> to accept
+objects instead of pointers.
+</descr>
+<errors>
+If an invalid <var>Index</var> is specified, an exception is raised.
+</errors>
+<seealso>
+<link id="TObjectList.Add"/>
+<link id="TObjectList.Remove"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectList.Insert.Index">
+<short>Position to insert object at.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectList.Insert.AObject">
+<short>Object to insert</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectList.First">
+<short>Return the first non-nil object in the list</short>
+<descr>
+<var>First</var> returns a reference to the first non-<var>Nil</var> element in the
+list. If no non-<var>Nil</var> element is found, <var>Nil</var> is returned.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectList.Last"/>
+<link id="TObjectList.Pack"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectList.First.Result">
+<short>First non-nil object in the list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectList.Last">
+<short>Return the last non-nil object in the list.</short>
+<descr>
+<var>Last</var> returns a reference to the last non-<var>Nil</var> element
+in the list. If no non-<var>Nil</var> element is found, <var>Nil</var> is 
+returned.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectList.First"/>
+<link id="TObjectList.Pack"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectList.Last.Result">
+<short>Last non-nil object in the list.</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TObjectList.OwnsObjects">
+<short>Should the list free elements when they are removed.</short>
+<descr>
+<p>
+<var>OwnsObjects</var> determines whether the objects in the list should be
+freed when they are removed (not extracted) from the list, or when the list
+is cleared. If the property is <var>True</var> then they are freed. If the
+property is <var>False</var> the elements are not freed.
+</p>
+<p>
+The value is usually set in the constructor, and is seldom changed during
+the lifetime of the list. It defaults to <var>True</var>.
+</p>
+</descr>
+<seealso>
+<link id="TObjectList.Create"/>
+<link id="TObjectList.Delete"/>
+<link id="TObjectList.Remove"/>
+<link id="TObjectList.Clear"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TObjectList.Items">
+<short>Indexed access to the elements of the list.</short>
+<descr>
+<var>Items</var> is the default property of the list. It provides indexed
+access to the elements in the list. The index <var>Index</var> is zero
+based, i.e., runs from 0 (zero) to <var>Count-1</var>.
+</descr>
+<seealso>
+<link id="#rtl.classes.TList.Count"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectList.Items.Index">
+<short>Index of the element</short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TComponentList">
+<short>List to manage component instances.</short>
+<descr>
+<p>
+<var>TComponentList</var> is a <link id="TObjectList"/> descendent which has as the 
+default array property  <link id="#rtl.classes.TComponent">TComponents</link> 
+instead of objects. It overrides some methods so only components can be added.
+</p>
+<p>
+In difference with <link id="TObjectList"/>, <var>TComponentList</var>
+removes any <var>TComponent</var> from the list if the <var>TComponent</var>
+instance was freed externally. It uses the <var>FreeNotification</var>
+mechanism for this.
+</p>
+</descr>
+<seealso>
+<link id="#rtl.classes.TList"/>
+<link id="TFPObjectList"/>
+<link id="TObjectList"/>
+<link id="TClassList"/>
+</seealso>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TComponentList.Destroy">
+<short>Destroys the instance</short>
+<descr>
+<var>Destroy</var> unhooks the free notification handler and then calls the
+inherited destroy to clean up the <var>TComponentList</var> instance.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectList"/>
+<link id="#rtl.classes.TComponent"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TComponentList.Add">
+<short>Add a component to the list.</short>
+<descr>
+<p>
+<var>Add</var> overrides the <var>Add</var> operation of it's ancestors, so
+it only accepts <var>TComponent</var> instances. It introduces no new behaviour.
+</p>
+<p>
+The function returns the index at which the component was added.
+</p>
+</descr>
+<errors>
+If not enough memory is available to expand the list, an exception may be
+raised.
+</errors>
+<seealso>
+<link id="TObjectList.Add"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TComponentList.Add.Result">
+<short>Index at which the component was added.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TComponentList.Add.AComponent">
+<short>The component to add.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TComponentList.Extract">
+<short>Remove a component from the list without destroying it.</short>
+<descr>
+<p>
+<var>Extract</var> removes a component (<var>Item</var>) from the list, 
+without destroying it. It overrides the implementation of 
+<link id="TObjectList"/> so only <var>TComponent</var> descendents 
+can be extracted. It introduces no new behaviour.
+</p>
+<p>
+<var>Extract</var> returns the instance that was extracted, or
+<var>Nil</var> if no instance was found.
+</p>
+</descr>
+<seealso>
+<link id="TComponentList.Remove"/>
+<link id="TObjectList.Extract"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TComponentList.Extract.Result">
+<short>The extracted component, or <var>Nil</var> if none was found.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TComponentList.Extract.Item">
+<short>The component to extract.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TComponentList.Remove">
+<short>Remove a component from the list, possibly destroying it.</short>
+<descr>
+<p>
+<var>Remove</var> removes <var>item</var> from the list, and if the list
+owns it's items, it also destroys it. It returns the index of the item that
+was removed, or -1 if no item was removed. 
+</p>
+<p>
+<var>Remove</var> simply overrides the implementation in <link
+id="TObjectList"/> so it only accepts <var>TComponent</var> descendents.
+It introduces no new behaviour.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TComponentList.Extract"/>
+<link id="TObjectList.Remove"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TComponentList.Remove.Result">
+<short>The index of the removed instance</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TComponentList.Remove.AComponent">
+<short>Component to remove from the list</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TComponentList.IndexOf">
+<short>Search for an instance in the list</short>
+<descr>
+<p>
+<var>IndexOf</var> searches for an instance in the list and returns it's
+position in the list. The position is zero-based. If no instance is found,
+-1 is returned.
+</p>
+<p>
+<var>IndexOf</var> just overrides the implementation of the parent class so
+it accepts only <var>TComponent</var> instances. It introduces no new
+behaviour.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectList.IndexOf"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TComponentList.IndexOf.Result">
+<short>Index of the found instance</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TComponentList.IndexOf.AComponent">
+<short>Instance to look for.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TComponentList.First">
+<short>First non-nil instance in the list.</short>
+<descr>
+<var>First</var> overrides the implementation of it's ancestors to return
+the first non-nil instance of <var>TComponent</var> in the list. If no
+non-nil instance is found, <var>Nil</var> is returned.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TComponentList.Last"/>
+<link id="TObjectList.First"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TComponentList.First.Result">
+<short>The first non-nil instance in the list, or Nil</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TComponentList.Last">
+<short>Last non-nil instance in the list.</short>
+<descr>
+<var>Last</var> overrides the implementation of it's ancestors to return
+the last non-nil instance of <var>TComponent</var> in the list. If no
+non-nil instance is found, <var>Nil</var> is returned.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TComponentList.First"/>
+<link id="TObjectList.Last"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TComponentList.Last.Result">
+<short>The last non-nil instance in the list, or Nil</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TComponentList.Insert">
+<short>Insert a new component in the list</short>
+<descr>
+<var>Insert</var> inserts a <var>TComponent</var> instance
+(<var>AComponent</var>) in the list at position <var>Index</var>. It simply
+overrides the parent implementation so it only accepts <var>TComponent</var>
+instances. It introduces no new behaviour.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectList.Insert"/>
+<link id="TComponentList.Add"/>
+<link id="TComponentList.Remove"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TComponentList.Insert.Index">
+<short>Position in the list where the component should be inserted</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TComponentList.Insert.AComponent">
+<short>Component instance to insert.</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TComponentList.Items">
+<short>Index-based access to the elements in the list.</short>
+<descr>
+<var>Items</var> provides access to the components in the list using an
+index. It simply overrides the default property of the parent classes so it
+returns/accepts <var>TComponent</var> instances only. Note that the index is
+zero based.
+</descr>
+<seealso>
+<link id="TObjectList.Items"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TComponentList.Items.Index">
+<short>Index in the array.</short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TClassList">
+<short>List of classes.</short>
+<descr>
+<p>
+<var>TClassList</var> is a <link id="#rtl.classes.Tlist">Tlist</link>
+descendent which stores class references instead of pointers. It introduces
+no new behaviour other than ensuring all stored pointers are class pointers.
+</p>
+<p>
+The <var>OwnsObjects</var> property as found in <var>TComponentList</var>
+and <var>TObjectList</var> is not implemented as there are no actual
+instances.
+</p>
+</descr>
+<seealso>
+<link id="#rtl.classes.tlist"/>
+<link id="TComponentList"/>
+<link id="TObjectList"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TClassList.Add">
+<short>Add a new class pointer to the list.</short>
+<descr>
+<var>Add</var> adds <var>AClass</var> to the list, and returns the position
+at which it was added. It simply overrides the <link
+id="#rtl.classes.tlist">TList</link> bevahiour, and introduces no new
+functionality.
+</descr>
+<errors>
+If not enough memory is available to expand the list, an exception may be
+raised.
+</errors>
+<seealso>
+<link id="TClassList.Extract"/>
+<link id="#rtl.classes.tlist.add"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TClassList.Add.Result">
+<short>Index at which the class pointer was added.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TClassList.Add.AClass">
+<short>Class pointer to add.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TClassList.Extract">
+<short>Extract a class pointer from the list.</short>
+<descr>
+<var>Extract</var> extracts a class pointer <var>Item</var> from the list, 
+if it is present in the list. It returns the extracted class pointer, or 
+<var>Nil</var> if the class pointer was not present in the list.
+It simply overrides the implementation in <var>TList</var> so it accepts a
+class pointer instead of a simple pointer. No new behaviour is introduced.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TClassList.Remove"/>
+<link id="#rtl.classes.Tlist.Extract"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TClassList.Extract.Result">
+<short>The extracted class pointer or Nil if none was found.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TClassList.Extract.Item">
+<short>Class pointer to extract from the list</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TClassList.Remove">
+<short>Remove a class pointer from the list.</short>
+<descr>
+<var>Remove</var> removes a class pointer <var>Item</var> from the list, 
+if it is present in the list. It returns the index of the removed 
+class pointer, or <var>-1</var> if the class pointer was not present 
+in the list. It simply overrides the implementation in <var>TList</var> 
+so it accepts a class pointer instead of a simple pointer. 
+No new behaviour is introduced.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TClassList.Extract"/>
+<link id="#rtl.classes.Tlist.Remove"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TClassList.Remove.Result">
+<short>Index of the removed item</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TClassList.Remove.AClass">
+<short>Class pointer to remove from the list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TClassList.IndexOf">
+<short>Search for a class pointer in the list.</short>
+<descr>
+<var>IndexOf</var> searches for <var>AClass</var> in the list, and returns
+it's position if it was found, or -1 if it was not found in the list.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="#rtl.classes.tlist.indexof"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TClassList.IndexOf.Result">
+<short>Position of the class pointer, or -1 if not found.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TClassList.IndexOf.AClass">
+<short>Class pointer to search for</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TClassList.First">
+<short>Return first non-nil class pointer</short>
+<descr>
+<var>First</var> returns a reference to the first non-<var>Nil</var> class
+pointer in the
+list. If no non-<var>Nil</var> element is found, <var>Nil</var> is returned.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TClassList.Last"/>
+<link id="TClassList.Pack"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TClassList.First.Result">
+<short>The first non-<var>Nil</var> class pointer in the list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TClassList.Last">
+<short>Return last non-<var>Nil</var> class pointer</short>
+<descr>
+<var>Last</var> returns a reference to the last non-<var>Nil</var> class
+pointer in the
+list. If no non-<var>Nil</var> element is found, <var>Nil</var> is returned.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TClassList.First"/>
+<link id="TClassList.Pack"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TClassList.Last.Result">
+<short>The last non-<var>Nil</var> class pointer in the list.</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TClassList.Insert">
+<short>Insert a new class pointer in the list.</short>
+<descr>
+<var>Insert</var> inserts a class pointer in the list at position <var>Index</var>. It simply
+overrides the parent implementation so it only accepts class pointers.
+It introduces no new behaviour.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="#rtl.classes.TList.Insert"/>
+<link id="TClassList.Add"/>
+<link id="TClassList.Remove"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TClassList.Insert.Index">
+<short>Position to insert class pointer at.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TClassList.Insert.AClass">
+<short>Class pointer to insert.</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TClassList.Items">
+<short>Index based access to class pointers.</short>
+<descr>
+<var>Items</var> provides index-based access to the class pointers in the
+list. <var>TClassList</var> overrides the default <var>Items</var>
+implementation of <var>TList</var> so it returns class pointers instead of
+pointers.
+</descr>
+<seealso>
+<link id="#rtl.classes.TList.Items"/>
+<link id="#rtl.classes.TList.Count"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TClassList.Items.Index">
+<short>Position in the list.</short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TOrderedList">
+<short>Base class for queues and stacks.</short>
+<descr>
+<p>
+<var>TOrderedList</var> provides the base class for <link id="TQueue"/> and <link
+id="TStack"/>. It provides an interface for pushing and popping elements on
+or off the list, and manages the internal list of pointers. 
+</p>
+<p>
+Note that <var>TOrderedList</var> does not manage objects on the stack, i.e.
+objects are not freed when the ordered list is destroyed.
+</p>
+</descr>
+<seealso>
+<link id="TQueue"/>
+<link id="TStack"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TOrderedList.Create">
+<short>Create a new ordered list</short>
+<descr>
+<var>Create</var> instantiates a new ordered list. It initializes the
+internal pointer list.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TOrderedList.Destroy"/>
+</seealso>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TOrderedList.Destroy">
+<short>Free an ordered list</short>
+<descr>
+<var>Destroy</var> cleans up the internal pointer list, and removes the
+<var>TOrderedList</var> instance from memory.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TOrderedList.Create"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TOrderedList.Count">
+<short>Number of elements on the list.</short>
+<descr>
+<var>Count</var> is the number of pointers in the list.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TOrderedList.AtLeast"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TOrderedList.Count.Result">
+<short>Number of elements on the list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TOrderedList.AtLeast">
+<short>Check whether the list contains a certain number of elements.</short>
+<descr>
+<var>AtLeast</var> returns <var>True</var> if the number of elements in the
+list is equal to or bigger than <var>ACount</var>. It returns
+<var>False</var> otherwise.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TOrderedList.Count"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TOrderedList.AtLeast.Result">
+<short><var>True</var> if <var>ACount</var> or more elements in the list.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TOrderedList.AtLeast.ACount">
+<short>Required number of elements</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TOrderedList.Push">
+<short>Push another element on the list.</short>
+<descr>
+<var>Push</var> adds <var>AItem</var> to the list, and returns
+<var>AItem</var>. 
+</descr>
+<errors>
+If not enough memory is available to expand the list, an exception may be
+raised.
+</errors>
+<seealso>
+<link id="TOrderedList.Pop"/>
+<link id="TOrderedList.Peek"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TOrderedList.Push.Result">
+<short>The element added to the list.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TOrderedList.Push.AItem">
+<short>Item to add to the list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TOrderedList.Pop">
+<short>Remove an element from the list.</short>
+<descr>
+<var>Pop</var> removes an element from the list, and returns the element
+that was removed from the list. If no element is on the list, <var>Nil</var>
+is returned.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TOrderedList.Peek"/>
+<link id="TOrderedList.Push"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TOrderedList.Pop.Result">
+<short>The element removed from the list.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TOrderedList.Peek">
+<short>Return the next element to be popped from the list.</short>
+<descr>
+<var>Peek</var> returns the element that will be popped from the list at the
+next call to <link id="TOrderedList.Pop">Pop</link>, without actually
+popping it from the list.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TOrderedList.Pop"/>
+<link id="TOrderedList.Push"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TOrderedList.Peek.Result">
+<short>Next element to be popped from the list.</short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TStack">
+<short>Pointer Stack</short>
+<descr>
+<p>
+<var>TStack</var> is a descendent of <link id="TOrderedList"/> which
+implements <link id="TOrderedList.Push">Push</link> and 
+<link id="TOrderedList.Pop">Pop</link> behaviour as a stack: what is 
+last pushed on the stack, is popped of first (LIFO: Last in, first out).
+</p>
+<p>
+<var>TStack</var> offers no new methods, it merely implements some abstract
+methods introduced by <link id="TOrderedList"/>
+</p>
+</descr>
+<seealso>
+<link id="TOrderedList"/>
+<link id="TObjectStack"/>
+<link id="TQueue"/>
+</seealso>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TObjectStack">
+<short>Object instances stack</short>
+<descr>
+<p>
+<var>TObjectStack</var> is a stack implementation which manages pointers
+only.
+</p>
+<p>
+<var>TObjectStack</var> introduces no new behaviour, it simply overrides
+some methods to accept and/or return <var>TObject</var> instances instead of
+pointers.
+</p>
+</descr>
+<seealso>
+<link id="TOrderedList"/>
+<link id="TStack"/>
+<link id="TQueue"/>
+<link id="TObjectQueue"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectStack.Push">
+<short>Push an object on the stack.</short>
+<descr>
+<var>Push</var> pushes another object on the stack. It overrides the
+<var>Push</var> method as implemented in <var>TStack</var> so it accepts
+only objects as arguments.
+</descr>
+<errors>
+If not enough memory is available to expand the stack, an exception may be
+raised.
+</errors>
+<seealso>
+<link id="TObjectStack.Pop"/>
+<link id="TObjectStack.Peek"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectStack.Push.Result">
+<short>The element pushed on the stack.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectStack.Push.AObject">
+<short>The object instance to push on the stack.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectStack.Pop">
+<short>Pop the top object of the stack.</short>
+<descr>
+<var>Pop</var> pops the top object of the stack, and returns the object
+instance. If there are no more objects on the stack, <var>Nil</var> is
+returned.
+</descr>
+<errors>
+None
+</errors>
+<seealso>
+<link id="TObjectStack.Push"/>
+<link id="TObjectStack.Peek"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectStack.Pop.Result">
+<short>The top object on the stack, or <var>Nil</var> if the stack is empty.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectStack.Peek">
+<short>Look at the top object in the stack.</short>
+<descr>
+<var>Peek</var> returns the top object of the stack, without removing it
+from the stack. If there are no more objects on the stack, <var>Nil</var> is
+returned.
+</descr>
+<errors>
+None
+</errors>
+<seealso>
+<link id="TObjectStack.Push"/>
+<link id="TObjectStack.Pop"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectStack.Peek.Result">
+<short>The top object on the stack, or <var>Nil</var> if the stack is empty.</short>
+</element>
+
+<!-- object Visibility: default -->
+<element name="TQueue">
+<short>Pointer queue</short>
+<descr>
+<p>
+<var>TQueue</var> is a descendent of <link id="TOrderedList"/> which
+implements <link id="TOrderedList.Push">Push</link> and 
+<link id="TOrderedList.Pop">Pop</link> behaviour as a queue: what is 
+first pushed on the queue, is popped of first (FIFO: First in, first out).
+</p>
+<p>
+<var>TQueue</var> offers no new methods, it merely implements some abstract
+methods introduced by <link id="TOrderedList"/>
+</p>
+</descr>
+<seealso>
+<link id="TOrderedList"/>
+<link id="TObjectQueue"/>
+<link id="TStack"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectQueue.Push">
+<short>Push an object on the queue</short>
+<descr>
+<var>Push</var> pushes another object on the queue. It overrides the
+<var>Push</var> method as implemented in <var>TQueue</var> so it accepts
+only objects as arguments.
+</descr>
+<errors>
+If not enough memory is available to expand the queue, an exception may be
+raised.
+</errors>
+<seealso>
+<link id="TObjectQueue.Pop"/>
+<link id="TObjectQueue.Peek"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectQueue.Push.Result">
+<short>The element just pushed on the queue</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectQueue.Push.AObject">
+<short>Object to push on the queue</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectQueue.Pop">
+<short>Pop the first element off the queue</short>
+<descr>
+<var>Pop</var> removes the first element in the queue, and returns a
+reference to the instance. If the queue is empty, <var>Nil</var> is
+returned.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectQueue.Push"/>
+<link id="TObjectQueue.Peek"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectQueue.Pop.Result">
+<short>The first element in the queue, or <var>Nil</var> if the queue is empty</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectQueue.Peek">
+<short>Look at the first object in the queue.</short>
+<descr>
+<var>Peek</var> returns the first object in the queue, without removing it
+from the queue. If there are no more objects in the queue, <var>Nil</var> is
+returned.
+</descr>
+<errors>
+None
+</errors>
+<seealso>
+<link id="TObjectQueue.Push"/>
+<link id="TObjectQueue.Pop"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectQueue.Peek.Result">
+<short>The first element in the queue, or <var>Nil</var> if the queue is empty</short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TObjectListCallback">
+<short>Method callback type for <link id="#fcl.contnrs.TFPObjectList.ForEachCall">TFPObjectList.ForEachCall</link></short>
+<descr>
+<var>TObjectListCallback</var> is used as the prototype for the <link id="TFPObjectList.ForEachCall"/> link call 
+when a method should be called. The <var>Data</var> argument will contain each of the objects in the list in turn, 
+and the <var>Data</var> argument will contain the data passed to the <var>ForEachCall</var> call.
+</descr>
+<seealso>
+<link id="TFPObjectList.ForEachCall"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectListCallback.data">
+<short>Object from the list</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectListCallback.arg">
+<short>Data passed to <var>ForEachCall</var></short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TObjectListStaticCallback">
+<short>Plan procedure callback type for <link id="#fcl.contnrs.TFPObjectList.ForEachCall">TFPObjectList.ForEachCall</link></short>
+<descr>
+<var>TObjectListCallback</var> is used as the prototype for the <link id="TFPObjectList.ForEachCall"/> link call
+when a plain procedure should be called. The <var>Data</var> argument will contain each of the objects in the list in turn,
+and the <var>Data</var> argument will contain the data passed to the <var>ForEachCall</var> call.
+</descr>
+<seealso>
+<link id="TFPObjectList.ForEachCall"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectListStaticCallback.data">
+<short>Object from the list</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectListStaticCallback.arg">
+<short>Data passed to <var>ForEachCall</var></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPObjectList.ForEachCall">
+<short>For each object in the list, call a method or procedure, passing it the object.</short>
+<descr>
+<var>ForEachCall</var> loops through all objects in the list, and calls <var>proc2call</var>, 
+passing it the object in the list. Additionally, <var>arg</var> is also passed to the procedure.
+<var>Proc2call</var> can be a plain procedure or can be a method of a class.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TObjectListStaticCallback"/>
+<link id="TObjectListCallback"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.ForEachCall.proc2call">
+<short>Procedure or method to be called.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectList.ForEachCall.arg">
+<short>Additional pointer passed to <var>proc2call</var></short>
+</element>
+
+<!-- function type Visibility: default -->
+<element name="THashFunction">
+<short>Hash calculation function.</short>
+<descr>
+<var>THashFunction</var> is the prototype for a hash calculation function. 
+It should calculate a hash of string <var>S</var>, where the hash table 
+size is  <var>TableSize</var>. The return value should be the hash value.
+</descr>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="THashFunction.Result">
+<short>Hash value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="THashFunction.S">
+<short>String to calculate hash value from.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="THashFunction.TableSize">
+<short>Hash table size.</short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TIteratorMethod">
+<short>Iterator prototype for <link id="#fcl.contnrs.TFPCustomHashTable">TFPCustomHashTable</link></short>
+<descr>
+<var>TIteratorMethod</var> is used in an internal <link id="TFPDataHashTable"/> method.
+</descr>
+<seealso>
+<link id="TFPDataHashTable"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TIteratorMethod.Item">
+<short>Hash item</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TIteratorMethod.Key">
+<short>Key value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TIteratorMethod.Continue">
+<short>Should the iterator continue after processing this item or not</short>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.THTNode
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="THTCustomNode">
+<short>Single item in the hash table.</short>
+<descr>
+<var>THTCustomNode</var> is used by the <link id="TFPCustomHashTable"/> class to 
+store the keys and associated values.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="THTCustomNode.CreateWith">
+<short>Create a new instance of <var>THTCustomNode</var></short>
+<descr>
+<var>CreateWith</var> creates a new instance of <var>THTCustomNode</var> and stores the string <var>AString</var>
+in it. It should never be necessary to call this method directly, it will be called by the <link id="TFPCustomHashTable"/> class when needed.
+</descr>
+<errors>
+If no more memory is available, an exception may be raised.
+</errors>
+<seealso>
+<link id="TFPCustomHashTable"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="THTCustomNode.CreateWith.AString">
+<short>Key value for this node.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="THTCustomNode.HasKey">
+<short>Check whether this node matches the given key.</short>
+<descr>
+<var>HasKey</var> checks whether this node matches the given key <var>AKey</var>,
+by comparing it with the stored key.
+It returns <var>True</var> if it does, <var>False</var> if not.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="THTCustomNode.Key"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="THTCustomNode.HasKey.Result">
+<short><var>True</var> if the key matches, <var>False</var> if not.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="THTCustomNode.HasKey.AKey">
+<short>Key to check for</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="THTCustomNode.Key">
+<short>Key value associated with this hash item.</short>
+<descr>
+<var>Key</var> is the key value associated with this hash item. 
+It is stored when the item is created, and is read-only.
+</descr>
+<seealso>
+<link id="THTCustomNode.CreateWith"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="THTCustomNode.Data">
+<short>Data associated with this hash value.</short>
+<descr>
+<var>Data</var> is the (optional) data associated with this hash value. 
+It will be set by the <link id="TFPCustomHashTable.Add"/>  method.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable.Add"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.TFPCustomHashTable
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="TFPCustomHashTable">
+<short>Hash class</short>
+<descr>
+<p><var>TFPCustomHashTable</var> is a general-purpose hashing class. 
+It can store string keys and pointers associated with these strings. 
+The hash mechanism is configurable and can be optionally be specified 
+when a new instance of the class is created; A default hash mechanism 
+is implemented in <link id="RSHash"/>.
+</p>
+<p>
+The <link id="TFPHasList">TFPHasList</link> can also be used when fast 
+lookup of data based on some key is required. It is slightly faster than
+the <var>TFPCustomHashTable</var> implementation, but the keys are limited
+to a length of 256 characters, and it is not suitable for re-use: it is a
+one-time fill, many times search object. <var>TFPCustomHashTable</var> is
+slower, but handles re-use better.
+</p>
+</descr>
+<seealso>
+<link id="THTCustomNode"/>
+<link id="TFPObjectList"/>
+<link id="RSHash"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFPCustomHashTable.Create">
+<short>Instantiate a new <var>TFPCustomHashTable</var> instance using the default hash mechanism</short>
+<descr>
+<var>Create</var> creates a new instance of <var>TFPCustomHashTable</var> with hash size 196613 and hash 
+algorithm <link id="RSHash"/>
+</descr>
+<errors>
+If no memory is available, an exception may be raised.
+</errors>
+<seealso>
+<link id="TFPCustomHashTable.CreateWith">CreateWith</link>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFPCustomHashTable.CreateWith">
+<short>Instantiate a new <var>TFPCustomHashTable</var> instance with given algorithm and size</short>
+<descr>
+<var>CreateWith</var> creates a new instance of <var>TFPCustomHashTable</var> with hash size <var>AHashTableSize</var>
+and hash calculating algorithm <var>aHashFunc</var>.
+</descr>
+<errors>
+If no memory is available, an exception may be raised.
+</errors>
+<seealso>
+<link id="TFPCustomHashTable.Create">Create</link>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPCustomHashTable.CreateWith.AHashTableSize">
+<short>Size of the hash table.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPCustomHashTable.CreateWith.aHashFunc">
+<short>Hash calculating function.</short>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TFPCustomHashTable.Destroy">
+<short>Free the hash table.</short>
+<descr>
+<var>Destroy</var> removes the hash table from memory. If any data was associated with the keys in the hash table, 
+then this data is not freed. This must be done by the programmer.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPCustomHashTable.Destroy">Destroy</link>
+<link id="TFPCustomHashTable.Create">Create</link>
+<link id="TFPCustomHashTable.CreateWith">Create</link>
+<link id="THTCustomNode.Data"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPCustomHashTable.ChangeTableSize">
+<short>Change the table size of the hash table.</short>
+<descr>
+<var>ChangeTableSize</var> changes the size of the hash table: 
+it recomputes the hash value for all of the keys in the table, so this is an expensive operation.
+</descr>
+<errors>
+If no memory is available, an exception may be raised.
+</errors>
+<seealso>
+<link id="TFPCustomHashTable.HashTableSize">HashTableSize</link>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPCustomHashTable.ChangeTableSize.ANewSize">
+<short>New hash table size</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPCustomHashTable.Clear">
+<short>Clear the hash table.</short>
+<descr>
+<var>Clear</var> removes all keys and their associated data from the hash table. 
+The data itself is not freed from memory, this should be done by the programmer.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPCustomHashTable.Destroy">Destroy</link>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPCustomHashTable.Add">
+<short>Add a new key and its associated data to the hash.</short>
+<descr>
+<p>
+<var>Add</var> calculates the hash value of <var>aKey</var> and adds key 
+and it's associated data to the corresponding hash chain.
+</p>
+<p>
+A given key can only be added once. It is an error to attempt to add the same key value twice.
+</p>
+</descr>
+<errors>
+If the key is already in the list, adding it a second time will raise an <link id="EDuplicate"/>.
+</errors>
+<seealso>
+<link id="TFPCustomHashTable.Find"/>
+<link id="TFPCustomHashTable.Delete"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPCustomHashTable.Add.aKey">
+<short>Key to add</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPCustomHashTable.Add.AItem">
+<short>Data to associate with key</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPCustomHashTable.Delete">
+<short>Delete a key from the hash list.</short>
+<descr>
+<var>Delete</var> deletes all keys with value <var>AKey</var> from the hash table. 
+It does not free the data associated with key. If <var>AKey</var> is not in the list, 
+nothing is removed. 
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPCustomHashTable.Find"/>
+<link id="TFPCustomHashTable.Add"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPCustomHashTable.Delete.aKey">
+<short>Key to delete from the list</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPCustomHashTable.Find">
+<short>Search for an item with a certain key value.</short>
+<descr>
+<p>
+<var>Find</var> searches for the <link id="THTCustomNode"/> instance with key value 
+equal to <var>Akey</var> and if it finds it, it returns the instance. 
+If no matching value is found, <var>Nil</var> is returned.
+</p>
+<p>
+Note that the instance returned by this function cannot be freed; 
+If it should be removed from the hash table, the 
+<link id="TFPCustomHashTable.Delete">Delete</link> method should be used instead.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPCustomHashTable.Add">Add</link>
+<link id="TFPCustomHashTable.Delete">Delete</link>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPCustomHashTable.Find.Result">
+<short><var>THTCustomNode</var> instance matching <var>AKey</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPCustomHashTable.Find.aKey">
+<short>Key value to look for.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPCustomHashTable.IsEmpty">
+<short>Check if the hash table is empty.</short>
+<descr>
+<var>IsEmpty</var> returns <var>True</var> if the hash 
+table contains no elements, or <var>False</var> if there are still elements in the hash table.
+</descr>
+<errors>
+</errors>
+<seealso>
+<link id="TFPCustomHashTable.Count"/>
+<link id="TFPCustomHashTable.HashTableSize"/>
+<link id="TFPCustomHashTable.AVGChainLen"/>
+<link id="TFPCustomHashTable.MaxChainLength"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPCustomHashTable.IsEmpty.Result">
+<short><var>True</var> if there are zero keys in the hashtable</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPCustomHashTable.HashFunction">
+<short>Hash function currently in use</short>
+<descr>
+<var>HashFunction</var> is the hash function currently in use to calculate hash values from keys.
+The property can be set, this simply calls <link id="TFPCustomHashTable.SetHashFunction">SetHashFunction</link>.
+Note that setting the hash function does NOT the hash value of all keys to be recomputed, so changing the
+value while there are still keys in the table is not a good idea.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable.SetHashFunction">SetHashFunction</link>
+<link id="TFPCustomHashTable.HashTableSize">HashTableSize</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPCustomHashTable.Count">
+<short>Number of items in the hash table.</short>
+<descr>
+<var>Count</var> is the number of items in the hash table.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable.IsEmpty"/>
+<link id="TFPCustomHashTable.HashTableSize"/>
+<link id="TFPCustomHashTable.AVGChainLen"/>
+<link id="TFPCustomHashTable.MaxChainLength"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPCustomHashTable.HashTableSize">
+<short>Size of the hash table</short>
+<descr>
+<var>HashTableSize</var> is the size of the hash table. 
+It can be set, in which case it will be rounded to the nearest prime number suitable for RSHash.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable.IsEmpty"/>
+<link id="TFPCustomHashTable.Count"/>
+<link id="TFPCustomHashTable.AVGChainLen"/>
+<link id="TFPCustomHashTable.MaxChainLength"/>
+<link id="TFPCustomHashTable.VoidSlots"/>
+<link id="TFPCustomHashTable.Density"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPCustomHashTable.Items">
+<short>Indexed access to the data pointer.</short>
+<descr>
+<var>Item</var> allows indexed access to the data pointers. 
+When reading the property, if <var>Index</var> exists, then the associated data pointer is returned. If it does not exist, <var>Nil</var> is returned.
+When writing the property, if <var>Index</var> does not exist, a new item is added with the associated data pointer. If it existed, then the associated 
+data pointer is overwritten with the new value.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable.Find"/>
+<link id="TFPCustomHashTable.Add"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPCustomHashTable.Items.index">
+<short>Key for which data pointer should be returned.</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPCustomHashTable.HashTable">
+<short>Hash table instance</short>
+<descr>
+<var>TFPCustomHashTable</var> is the internal list object (<link id="TFPObjectList"/> used for the hash table. 
+Each element in this table is again a <link id="TFPObjectList"/> instance or <var>Nil</var>.
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPCustomHashTable.VoidSlots">
+<short>Number of empty slots in the hash table.</short>
+<descr>
+<var>VoidSlots</var> is the number of empty slots in the hash table. 
+Calculating this is an expensive operation.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable.IsEmpty"/>
+<link id="TFPCustomHashTable.Count"/>
+<link id="TFPCustomHashTable.AVGChainLen"/>
+<link id="TFPCustomHashTable.MaxChainLength"/>
+<link id="TFPCustomHashTable.LoadFactor"/>
+<link id="TFPCustomHashTable.Density"/>
+<link id="TFPCustomHashTable.NumberOfCollisions"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPCustomHashTable.LoadFactor">
+<short>Fraction of count versus size</short>
+<descr>
+<var>LoadFactor</var> is the ratio of elements in the table versus table size. 
+Ideally, this should be as small as possible.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable.IsEmpty"/>
+<link id="TFPCustomHashTable.Count"/>
+<link id="TFPCustomHashTable.AVGChainLen"/>
+<link id="TFPCustomHashTable.MaxChainLength"/>
+<link id="TFPCustomHashTable.VoidSlots"/>
+<link id="TFPCustomHashTable.Density"/>
+<link id="TFPCustomHashTable.NumberOfCollisions"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPCustomHashTable.AVGChainLen">
+<short>Average chain length</short>
+<descr>
+<var>AVGChainLen</var> is the average chain length, i.e. the ratio of elements in the 
+table versus the number of filled slots. Calculating this is an expensive operation.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable.IsEmpty"/>
+<link id="TFPCustomHashTable.Count"/>
+<link id="TFPCustomHashTable.LoadFactor"/>
+<link id="TFPCustomHashTable.MaxChainLength"/>
+<link id="TFPCustomHashTable.VoidSlots"/>
+<link id="TFPCustomHashTable.Density"/>
+<link id="TFPCustomHashTable.NumberOfCollisions"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPCustomHashTable.MaxChainLength">
+<short>Maximum chain length</short>
+<descr>
+<var>MaxChainLength</var> is the length of the longest chain in the hash table. 
+Calculating this is an expensive operation.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable.IsEmpty"/>
+<link id="TFPCustomHashTable.Count"/>
+<link id="TFPCustomHashTable.LoadFactor"/>
+<link id="TFPCustomHashTable.AvgChainLength"/>
+<link id="TFPCustomHashTable.VoidSlots"/>
+<link id="TFPCustomHashTable.Density"/>
+<link id="TFPCustomHashTable.NumberOfCollisions"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPCustomHashTable.NumberOfCollisions">
+<short>Number of extra items</short>
+<descr>
+<var>NumberOfCollisions</var> is the number of items 
+which are not the first item in a chain. If this number 
+is too big, the hash size may be too small.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable.IsEmpty"/>
+<link id="TFPCustomHashTable.Count"/>
+<link id="TFPCustomHashTable.LoadFactor"/>
+<link id="TFPCustomHashTable.AvgChainLength"/>
+<link id="TFPCustomHashTable.VoidSlots"/>
+<link id="TFPCustomHashTable.Density"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPCustomHashTable.Density">
+<short>Number of filled slots</short>
+<descr>
+<var>Density</var> is the number of filled slots in the hash table.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable.IsEmpty"/>
+<link id="TFPCustomHashTable.Count"/>
+<link id="TFPCustomHashTable.LoadFactor"/>
+<link id="TFPCustomHashTable.AvgChainLength"/>
+<link id="TFPCustomHashTable.VoidSlots"/>
+<link id="TFPCustomHashTable.Density"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.EDuplicate
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="EDuplicate">
+<short>Exception raised when a key is stored twice in a hash table.</short>
+<seealso>
+<link id="TFPCustomHashTable.Add"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.EKeyNotFound
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="EKeyNotFound">
+<short>Exception raised when a key is not found.</short>
+<seealso>
+<link id="TFPCustomHashTable.Delete"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="RSHash">
+<short>Standard hash value calculating function.</short>
+<descr>
+<var>RSHash</var> is the standard hash calculating function used in the <link id="TFPCustomHashTable"/> 
+hash class. It's Robert Sedgwick's "Algorithms in C" hash function.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPCustomHashTable"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="RSHash.Result">
+<short>Hash value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="RSHash.S">
+<short>String to calculate hash value from</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="RSHash.TableSize">
+<short>Hash table size</short>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="THashItem">
+<short>Record used to maintain an item in the hash list</short>
+<descr>
+<var>THashItem</var> is used internally in the hash list. 
+It should never be used directly.
+</descr>
+<seealso>
+<link id="TFPHashList"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="THashItem.HashValue">
+<short>Key hash value</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="THashItem.StrIndex">
+<short>Index of the string value</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="THashItem.NextIndex">
+<short>Next value index</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="THashItem.Data">
+<short>Data associated with the key.</short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PHashItem">
+<short>Pointer to <link id="#fcl.contnrs.THashItem">THashItem</link></short>
+<descr>
+<var>PHashItem</var> is a pointer type, pointing to the <link id="THashItem"/>
+record.
+</descr>
+<seealso>
+<link id="THashItem"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MaxHashListSize">
+<short>Maximum size of hash list.</short>
+<descr>
+<var>MaxHashListSize</var> is the maximum number of elements a hash
+list can contain.
+</descr>
+<seealso>
+<link id="TFPHashList"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MaxHashStrSize">
+<short>Maximum string size</short>
+<descr>
+<var>MaxHashStrSize</var> is the maximum amount of data for the key string
+values. The key strings are kept in a continuous memory area. This constant
+determines the maximum size of this memory area.
+</descr>
+<seealso>
+<link id="TFPHashList"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MaxHashTableSize">
+<short>Maximum size of the hash table.</short>
+<descr>
+<var>MaxHashTableSize</var> is the maximum number of elements in the hash.
+</descr>
+<seealso>
+<link id="TFPHashList"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="MaxItemsPerHash">
+<short>Maximum number of items in each hash bucket.</short>
+<descr>
+<var>MaxItemsPerHash</var> is the threshold above which the hash is
+expanded. If the number of elements in a hash bucket becomes larger
+than this value, the hash size is increased.
+</descr>
+<seealso>
+<link id="TFPHashList"/>
+</seealso>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PHashItemList">
+<short>Pointer to <link id="#fcl.contnrs.THashItemList">THashItemList</link> array</short>
+<descr>
+<var>PHashItemList</var> is a pointer to the <link id="THashItemList"/>.
+It's used in the <link id="TFPHashList"/> as a pointer to the memory area
+containing the hash item records.
+</descr>
+<seealso>
+<link id="THashItemList"/>
+</seealso>
+</element>
+
+<!-- array type Visibility: default -->
+<element name="THashItemList">
+<short>array of <link id="#fcl.contnrs.THashItem">THashItem</link> records.</short>
+<descr>
+<var>THashItemList</var> is an array type, primarily used to be able to
+define the <link id="PHashItemList"/> type. It's used in the <link
+id="TFPHashList"/> class.
+</descr>
+<seealso>
+<link id="PHashItemList"/>
+<link id="TFPHashList"/>
+</seealso>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PHashTable">
+<short>Pointer to <link id="#fcl.contnrs.THashTable">THashTable</link> array.</short>
+<descr>
+<var>PHashTable</var> is a pointer to the <link id="THashTable"/>.
+It's used in the <link id="TFPHashList"/> as a pointer to the memory area
+containing the hash values.
+</descr>
+<seealso>
+<link id="THashTable"/>
+<link id="TFPHashList"/>
+</seealso>
+</element>
+
+<!-- array type Visibility: default -->
+<element name="THashTable">
+<short>Array of hash values</short>
+<descr>
+<var>THashTable</var> defines an array of integers, used to hold hash
+values. It's mainly used to define the <link id="PHashTable"/> class.
+</descr>
+<seealso>
+<link id="PHashTable"/>
+<link id="TFPHashList"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.TFPHashList
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="TFPHashList">
+<short>Hash list class for pointer data</short>
+<descr>
+<p>
+<var>TFPHashList</var> implements a fast hash class. The class is built for
+speed, therefore the key values can be shortstrings only, and the data can
+only be non-nil pointers. 
+</p>
+<p>
+if a base class for an own hash class is wanted, the
+<link id="TFPCustomHashTable"/> class can be used. If a hash class for
+objects is needed instead of pointers, the <link id="TFPHashObjectList"/>
+class can be used.
+</p>
+</descr>
+<seealso>
+<link id="TFPCustomHashTable"/>
+<link id="TFPHashObjectList"/>
+<link id="TFPDataHashTable"/>
+<link id="TFPStringHashTable"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFPHashList.Create">
+<short>Create a new instance of the hashlist</short>
+<descr>
+<var>Create</var> creates a new instance of <var>TFPHashList</var> on the
+heap and sets the hash capacity to 1.
+</descr>
+<seealso>
+<link id="TFPHashList.Destroy"/>
+</seealso>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TFPHashList.Destroy">
+<short>Removes an instance of the hashlist from the heap</short>
+<descr>
+<p>
+<var>Destroy</var> cleans up the memory structures maintained by the 
+hashlist and removes the <var>TFPHashList</var> instance from the heap.
+</p>
+<p>
+<var>Destroy</var> should not be called directly, it's better to use
+<var>Free</var> or <var>FreeAndNil</var> instead.
+</p>
+</descr>
+<seealso>
+<link id="TFPHashList.Create"/>
+<link id="TFPHashList.Clear"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.Add">
+<short>Add a new key/data pair to the list</short>
+<descr>
+<var>Add</var> adds a new data pointer (<var>Item</var>) with key
+<var>AName</var> to the list. It returns the position of the item
+in the list.
+</descr>
+<errors>
+If not enough memory is available to hold the key and data, an exception may
+be raised. 
+</errors>
+<seealso>
+<link id="TFPHashList.Extract"/>
+<link id="TFPHashList.Remove"/>
+<link id="TFPHashList.Delete"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.Add.Result">
+<short>Position of the new item in the list</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.Add.AName">
+<short>Key name associated with data.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.Add.Item">
+<short>Data pointer</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashList.Clear">
+<short>Clear the list</short>
+<descr>
+<var>Clear</var> removes all items from the list. It does not free the data
+items themselves. It frees all memory needed to contain the items.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPHashList.Extract"/>
+<link id="TFPHashList.Remove"/>
+<link id="TFPHashList.Delete"/>
+<link id="TFPHashList.Add"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.NameOfIndex">
+<short>Returns the key name of an item by index</short>
+<descr>
+<var>NameOfIndex</var> returns the key name of the item at position
+<var>Index</var>.
+</descr>
+<errors>
+If <var>Index</var> is out of the valid range, an exception is raised.
+</errors>
+<seealso>
+<link id="TFPHashList.HashOfIndex"/>
+<link id="TFPHashList.Find"/>
+<link id="TFPHashList.FindIndexOf"/>
+<link id="TFPHashList.FindWithHash"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.NameOfIndex.Result">
+<short>Key name of item <var>Index</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.NameOfIndex.Index">
+<short>Index of item for which to return name</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.HashOfIndex">
+<short>Return the hash valye of an item by index</short>
+<descr>
+<var>HashOfIndex</var> returns the hash value of the item at position
+<var>Index</var>.
+</descr>
+<errors>
+If <var>Index</var> is out of the valid range, an exception is raised.
+</errors>
+<seealso>
+<link id="TFPHashList.HashOfName"/>
+<link id="TFPHashList.Find"/>
+<link id="TFPHashList.FindIndexOf"/>
+<link id="TFPHashList.FindWithHash"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.HashOfIndex.Result">
+<short>Hash value of item <var>Index</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.HashOfIndex.Index">
+<short>Index of item for which to return hash value</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashList.Delete">
+<short>Delete an item from the list.</short>
+<descr>
+<var>Delete</var> deletes the item at position <var>Index</var>. The data to
+which it points is not freed from memory.
+</descr>
+<errors>
+<link id="TFPHashList.Extract"/>
+<link id="TFPHashList.Remove"/>
+<link id="TFPHashList.Add"/>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.Delete.Index">
+<short>Index of item to remove from the list</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashList.Error">
+<short>Raise an error</short>
+<descr>
+<var>Error</var> raises an <var>EListError</var> exception, with message
+<var>Msg</var>. The <var>Data</var> pointer is used to format the message.
+</descr>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.Error.Msg">
+<short>Message string</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.Error.Data">
+<short>Data pointer</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.Expand">
+<short>Expand the list</short>
+<descr>
+<var>Expand</var> enlarges the capacity of the list if the maximum capacity
+was reached. It returns itself.
+</descr>
+<errors>
+If not enough memory is available, an exception may be raised.
+</errors>
+<seealso>
+<link id="TFPHashList.Clear"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.Expand.Result">
+<short>Returns self</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.Extract">
+<short>Extract a pointer from the list</short>
+<descr>
+<p>
+<var>Extract</var> removes the data item from the list, if it is in the
+list. It returns the pointer if it was removed from the list, <var>Nil</var>
+otherwise.
+</p>
+<p>
+<var>Extract</var> does a linear search, and is not very efficient.
+</p>
+</descr>
+<seealso>
+<link id="TFPHashList.Delete"/>
+<link id="TFPHashList.Remove"/>
+<link id="TFPHashList.Clear"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.Extract.Result">
+<short>The removed pointer or nil.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.Extract.item">
+<short>Pointer to be removed.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.IndexOf">
+<short>Return the index of the data pointer</short>
+<descr>
+<p>
+<var>IndexOf</var> returns the index of the first occurrence of pointer <var>Item</var>. 
+If the item is not in the list, -1 is returned.
+</p>
+<p>
+The performed search is linear, and not very efficient.
+</p>
+</descr>
+<seealso>
+<link id="TFPHashList.HashOfIndex"/>
+<link id="TFPHashList.NameOfIndex"/>
+<link id="TFPHashList.Find"/>
+<link id="TFPHashList.FindIndexOf"/>
+<link id="TFPHashList.FindWithHash"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.IndexOf.Result">
+<short>Index of <var>Item</var> in the list.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.IndexOf.Item">
+<short>Data pointer to search for.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.Find">
+<short>Find data associated with key</short>
+<descr>
+<var>Find</var> searches (using the hash) for the data item associated with
+item <var>AName</var> and returns the data pointer associated with it. If
+the item is not found, <var>Nil</var> is returned. It uses the hash value of
+the key to perform the search.
+</descr>
+<seealso>
+<link id="TFPHashList.HashOfIndex"/>
+<link id="TFPHashList.NameOfIndex"/>
+<link id="TFPHashList.IndexOf"/>
+<link id="TFPHashList.FindIndexOf"/>
+<link id="TFPHashList.FindWithHash"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.Find.Result">
+<short>Data associated with <var>AName</var> or <var>Nil</var> if it does
+not exist.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.Find.AName">
+<short>Key name to search for.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.FindIndexOf">
+<short>Return index of named item.</short>
+<descr>
+<var>FindIndexOf</var> returns the index of the key <var>AName</var>, or -1
+if the key does not exist in the list. It uses the hash value to search for
+the key. Note that <var>Nil</var> data pointers will result in -1 as well.
+</descr>
+<seealso>
+<link id="TFPHashList.HashOfIndex"/>
+<link id="TFPHashList.NameOfIndex"/>
+<link id="TFPHashList.IndexOf"/>
+<link id="TFPHashList.Find"/>
+<link id="TFPHashList.FindWithHash"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.FindIndexOf.Result">
+<short>Index of the key</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.FindIndexOf.AName">
+<short>Key value to look for</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.FindWithHash">
+<short>Find first element with given name and hash value</short>
+<descr>
+<var>FindWithHash</var> searches for the item with key <var>AName</var>. It
+uses the provided hash value <var>AHash</var> to perform the search. If the
+item exists, the data pointer is returned, if not, the result is
+<var>Nil</var>.
+</descr>
+<seealso>
+<link id="TFPHashList.HashOfIndex"/>
+<link id="TFPHashList.NameOfIndex"/>
+<link id="TFPHashList.IndexOf"/>
+<link id="TFPHashList.Find"/>
+<link id="TFPHashList.FindIndexOf"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.FindWithHash.Result">
+<short>Data pointer associated with key <var>AName</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.FindWithHash.AName">
+<short>Key value to search for.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.FindWithHash.AHash">
+<short>Hash value of the key <var>AName</var></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.Rename">
+<short>Rename a key</short>
+<descr>
+<var>Rename</var> renames key <var>AOldname</var> to <var>ANewName</var>.
+The hash value is recomputed and the item is moved in the list to it's new
+position.
+</descr>
+<errors>
+If an item with <var>ANewName</var> already exists, an exception will be
+raised.
+</errors>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.Rename.Result">
+<short>New position in the list</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.Rename.AOldName">
+<short>Key to rename</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.Rename.ANewName">
+<short>New name of key</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.Remove">
+<short>Remove first instance of a pointer</short>
+<descr>
+<var>Remove</var> removes the first occurrence of the data pointer
+<var>Item</var> in the list, if it is present. The return value is the
+removed data pointer, or <var>Nil</var> if no data pointer was removed.
+</descr>
+<seealso>
+<link id="TFPHashList.Delete"/>
+<link id="TFPHashList.Clear"/>
+<link id="TFPHashList.Extract"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.Remove.Result">
+<short>Data pointer which was removed</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.Remove.Item">
+<short>Item to remove from the list.</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashList.Pack">
+<short>Remove nil pointers from the list</short>
+<descr>
+<var>Pack</var> removes all <var>Nil</var> items from the list, and frees
+all unused memory.
+</descr>
+<seealso>
+<link id="TFPHashList.Clear"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashList.ShowStatistics">
+<short>Return some statistics for the list.</short>
+<descr>
+<p>
+<var>ShowStatistics</var> prints some information about the hash list to
+standard output. It prints the following values:
+</p>
+<dl>
+<dt>HashSize</dt><dd>Size of the hash table</dd>
+<dt>HashMean</dt><dd>Mean hash value</dd>
+<dt>HashStdDev</dt><dd>Standard deviation of hash values</dd>
+<dt>ListSize</dt><dd>Size and capacity of the list</dd>
+<dt>StringSize</dt><dd>Size and capacity of key strings</dd>
+</dl>
+</descr>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashList.ForEachCall">
+<short>Call a procedure for each element in the list</short>
+<descr>
+<var>ForEachCall</var> loops over the items in the list and calls
+<var>proc2call</var>, passing it the item and <var>arg</var>.
+</descr>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.ForEachCall.proc2call">
+<short>Callback procedure</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.ForEachCall.arg">
+<short>Additional argument passed to <var>proc2call</var></short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPHashList.Capacity">
+<short>Capacity of the list.</short>
+<descr>
+<var>Capacity</var> returns the current capacity of the list. The capacity
+is expanded as more elements are added to the list. If a good estimate of
+the number of elements that will be added to the list, the property can be 
+set to a sufficiently large value to avoid reallocation of memory each time 
+the list needs to grow.
+</descr>
+<seealso>
+<link id="TFPHashList.Count">Count</link>
+<link id="TFPHashList.Items">Items</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPHashList.Count">
+<short>Current number of elements in the list.</short>
+<descr>
+<var>Count</var> is the current number of elements in the list.
+</descr>
+<seealso>
+<link id="TFPHashList.Capacity">Capacity</link>
+<link id="TFPHashList.Items">Items</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPHashList.Items">
+<short>Indexed array with pointers</short>
+<descr>
+<var>Items</var> provides indexed access to the pointers, the index runs
+from 0 to <link id="TFPHashList.Count">Count-1</link>. 
+</descr>
+<errors>
+Specifying an invalid index will result in an exception.
+</errors>
+<seealso>
+<link id="TFPHashList.Capacity">Capacity</link>
+<link id="TFPHashList.Count">Count</link>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.Items.Index">
+<short>0-based index</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPHashList.List">
+<short>Low-level hash list</short>
+<descr>
+<var>List</var> exposes the low-level <link id="THashItemList">item list</link>.
+It should not be used directly.
+</descr>
+<seealso>
+<link id="TFPHashList.Strs">Strs</link>
+<link id="THashItemList"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPHashList.Strs">
+<short>Low-level memory area with strings.</short>
+<descr>
+<var>Strs</var> exposes the raw memory area with the strings.
+</descr>
+<seealso>
+<link id="TFPHashList.List">List</link>
+</seealso>
+</element>
+
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.TFPHashObject
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="TFPHashObject">
+<short>Hash-list aware object</short>
+<descr>
+<var>TFPHashObject</var> is a <var>TObject</var> descendent which is aware
+of the <link id="TFPHashObjectList"/> class. It has a name property and an
+owning list: if the name is changed, it will reposition itself in the list
+which owns it. It offers methods to change the owning list: the object will
+correctly remove itself from the list which currently owns it, and insert 
+itself in the new list.
+</descr>
+<seealso>
+<link id="TFPHashObject.Name"/>
+<link id="TFPHashObject.ChangeOwner"/>
+<link id="TFPHashObject.ChangeOwnerAndName"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFPHashObject.CreateNotOwned">
+<short>Create an instance not owned by any list.</short>
+<descr>
+<var>CreateNotOwned</var> creates an instance of <var>TFPHashObject</var>
+which is not owned by any <link id="TFPHashObjectList"/> hash list. It also
+has no name when created in this way.
+</descr>
+<seealso>
+<link id="TFPHashObject.Name"/>
+<link id="TFPHashObject.ChangeOwner"/>
+<link id="TFPHashObject.ChangeOwnerAndName"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFPHashObject.Create">
+<short>Create a named instance, and insert in a hash list.</short>
+<descr>
+<var>Create</var> creates an instance of <var>TFPHashObject</var>, gives it
+the name <var>S</var> and inserts it in the hash list <link
+id="TFPHashObjectList">HashObjectList</link>.
+</descr>
+<seealso>
+<link id="TFPHashObject.CreateNotOwned">CreateNotOwned</link>
+<link id="TFPHashObject.ChangeOwner"/>
+<link id="TFPHashObject.Name"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObject.Create.HashObjectList">
+<short>Hash list to which the object should be added.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObject.Create.s">
+<short>Name for the object</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashObject.ChangeOwner">
+<short>Change the list owning the object.</short>
+<descr>
+<var>ChangeOwner</var> can be used to move the object between hash lists:
+The object will be removed correctly from the hash list that currently 
+owns it, and will be inserted in the list <var>HashObjectList</var>.
+</descr>
+<errors>
+If an object with the same name already is present in the new hash list, an exception will be
+raised.
+</errors>
+<seealso>
+<link id="TFPHashObject.ChangeOwnerAndName">ChangeOwnerAndName</link>
+<link id="TFPHashObject.Name">Name</link>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObject.ChangeOwner.HashObjectList">
+<short>Hash list in which to insert object.</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashObject.ChangeOwnerAndName">
+<short>Simultaneously change the list owning the object and the name of the
+object.</short>
+<descr>
+<var>ChangeOwnerAndName</var> can be used to move the object between hash lists:
+The object will be removed correctly from the hash list that currently
+owns it (using the current name), and will be inserted in the list
+<var>HashObjectList</var> with the new name <var>S</var>.
+</descr>
+<errors>
+If the new name already is present in the new hash list, an exception will be
+raised.
+</errors>
+<seealso>
+<link id="TFPHashObject.ChangeOwner">ChangeOwner</link>
+<link id="TFPHashObject.Name">Name</link>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObject.ChangeOwnerAndName.HashObjectList">
+<short>Hash list in which to insert object.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObject.ChangeOwnerAndName.s">
+<short>New name with which to insert object.</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashObject.Rename">
+<short>Rename the object</short>
+<descr>
+<var>Rename</var> changes the name of the object, and notifies the hash list
+of this change.
+</descr>
+<errors>
+If the new name already is present in the hash list, an exception will be
+raised.
+</errors>
+<seealso>
+<link id="TFPHashObject.ChangeOwner">ChangeOwner</link>
+<link id="TFPHashObject.ChangeOwnerAndName">ChangeOwnerAndName</link>
+<link id="TFPHashObject.Name">Name</link>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObject.Rename.ANewName">
+<short>New name for the object</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPHashObject.Name">
+<short>Current name of the object</short>
+<descr>
+<var>Name</var> is the name of the object, it is stored in the hash list
+using this name as the key.
+</descr>
+<seealso>
+<link id="TFPHashObject.Rename">Rename</link>
+<link id="TFPHashObject.ChangeOwnerAndName">ChangeOwnerAndName</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPHashObject.Hash">
+<short>Hash value</short>
+<descr>
+<var>Hash</var> is the hash value of the object in the hash list that owns
+it.
+</descr>
+<seealso>
+<link id="TFPHashObject.Name">Name</link>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.TFPHashObjectList
+  ********************************************************************
+-->
+
+<!-- constructor Visibility: public -->
+<element name="TFPHashObjectList.Create">
+<short>Create a new instance of the hashlist</short>
+<descr>
+<p>
+<var>Create</var> creates a new instance of <var>TFPHashObjectList</var> on the
+heap and sets the hash capacity to 1.
+</p>
+<p>
+If <var>FreeObjects</var> is <var>True</var> (the default), then the list
+owns the objects: when an object is removed from the list, it is destroyed
+(freed from memory). Clearing the list will free all objects in the list.
+</p>
+</descr>
+<seealso>
+<link id="TFPHashObjectList.Destroy"/>
+<link id="TFPHashObjectList.OwnsObjects"/>
+</seealso>
+</element>
+
+<element name="TFPHashObjectList.Create.FreeObjects">
+<short>Does the list own the objects</short>
+</element>
+
+<element name="TFPHashObjectList.OwnsObjects">
+<short>Does the list own the objects it contains</short>
+<descr>
+<p>
+<var>OwnsObjects</var> determines what to do when an object is
+removed from the list: if it is <var>True</var> (the default), then the list
+owns the objects: when an object is removed from the list, it is destroyed
+(freed from memory). Clearing the list will free all objects in the list.
+</p>
+<p>
+The value of <var>OwnsObjects</var> is set when the hash list is created,
+and may not be changed during the lifetime of the hash list. 
+(The property is made read-only in versions later than 3.0 of Free Pascal).
+</p>
+</descr>
+<seealso>
+<link id="TFPHashObjectList.Create"/>
+</seealso>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TFPHashObjectList.Destroy">
+<short>Removes an instance of the hashlist from the heap</short>
+<descr>
+<p>
+<var>Destroy</var> cleans up the memory structures maintained by the 
+hashlist and removes the <var>TFPHashObjectList</var> instance from the heap.
+If the list owns its objects, they are freed from memory as well.
+</p>
+<p>
+<var>Destroy</var> should not be called directly, it's better to use
+<var>Free</var> or <var>FreeAndNil</var> instead.
+</p>
+</descr>
+<seealso>
+<link id="TFPHashObjectList.Create"/>
+<link id="TFPHashObjectList.Clear"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.Add">
+<short>Add a new key/data pair to the list</short>
+<descr>
+<var>Add</var> adds a new object instance (<var>AObject</var>) with key
+<var>AName</var> to the list. It returns the position of the object
+in the list.
+</descr>
+<errors>
+If not enough memory is available to hold the key and data, an exception may
+be raised. If an object with this name already exists in the list, an
+exception is raised.
+</errors>
+<seealso>
+<link id="TFPHashObjectList.Extract"/>
+<link id="TFPHashObjectList.Remove"/>
+<link id="TFPHashObjectList.Delete"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.Add.Result">
+<short>Position of the new object in the list</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.Add.AName">
+<short>Key name associated with object instance.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.Add.AObject">
+<short>object instance</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashObjectList.Clear">
+<short>Clear the list</short>
+<descr>
+<var>Clear</var> removes all objects from the list. It does not free the
+objects themselves, unless <link id="TFPHashObjectList.OwnsObjects">OwnsObjects</link> is
+<var>True</var>. It always frees all memory needed to contain the objects.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TFPHashObjectList.Extract"/>
+<link id="TFPHashObjectList.Remove"/>
+<link id="TFPHashObjectList.Delete"/>
+<link id="TFPHashObjectList.Add"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.NameOfIndex">
+<short>Returns the key name of an object by index</short>
+<descr>
+<var>NameOfIndex</var> returns the key name of the object at position <var>Index</var>.
+</descr>
+<errors>
+If <var>Index</var> is out of the valid range, an exception is raised.
+</errors>
+<seealso>
+<link id="TFPHashObjectList.HashOfIndex"/>
+<link id="TFPHashObjectList.Find"/>
+<link id="TFPHashObjectList.FindIndexOf"/>
+<link id="TFPHashObjectList.FindWithHash"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.NameOfIndex.Result">
+<short>Key name of object at position <var>Index</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.NameOfIndex.Index">
+<short>Index of object for which to return name</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.HashOfIndex">
+<short>Return the hash valye of an object by index</short>
+<descr>
+<var>HashOfIndex</var> returns the hash value of the object at position
+<var>Index</var>.
+</descr>
+<errors>
+If <var>Index</var> is out of the valid range, an exception is raised.
+</errors>
+<seealso>
+<link id="TFPHashObjectList.HashOfName"/>
+<link id="TFPHashObjectList.Find"/>
+<link id="TFPHashObjectList.FindIndexOf"/>
+<link id="TFPHashObjectList.FindWithHash"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.HashOfIndex.Result">
+<short>Hash value of object at position <var>Index</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.HashOfIndex.Index">
+<short>Index of object for which to return hash value</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashObjectList.Delete">
+<short>Delete an object from the list.</short>
+<descr>
+<var>Delete</var> deletes the object at position <var>Index</var>. 
+If <link id="TFPHashObjectList.OwnsObjects">OwnsObjects</link> is
+<var>True</var>, then the object itself is also freed from memory.
+</descr>
+<seealso>
+<link id="TFPHashObjectList.Extract"/>
+<link id="TFPHashObjectList.Remove"/>
+<link id="TFPHashObjectList.Add"/>
+<link id="TFPHashObjectList.OwnsObjects">OwnsObjects</link>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.Delete.Index">
+<short>Index of object to remove from the list</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.Expand">
+<short>Expand the list</short>
+<descr>
+<var>Expand</var> enlarges the capacity of the list if the maximum capacity
+was reached. It returns itself.
+</descr>
+<errors>
+If not enough memory is available, an exception may be raised.
+</errors>
+<seealso>
+<link id="TFPHashObjectList.Clear"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.Expand.Result">
+<short>Returns self</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.Extract">
+<short>Extract a object instance from the list</short>
+<descr>
+<p>
+<var>Extract</var> removes the data object from the list, if it is in the
+list. It returns the object instance if it was removed from the list, <var>Nil</var>
+otherwise. The object is <em>not</em> freed from memory, regardless of the
+value of <link id="TFPHashObjectList.OwnsObjects">OwnsObjects</link>.
+</p>
+<p>
+<var>Extract</var> does a linear search, and is not very efficient.
+</p>
+</descr>
+<seealso>
+<link id="TFPHashObjectList.Delete"/>
+<link id="TFPHashObjectList.Remove"/>
+<link id="TFPHashObjectList.Clear"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.Extract.Result">
+<short>The removed object instance or nil.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.Extract.Item">
+<short>Object instance to be removed.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.IndexOf">
+<short>Return the index of the object instance</short>
+<descr>
+<p>
+<var>IndexOf</var> returns the index of the first occurrence of object instance
+<var>AObject</var>.  If the object is not in the list, -1 is returned.
+</p>
+<p>
+The performed search is linear, and not very efficient.
+</p>
+</descr>
+<seealso>
+<link id="TFPHashObjectList.HashOfIndex"/>
+<link id="TFPHashObjectList.NameOfIndex"/>
+<link id="TFPHashObjectList.Find"/>
+<link id="TFPHashObjectList.FindIndexOf"/>
+<link id="TFPHashObjectList.FindWithHash"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.IndexOf.Result">
+<short>Index of <var>Item</var> in the list.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.IndexOf.AObject">
+<short>Data object instance to search for.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.Find">
+<short>Find data associated with key</short>
+<descr>
+<var>Find</var> searches (using the hash) for the data object associated with
+key <var>AName</var> and returns the data object instance associated with it. If
+the object is not found, <var>Nil</var> is returned. It uses the hash value of
+the key to perform the search.
+</descr>
+<seealso>
+<link id="TFPHashObjectList.HashOfIndex"/>
+<link id="TFPHashObjectList.NameOfIndex"/>
+<link id="TFPHashObjectList.IndexOf"/>
+<link id="TFPHashObjectList.FindIndexOf"/>
+<link id="TFPHashObjectList.FindWithHash"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.Find.Result">
+<short>Object associated with <var>AName</var> or <var>Nil</var> if it does
+not exist.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.Find.S">
+<short>Key name to search for.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.FindIndexOf">
+<short>Return index of named object.</short>
+<descr>
+<var>FindIndexOf</var> returns the index of the key <var>AName</var>, or -1
+if the key does not exist in the list. It uses the hash value to search for
+the key.
+</descr>
+<seealso>
+<link id="TFPHashObjectList.HashOfIndex"/>
+<link id="TFPHashObjectList.NameOfIndex"/>
+<link id="TFPHashObjectList.IndexOf"/>
+<link id="TFPHashObjectList.Find"/>
+<link id="TFPHashObjectList.FindWithHash"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.FindIndexOf.Result">
+<short>Index of the key</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.FindIndexOf.S">
+<short>Key value to look for</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.FindWithHash">
+<short>Find first element with given name and hash value</short>
+<descr>
+<var>FindWithHash</var> searches for the object with key <var>AName</var>. It
+uses the provided hash value <var>AHash</var> to perform the search. If the
+object exists, the data object instance is returned, if not, the result is
+<var>Nil</var>.
+</descr>
+<seealso>
+<link id="TFPHashObjectList.HashOfIndex"/>
+<link id="TFPHashObjectList.NameOfIndex"/>
+<link id="TFPHashObjectList.IndexOf"/>
+<link id="TFPHashObjectList.Find"/>
+<link id="TFPHashObjectList.FindIndexOf"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.FindWithHash.Result">
+<short>Object instance associated with key <var>AName</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.FindWithHash.AName">
+<short>Key value to search for.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.FindWithHash.AHash">
+<short>Hash value of the key <var>AName</var></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.Rename">
+<short>Rename a key</short>
+<descr>
+<var>Rename</var> renames key <var>AOldname</var> to <var>ANewName</var>.
+The hash value is recomputed and the object is moved in the list to it's new
+position.
+</descr>
+<errors>
+If an object with <var>ANewName</var> already exists, an exception will be
+raised.
+</errors>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.Rename.Result">
+<short>New position in the list</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.Rename.AOldName">
+<short>Key to rename</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.Rename.ANewName">
+<short>New name of key</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.Remove">
+<short>Remove first occurrence of a object instance</short>
+<descr>
+<p>
+<var>Remove</var> removes the first occurrence of the object instance
+<var>Item</var> in the list, if it is present. The return value is the
+location of the removed object instance, or <var>-1</var> if no object 
+instance was removed. 
+</p>
+<p>
+If <link id="TFPHashObjectList.OwnsObjects">OwnsObjects</link> is
+<var>True</var>, then the object itself is also freed from memory.
+</p>
+</descr>
+<seealso>
+<link id="TFPHashObjectList.Delete"/>
+<link id="TFPHashObjectList.Clear"/>
+<link id="TFPHashObjectList.Extract"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.Remove.Result">
+<short>Position of object instance which was removed</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.Remove.AObject">
+<short>Object instance to remove from the list.</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashObjectList.Pack">
+<short>Remove nil object instances from the list</short>
+<descr>
+<var>Pack</var> removes all <var>Nil</var> objects from the list, and frees
+all unused memory.
+</descr>
+<seealso>
+<link id="TFPHashObjectList.Clear"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashObjectList.ShowStatistics">
+<short>Return some statistics for the list.</short>
+<descr>
+<p>
+<var>ShowStatistics</var> prints some information about the hash list to
+standard output. It prints the following values:
+</p>
+<dl>
+<dt>HashSize</dt><dd>Size of the hash table</dd>
+<dt>HashMean</dt><dd>Mean hash value</dd>
+<dt>HashStdDev</dt><dd>Standard deviation of hash values</dd>
+<dt>ListSize</dt><dd>Size and capacity of the list</dd>
+<dt>StringSize</dt><dd>Size and capacity of key strings</dd>
+</dl>
+</descr>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPHashObjectList.ForEachCall">
+<short>Call a procedure for each object in the list</short>
+<descr>
+<var>ForEachCall</var> loops over the objects in the list and calls
+<var>proc2call</var>, passing it the object and <var>arg</var>.
+</descr>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.ForEachCall.proc2call">
+<short>Callback procedure</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.ForEachCall.arg">
+<short>Additional argument passed to <var>proc2call</var></short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPHashObjectList.Capacity">
+<short>Capacity of the list.</short>
+<descr>
+<var>Capacity</var> returns the current capacity of the list. The capacity
+is expanded as more elements are added to the list. If a good estimate of
+the number of elements that will be added to the list, the property can be 
+set to a sufficiently large value to avoid reallocation of memory each time 
+the list needs to grow.
+</descr>
+<seealso>
+<link id="TFPHashObjectList.Count">Count</link>
+<link id="TFPHashObjectList.Items">Items</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPHashObjectList.Count">
+<short>Current number of elements in the list.</short>
+<descr>
+<var>Count</var> is the current number of elements in the list.
+</descr>
+<seealso>
+<link id="TFPHashObjectList.Capacity">Capacity</link>
+<link id="TFPHashObjectList.Items">Items</link>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPHashObjectList.Items">
+<short>Indexed array with object instances</short>
+<descr>
+<var>Items</var> provides indexed access to the object instances, the index runs
+from 0 to <link id="TFPHashObjectList.Count">Count-1</link>. 
+</descr>
+<errors>
+Specifying an invalid index will result in an exception.
+</errors>
+<seealso>
+<link id="TFPHashObjectList.Capacity">Capacity</link>
+<link id="TFPHashObjectList.Count">Count</link>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.Items.Index">
+<short>0-based index</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPHashObjectList.List">
+<short>Low-level hash list</short>
+<descr>
+<var>List</var> exposes the low-level <link id="TFPHashList">hash list</link>.
+It should not be used directly.
+</descr>
+<seealso>
+<link id="TFPHashList"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.FindInstanceOf">
+<short>Search an instance of a certain class</short>
+<descr>
+<var>FindInstanceOf</var> searches the list for an instance of
+class <var>AClass</var>. It starts searching at position <var>AStartAt</var>.
+If <var>AExact</var> is <var>True</var>, only instances of class
+<var>AClass</var> are considered. If <var>AExact</var> is <var>False</var>,
+then descendent classes of <var>AClass</var> are also taken into account
+when searching. If no instance is found, <var>Nil</var> is returned.
+</descr>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.FindInstanceOf.Result">
+<short>First instance of <var>AClass</var> after position
+<var>AStartAt</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.FindInstanceOf.AClass">
+<short>Class to search for.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.FindInstanceOf.AExact">
+<short>Should the class match exactly, or also consider descendents</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.FindInstanceOf.AStartAt">
+<short>Position in list to start search.</short>
+</element>
+
+<!-- "class of" type Visibility: default -->
+<element name="THTCustomNodeClass">
+<short>Class of <link
+id="#fcl.contnrs.THTCustomNodeClass">THTCustomNodeClass</link>.</short>
+<descr>
+<var>THTCustomNodeClass</var> was used by <link id="TFPCustomHashTable"/>
+to decide which class should be created for elements in the list.
+</descr>
+<seealso>
+<link id="TFPCustomHashTable"/>
+<link id="THTCustomNode"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.THTDataNode
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="THTDataNode">
+<short>Data node for pointer hashtable</short>
+<descr>
+<p>
+<var>THTDataNode</var> is used by <link id="TFPDataHashTable"/> to store the
+hash items in. It simply holds the data pointer.
+</p>
+<p>
+It should not be necessary to use <var>THTDataNode</var> directly, it's
+only for inner use by <var>TFPDataHashTable</var>
+</p>
+</descr>
+<seealso>
+<link id="TFPDataHashTable"/>
+<link id="THTObjectNode"/>
+<link id="THTStringNode"/>"
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="THTDataNode.Data">
+<short>Data pointer</short>
+<descr>
+Pointer containing the user data associated with the hash value.
+</descr>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="THTNode">
+<short>Alias for <var>THTDataNode</var></short>
+<descr>
+<var>THTNode</var> is provided for backwards compatibility.
+</descr>
+<seealso>
+<link id="THTDataNode"/>
+<link id="TFPCustomHashTable"/>
+<link id="TFPDataHashTable"/>
+<link id="THTObjectNode"/>
+<link id="THTStringNode"/>"
+</seealso>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TDataIteratorMethod">
+<short>Data iterator method.</short>
+<descr>
+<var>TDataIteratorMethod</var> is a callback prototype for the <link
+id="TFPDataHashTable.Iterate"/> method. It is called for each data
+pointer in the hash list, passing the key (<var>key</var>) and 
+data pointer (<var>item</var>) for each item in the list.
+If <var>Continue</var> is set to <var>false</var>, the iteration stops.
+</descr>
+<seealso>
+<link id="TFPDataHashTable.Iterate"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TDataIteratorMethod.Item">
+<short>Data pointer item</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TDataIteratorMethod.Key">
+<short>Key associated with item</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TDataIteratorMethod.Continue">
+<short>Continue iterating or stop iteration</short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TDataIteratorCallBack">
+<short>Data iterator CallBack.</short>
+<descr>
+<var>TDataIteratorCallBack</var> is a callback prototype for the <link
+id="TFPDataHashTable.Iterate"/> static CallBack. It is called for each data
+pointer in the hash list, passing the key (<var>key</var>) and 
+data pointer (<var>item</var>) for each item in the list.
+If <var>Continue</var> is set to <var>false</var>, the iteration stops.
+</descr>
+<seealso>
+<link id="TFPDataHashTable.Iterate"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TDataIteratorCallBack.Item">
+<short>Data pointer item</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TDataIteratorCallBack.Key">
+<short>Key associated with item</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TDataIteratorCallBack.Continue">
+<short>Continue iterating or stop iteration</short>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.TFPDataHashTable
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="TFPDataHashTable">
+<short>Hash table for data pointers</short>
+<descr>
+<var>TFPDataHashTable</var> is a <link id="TFPCustomHashTable"/> descendent
+which stores simple data pointers together with the keys. In case the data
+associated with the keys are objects, it's better to use <link
+id="TFPObjectHashTable"/>, or for string data, <link
+id="TFPStringHashTable"/> is more suitable. The data pointers are exposed with their
+keys through the <link id="TFPDataHashTable.Items">Items</link> property.
+
+</descr>
+<seealso>
+<link id="TFPObjectHashTable"/>
+<link id="TFPStringHashTable"/>
+<link id="TFPDataHashTable.Items">Items</link>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPDataHashTable.Add">
+<short>Add a data pointer to the list.</short>
+<descr>
+<var>Add</var> adds a data pointer (<var>AItem</var>) to the list with key
+<var>AKey</var>.
+</descr>
+<errors>
+If <var>AKey</var> already exists in the table, an exception is raised.
+</errors>
+<seealso>
+<link id="TFPDataHashTable.Items"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPDataHashTable.Add.aKey">
+<short>Key to insert in the hash table</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPDataHashTable.Add.AItem">
+<short>Data pointer associated with <var>AKey</var>.</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPDataHashTable.Items">
+<short>Key-based access to the items in the table</short>
+<descr>
+<var>Items</var> provides access to the items in the hash table using their
+key: the array index <var>Index</var> is the key. A key which is not present
+will result in an <var>Nil</var> pointer.
+</descr>
+<seealso>
+<link id="TFPStringHashTable.Add"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPDataHashTable.Items.index">
+<short>Key with which to retrieve data pointer.</short>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.THTStringNode
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="THTStringNode">
+<short>Node type for <link id="#fcl.contnrs.TFPStringHashTable">TFPStringHashTable</link></short>
+<descr>
+<p>
+<var>THTStringNode</var> is a <link id="THTCustomNode"/> descendent which
+holds the data in the <link id="TFPStringHashTable"/> hash table. It exposes
+a data string.
+</p>
+<p>
+It should not be necessary to use <var>THTStringNode</var> directly, it's
+only for inner use by <var>TFPStringHashTable</var>
+</p>
+</descr>
+<seealso>
+<link id="TFPStringHashTable"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="THTStringNode.Data">
+<short>String data</short>
+<descr>
+<var>Data</var> is the data of this has node. The data is a string,
+associated with the key. It is also exposed in <link id="TFPStringHashTable.Items"/>
+</descr>
+<seealso>
+<link id="TFPStringHashTable"/>
+</seealso>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TStringIteratorMethod">
+<short>Iterator callback type</short>
+<descr>
+<var>TStringIteratorMethod</var> is the callback prototype for the <link
+id="TFPCustomHashTable.Iterate">Iterate</link> method. It is called for each
+element in the hash table, with the string. If <var>Continue</var> is set to <var>false</var>, 
+the iteration stops.
+</descr>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TStringIteratorMethod.Item">
+<short>String associated with key</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TStringIteratorMethod.Key">
+<short>Key value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TStringIteratorMethod.Continue">
+<short>Should iterate continue or stop ?</short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TStringIteratorCallBack">
+<short>Iterator callback type</short>
+<descr>
+<var>TStringIteratorCallBack</var> is the callback prototype for the <link
+id="TFPCustomHashTable.Iterate">Iterate</link> method. It is called for each
+element in the hash table, with the string. If <var>Continue</var> is set to <var>false</var>, 
+the iteration stops.
+</descr>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TStringIteratorCallBack.Item">
+<short>String associated with key</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TStringIteratorCallBack.Key">
+<short>Key value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TStringIteratorCallBack.Continue">
+<short>Should iterate continue or stop ?</short>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.TFPStringHashTable
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="TFPStringHashTable">
+<short>Hash table for string data.</short>
+<descr>
+<var>TFPStringHashTable</var> is a <link id="TFPCustomHashTable"/> descendent
+which stores simple strings together with the keys. In case the data
+associated with the keys are objects, it's better to use <link
+id="TFPObjectHashTable"/>, or for arbitrary pointer data, <link
+id="TFPDataHashTable"/> is more suitable. The strings are exposed with their
+keys through the <link id="TFPStringHashTable.Items">Items</link> property.
+</descr>
+<seealso>
+<link id="TFPObjectHashTable"/>
+<link id="TFPDataHashTable"/>
+<link id="TFPStringHashTable.Items">Items</link>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPStringHashTable.Add">
+<short>Add a new string to the hash list</short>
+<descr>
+<var>Add</var> adds a new string <var>AItem</var> to the hash list with key
+<var>AKey</var>. 
+</descr>
+<errors>
+If a string with key <var>Akey</var> already exists in the hash table, an
+exception will be raised.
+</errors>
+<seealso>
+<link id="TFPStringHashTable.Items"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPStringHashTable.Add.aKey">
+<short>Key value associated with <var>aItem</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPStringHashTable.Add.aItem">
+<short>String data</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPStringHashTable.Items">
+<short>Key based access to the strings in the hash table</short>
+<descr>
+<var>Items</var> provides access to the strings in the hash table using their
+key: the array index <var>Index</var> is the key. A key which is not present
+will result in an empty string.
+</descr>
+<seealso>
+<link id="TFPStringHashTable.Add"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPStringHashTable.Items.index">
+<short>Key to retrieve string with.</short>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.THTObjectNode
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="THTObjectNode">
+<short>Node type for <link id="#fcl.contnrs.TFPObjectHashTable">TFPObjectHashTable</link></short>
+<descr>
+<p>
+<var>THTObjectNode</var> is a <link id="THTCustomNode"/> descendent which
+holds the data in the <link id="TFPObjectHashTable"/> hash table. It exposes
+a data string.
+</p>
+<p>
+It should not be necessary to use <var>THTObjectNode</var> directly, it's
+only for inner use by <var>TFPObjectHashTable</var>
+</p>
+</descr>
+<seealso>
+<link id="TFPObjectHashTable"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="THTObjectNode.Data">
+<short>Object instance</short>
+<descr>
+<var>Data</var> is the object instance associated with the key value.
+It is exposed in <link id="TFPObjectHashTable.Items"/> 
+</descr>
+<seealso>
+<link id="TFPObjectHashTable"/>
+<link id="TFPObjectHashTable.Items"/>
+<link id="THTOwnedObjectNode"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.THTOwnedObjectNode
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="THTOwnedObjectNode">
+<short>Node type for owned objects.</short>
+<descr>
+<var>THTOwnedObjectNode</var> is used instead of <link id="THTObjectNode"/>
+in case <link id="TFPObjectHashTable"/> owns it's objects. When this object
+is destroyed, the associated data object is also destroyed.
+</descr>
+<seealso>
+<link id="TFPObjectHashTable"/>
+<link id="THTObjectNode"/>
+<link id="TFPObjectHashTable.OwnsObjects"/>
+</seealso>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="THTOwnedObjectNode.Destroy">
+<short>Destroys the node and the object.</short>
+<descr>
+<var>Destroy</var> first frees the data object, and then only frees itself.
+</descr>
+<seealso>
+<link id="THTOwnedObjectNode"/>
+<link id="TFPObjectHashTable.OwnsObjects"/>
+</seealso>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TObjectIteratorMethod">
+<short>iterate callback prototype.</short>
+<descr>
+<var>TObjectIteratorMethod</var> is the iterator callback prototype.
+It is used to iterate over all items in the hash table, and is called
+with each key value (<var>Key</var>) and associated object
+(<var>Item</var>). If <var>Continue</var> is set to <var>false</var>, 
+the iteration stops.
+</descr>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectIteratorMethod.Item">
+<short>Data object</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectIteratorMethod.Key">
+<short>Key value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectIteratorMethod.Continue">
+<short>Should the iteration continue or stop</short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TObjectIteratorCallBack">
+<short>iterate callback prototype.</short>
+<descr>
+<var>TObjectIteratorCallBack</var> is the iterator callback prototype.
+It is used to iterate over all items in the hash table, and is called
+with each key value (<var>Key</var>) and associated object
+(<var>Item</var>). If <var>Continue</var> is set to <var>false</var>, 
+the iteration stops.
+</descr>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectIteratorCallBack.Item">
+<short>Data object</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectIteratorCallBack.Key">
+<short>Key value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectIteratorCallBack.Continue">
+<short>Should the iteration continue or stop</short>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.TFPObjectHashTable
+  ********************************************************************
+-->
+
+<!-- object Visibility: default -->
+<element name="TFPObjectHashTable">
+<short>Hash table for object instances</short>
+<descr>
+<var>TFPStringHashTable</var> is a <link id="TFPCustomHashTable"/>
+descendent which stores object instances together with the keys. In case the data
+associated with the keys are strings themselves, it's better to use <link
+id="TFPStringHashTable"/>, or for arbitrary pointer data, <link
+id="TFPDataHashTable"/> is more suitable. The objects are exposed with their
+keys through the <link id="TFPObjectHashTable.Items">Items</link> property.
+</descr>
+<seealso>
+<link id="TFPStringHashTable"/>
+<link id="TFPDataHashTable"/>
+<link id="TFPObjectHashTable.Items"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFPObjectHashTable.Create">
+<short>Create a new instance of <var>TFPObjectHashTable</var></short>
+<descr>
+<var>Create</var> creates a new instance of <var>TFPObjectHashTable</var> on
+the heap. It sets the <link id="TFPObjectHashTable.OwnsObjects">OwnsObjects</link> 
+property to <var>AOwnsObjects</var>, and then calls the inherited
+<var>Create</var>. If <var>AOwnsObjects</var> is set to <var>True</var>, 
+then the hash table owns the objects: whenever an object is removed from 
+the list, it is automatically freed.
+</descr>
+<errors>
+If not enough memory is available on the heap, an exception may be raised.
+</errors>
+<seealso>
+<link id="TFPObjectHashTable.OwnsObjects"/>
+<link id="TFPObjectHashTable.CreateWith"/>
+<link id="TFPObjectHashTable.Items"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectHashTable.Create.AOwnsObjects">
+<short>Does the hash table own the objects stored in it?</short>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TFPObjectHashTable.CreateWith">
+<short>Create a new hash table with given size and hash function</short>
+<descr>
+<p>
+<var>CreateWith</var> sets the <link id="TFPObjectHashTable.OwnsObjects">OwnsObjects</link>
+property to <var>AOwnsObjects</var>, and then calls the inherited
+<var>CreateWith</var>. If <var>AOwnsObjects</var> is set to <var>True</var>,
+then the hash table owns the objects: whenever an object is removed from
+the list, it is automatically freed.
+</p>
+<p>
+This constructor should be used when a table size and hash algorithm should be
+specified that differ from the default table size and hash algorithm.
+</p>
+</descr>
+<errors>
+If not enough memory is available on the heap, an exception may be raised.
+</errors>
+<seealso>
+<link id="TFPObjectHashTable.OwnsObjects"/>
+<link id="TFPObjectHashTable.Create"/>
+<link id="TFPObjectHashTable.Items"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectHashTable.CreateWith.AHashTableSize">
+<short>Hash table size</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectHashTable.CreateWith.aHashFunc">
+<short>Hash function to use</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectHashTable.CreateWith.AOwnsObjects">
+<short>Does the hash table own the objects stored in it?</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPObjectHashTable.Add">
+<short>Add a new object to the hash table</short>
+<descr>
+<var>Add</var> adds the object <var>AItem</var> to the hash table, and
+associates it with key <var>aKey</var>. 
+</descr>
+<errors>
+If the key <var>aKey</var> is already in the hash table, an exception will
+be raised.
+</errors>
+<seealso>
+<link id="TFPObjectHashTable.Items"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectHashTable.Add.aKey">
+<short>key Associated with object</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectHashTable.Add.AItem">
+<short>Object to store</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPObjectHashTable.Items">
+<short>Key-based access to the objects</short>
+<descr>
+<var>Items</var> provides access to the objects in the hash table using
+their key: the array index <var>Index</var> is the key. A key which is 
+not present will result in an <var>Nil</var> instance.
+</descr>
+<seealso>
+<link id="TFPObjectHashTable.Add"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPObjectHashTable.Items.index">
+<short>Key to return object for</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TFPObjectHashTable.OwnsObjects">
+<short>Does the hash table own the objects ?</short>
+<descr>
+<var>OwnsObjects</var> determines what happens with objects which are
+removed from the hash table: if <var>True</var>, then removing an object
+from the hash list will free the object. If <var>False</var>, the object
+is not freed. Note that way in which the object is removed is not relevant:
+be it <var>Delete</var>, <var>Remove</var> or <var>Clear</var>.
+</descr>
+<seealso>
+<link id="TFPObjectHashTable.Create"/>
+<link id="TFPObjectHashTable.Items"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashList.GetNextCollision">
+<short>Get next collision number</short>
+<descr>
+<var>GetNextCollision</var> returns the next collision in hash item
+<var>Index</var>. This is the count of items with the same hash.means that the next it
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashList.GetNextCollision.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashList.GetNextCollision.Index">
+<short>Index of hash item</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPHashObjectList.GetNextCollision">
+<short>Get next collision number</short>
+<descr>
+</descr>
+<errors>
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TFPHashObjectList.GetNextCollision.Result">
+<short></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TFPHashObjectList.GetNextCollision.Index">
+<short>Index of hash item</short>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TBucketItem">
+<short>Record used in bucket list.</short>
+<descr>
+<var>TBucketItem</var> is a record used for internal use in <link
+id="TCustomBucketList"/>. It should not be necessary to use it directly.
+</descr>
+<seealso>
+<link id="TCustomBucketList"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TBucketItem.Item">
+<short>Item to associate data with</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TBucketItem.Data">
+<short>Data associated with item</short>
+</element>
+
+<!-- array type Visibility: default -->
+<element name="TBucketItemArray">
+<short>Array of <var>TBucketItem</var> records</short>
+<seealso>
+<link id="TBucketItem"/>
+</seealso>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TBucket">
+<short>Bucket record</short>
+<descr>
+<var>TBucket</var> describes 1 bucket in the <link id="TCustomBucketList"/>
+class. It is a container for <link id="TBucketItem"/> records. 
+It should never be used directly.
+</descr>
+<seealso>
+<link id="TBucketItem"/>
+<link id="TCustomBucketList"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TBucket.Count">
+<short>Number of items in the bucket</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="TBucket.Items">
+<short>Items in this bucket</short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PBucket">
+<short>Pointer to <link id="#fcl.contnrs.TBucket">TBucket</link>" type.</short>
+</element>
+
+<!-- array type Visibility: default -->
+<element name="TBucketArray">
+<short>Array of <link id="#fcl.contnrs.TBucket">TBucket</link> records.</short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TBucketProc">
+<short>Callback for the <link id="#fcl.contnrs.TCustomBucketList.Foreach">ForEach</link> call.</short>
+<descr>
+<p>
+<var>TBucketProc</var> is the prototype for the <link id="TCustomBucketList.Foreach"/> call.
+It is the plain procedural form. The <var>Continue</var> parameter can be
+set to <var>False</var> to indicate that the <var>Foreach</var> call should
+stop the iteration.
+</p>
+<p>
+For a procedure of object (a method) callback, see the <link id="TBucketProcObject"/> prototype.
+</p>
+</descr>
+<seealso>
+<link id="TCustomBucketList.Foreach"/> 
+<link id="TBucketProcObject"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TBucketProc.AInfo">
+<short>Extra info pointer passed to Foreach call.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TBucketProc.AItem">
+<short>Item</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TBucketProc.AData">
+<short>Data associated with item</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TBucketProc.AContinue">
+<short>Set to false to stop iteration over items.</short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TBucketProcObject">
+<short>Callback for the <link id="#fcl.contnrs.TCustomBucketList.Foreach">ForEach</link> call.</short>
+<descr>
+<p>
+<var>TBucketProcObject</var> is the prototype for the <link id="TCustomBucketList.Foreach"/> call.
+It is the method (procedure of object) form. The <var>Continue</var> parameter can be
+set to <var>False</var> to indicate that the <var>Foreach</var> call should stop the iteration.
+</p>
+<p>
+For a plain procedural callback, see the <link id="TBucketProc"/> prototype.
+</p>
+</descr>
+<seealso>
+<link id="TCustomBucketList.Foreach"/>
+<link id="TBucketProc"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TBucketProcObject.AItem">
+<short>Item</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TBucketProcObject.AData">
+<short>Data associated with item</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TBucketProcObject.AContinue">
+<short>Set to false to stop iteration over items.</short>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.TCustomBucketList
+  ********************************************************************
+-->
+
+<!-- class Visibility: default -->
+<element name="TCustomBucketList">
+<short>Custom bucket list class</short>
+<descr>
+<p>
+<var>TCustomBucketList</var> is an associative list using buckets for storage.
+It scales better than a regular <link id="#rtl.classes.tlist">TList</link>
+list class, escpecially when an item must be searched in the list. 
+</p>
+<p>
+Since the list associates a data pointer with each item pointer, it follows
+that each item pointer must be unique, and can be added to the list only
+once.
+</p>
+<p>
+The <var>TCustomBucketList</var> class does not determine the number of
+buckets or the bucket hash mechanism, this must be done by descendent
+classes such as <link id="TBucketList"/>. <var>TCustomBucketList</var> 
+only takes care of storage and retrieval of items in the various buckets.
+</p>
+<p>
+Because <var>TCustomBucketList</var> is an abstract class - it does not determine the number of
+buckets - one should never instantiate an instance of <var>TCustomBucketList</var>, but always 
+use a descendent class such as <link id="TCustomBucketList"/>.
+</p>
+</descr>
+<seealso>
+<link id="TBucketList"/>
+</seealso>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TCustomBucketList.Destroy">
+<short>Frees the bucketlist from memory</short>
+<descr>
+<var>Detsroy</var> frees all storage for the buckets from memory. The items
+themselves are not freed from memory.
+</descr>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomBucketList.Clear">
+<short>Clear the list</short>
+<descr>
+<var>Clear</var> clears the list. The items and their data themselves 
+are not disposed of, this must be done separately. Clear only removes all
+references to the items from the list.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TCustomBucketList.Add"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomBucketList.Add">
+<short>Add an item to the list</short>
+<descr>
+<var>Add</var> adds <var>AItem</var> with it's associated <var>AData</var> 
+to the list and returns <var>AData</var>. 
+</descr>
+<errors>
+If <var>AItem</var> is already in the list, an <var>ElistError</var>
+exception will be raised.
+</errors>
+<seealso>
+<link id="TCustomBucketList.Exists"/>
+<link id="TCustomBucketList.Clear"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TCustomBucketList.Add.Result">
+<short>The result is always <var>AData</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomBucketList.Add.AItem">
+<short>Item to add to the list. Must uniquely identify <var>AData</var>.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomBucketList.Add.AData">
+<short>Data to be associated with <var>AItem</var></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomBucketList.Assign">
+<short>Assign one bucket list to another</short>
+<descr>
+<var>Assign</var> is implemented by <var>TCustomBucketList</var> to copy the
+contents of another bucket list to the bucket list. It clears the contents
+prior to the copy operation.
+</descr>
+<seealso>
+<link id="TCustomBucketList.Add"/>
+<link id="TCustomBucketList.Clear"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomBucketList.Assign.AList">
+<short>Source list to copy items from</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomBucketList.Exists">
+<short>Check if an item exists in the list.</short>
+<descr>
+<p>
+<var>Exists</var> searches the list and returns <var>True</var> if the
+<var>AItem</var> is already present in the list. If the item is not yet in
+the list, <var>False</var> is returne5Ad.
+</p>
+<p>
+If the data pointer associated with <var>AItem</var> is also needed, then it is better to
+use <link id="TCustomBucketList.Find">Find</link>. 
+</p>
+</descr>
+<seealso>
+<link id="TCustomBucketList.Find"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TCustomBucketList.Exists.Result">
+<short><var>True</var> if the item exists in the list, <var>False</var> if not.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomBucketList.Exists.AItem">
+<short>Item to search for</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomBucketList.Find">
+<short>Find an item in the list</short>
+<descr>
+<var>Find</var> searches for <var>AItem</var> in the list and returns the
+data pointer associated with it in <var>AData</var> if the item was found.
+In that case the return value is <var>True</var>. If <var>AItem</var> is not
+found in the list, <var>False</var> is returned.
+</descr>
+<seealso>
+<link id="TCustomBucketList.Exists"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TCustomBucketList.Find.Result">
+<short><var>True</var> if the item is present in the list.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomBucketList.Find.AItem">
+<short>Item to search for in the list</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomBucketList.Find.AData">
+<short>On return, contains the data pointer associated with <var>AItem</var>.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomBucketList.ForEach">
+<short>Loop over all items.</short>
+<descr>
+<p>
+<var>Foreach</var> loops over all items in the list and calls
+<var>AProc</var>, passing it in turn each item in the list.
+</p>
+<p>
+<var>AProc</var> exists in 2 variants: one which is a simple procedure, and
+one which is a method. In the case of the simple procedure, the <var>AInfo</var> 
+argument is passed as well in each call to <var>AProc</var>.
+</p>
+<p>
+The loop stops when all items have been processed, or when the <var>AContinue</var> 
+argument of <var>AProc</var> contains <var>False</var> on return.
+</p>
+<p>
+The result of the function is <var>True</var> if all items were processed,
+or <var>False</var> if the loop was interrupted with a <var>AContinue</var>
+return of <var>False</var>.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="TCustomBucketList.Data"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TCustomBucketList.ForEach.Result">
+<short><var>True</var> if all items were processed, <var>False</var> if the
+loop was stopped.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomBucketList.ForEach.AProc">
+<short>Callback handler to call for each item in the list.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomBucketList.ForEach.AInfo">
+<short>Extra info to pass to the procedural variant of the method.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomBucketList.Remove">
+<short>Remove an item from the list.</short>
+<descr>
+<var>Remove</var> removes <var>AItem</var> from the list, and returns the
+associated data pointer of the removed item. If the item was not in the
+list, then <var>Nil</var> is returned.
+</descr>
+<seealso>
+<link id ="TCustomBucketList.Find">Find</link>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TCustomBucketList.Remove.Result">
+<short><var>Data</var> pointer associated with <var>AItem</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomBucketList.Remove.AItem">
+<short>Item to remove from the list.</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomBucketList.Data">
+<short>Associative array for data pointers</short>
+<descr>
+<var>Data</var> provides direct access to the <var>Data</var> pointers associated
+with the <var>AItem</var> pointers. If <var>AItem</var> is not in the list
+of pointers, an <var>EListError</var> exception will be raised.
+</descr>
+<seealso>
+<link id="TCustomBucketList.Find"/>
+<link id="TCustomBucketList.Exists"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomBucketList.Data.AItem">
+<short>Item to retrieve data pointer from</short>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TBucketListSizes">
+<short>Enumerated type to indicate bucket list size</short>
+<descr>
+<var>TBucketListSizes</var> is used to set the bucket list size: It
+specified the number of buckets created by <link id="TBucketList"/>.
+</descr>
+<seealso>
+<link id="TBucketList"/>
+<link id="TBucketList.Create"/>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TBucketListSizes.bl2">
+<short>List with 2 buckets</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TBucketListSizes.bl4">
+<short>List with 4 buckets</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TBucketListSizes.bl8">
+<short>List with 8 buckets</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TBucketListSizes.bl16">
+<short>List with 16 buckets</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TBucketListSizes.bl32">
+<short>List with 32 buckets</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TBucketListSizes.bl64">
+<short>List with 64 buckets</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TBucketListSizes.bl128">
+<short>List with 128 buckets</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TBucketListSizes.bl256">
+<short>List with 256 buckets</short>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.TBucketList
+  ********************************************************************
+-->
+
+<!-- class Visibility: default -->
+<element name="TBucketList">
+<short>Default bucket list implementation.</short>
+<descr>
+<p>
+<var>TBucketList</var> is a descendent of <var>TCustomBucketList</var> which
+allows to specify a bucket count which is a multiple of 2, up to 256
+buckets. The size is passed to the constructor and cannot be changed in the
+lifetime of the bucket list instance.
+</p>
+<p>
+The buckets for an item is determined by looking at the last bits
+of the item pointer: For 2 buckets, the last bit is examined, for 4 buckets,
+the last 2 bits are taken and so on. The algorithm takes into account the
+average granularity (4) of heap pointers.
+</p>
+</descr>
+<seealso>
+<link id="TCustomBucketList"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TBucketList.Create">
+<short>Create a new <var>TBucketList</var> instance.</short>
+<descr>
+<var>Create</var> instantiates a new bucketlist instance with a number of
+buckets determined by <var>ABuckets</var>. After creation, the number of
+buckets can no longer be changed.
+</descr>
+<errors>
+If not enough memory is available to create the instance, an exception may
+be raised.
+</errors>
+<seealso>
+<link id="TBucketListSizes"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TBucketList.Create.ABuckets">
+<short>Number of buckets to create</short>
+</element>
+
+<!--
+  ********************************************************************
+    #fcl.contnrs.TObjectBucketList
+  ********************************************************************
+-->
+
+<!-- class Visibility: default -->
+<element name="TObjectBucketList">
+<short>Bucket list using objects instead of pointers.</short>
+<descr>
+<var>TObjectBucketList</var> is a class that redefines the associative
+<var>Data</var> array using <var>TObject</var> instead of <var>Pointer</var>. 
+It also adds some overloaded versions of the <var>Add</var> and
+<var>Remove</var> calls using <var>TObject</var> instead of
+<var>Pointer</var> for the argument and result types.
+</descr>
+<seealso>
+<link id="TObjectBucketList"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectBucketList.Add">
+<short>Add an object to the list</short>
+<descr>
+<var>Add</var> adds <var>AItem</var> to the list and associated <var>AData</var> with it.
+</descr>
+<seealso>
+<link id="TObjectBucketList.Data"/>
+<link id="TObjectBucketList.Remove"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectBucketList.Add.Result">
+<short>The result is always <var>AData</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectBucketList.Add.AItem">
+<short>Item to add to the list</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectBucketList.Add.AData">
+<short>Data associated with <var>AItem</var></short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TObjectBucketList.Remove">
+<short>Remove an object from the list</short>
+<descr>
+<var>Remove</var> removes the object <var>AItem</var> from the list.
+It returns the <var>Data</var> object which was associated with the item. If
+<var>AItem</var> was not in the list, then <var>Nil</var> is returned.
+</descr>
+<seealso>
+<link id="TObjectBucketList.Add"/>
+<link id="TObjectBucketList.Data"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TObjectBucketList.Remove.Result">
+<short>Data item associated with <var>AItem</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectBucketList.Remove.AItem">
+<short>Object to remove from the list</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TObjectBucketList.Data">
+<short>Associative array of data items</short>
+<descr>
+<var>Data</var> provides associative access to the data in the list: it
+returns the data object associated with the <var>AItem</var> object. If the
+<var>AItem</var> object is not in the list, an <var>EListError</var>
+exception is raised.
+</descr>
+<seealso>
+<link id="TObjectBucketList.Add"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TObjectBucketList.Data.AItem">
+<short>Object item to retrieve associated data object from</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPDataHashTable.Iterate">
+<short>Iterate over the pointers in the hash table</short>
+<descr>
+<p>
+<var>Iterate</var> iterates over all elements in the array, calling <var>aMethod</var> for each
+pointer, or until the method returns <var>False</var> in its <var>continue</var> parameter. 
+It returns <var>Nil</var> if all elements were processed, or the pointer that was being 
+processed when <var>aMethod</var> returned <var>False</var> in the <var>Continue</var> parameter.
+</p>
+<p>
+The <var>aMethod</var> callback can be a method of an object, or a normal, static procedure.
+</p>
+</descr>
+<seealso>
+<link id="ForeachCall"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: public -->
+<element name="TFPDataHashTable.Iterate.Result">
+<short><var>Nil</var> or the pointer that caused the iteration to abort.</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TFPDataHashTable.Iterate.aMethod">
+<short>Method to call for each pointer in the hash table.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPStringHashTable.Iterate">
+<short>Iterate over the strings in the hash table</short>
+<descr>
+<var>Iterate</var> iterates over all elements in the array, calling <var>aMethod</var> for each
+string, or until the method returns <var>False</var> in its <var>continue</var> parameter.
+It returns an empty string if all elements were processed, or the string that was being
+processed when <var>aMethod</var> returned <var>False</var> in the <var>Continue</var> parameter.
+</descr> 
+<seealso>
+<link id="ForeachCall"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: public -->
+<element name="TFPStringHashTable.Iterate.Result">
+<short>Empty or the string that caused the iterate to abort.</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TFPStringHashTable.Iterate.aMethod">
+<short>Method to call for each string in the hash table.</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TFPObjectHashTable.Iterate">
+<short>Iterate over the objects in the hash table</short>
+<descr>
+<var>Iterate</var> iterates over all elements in the array, calling <var>aMethod</var> 
+for each object, or until the method returns <var>False</var> in its <var>continue</var> parameter.
+It returns <var>Nil</var> if all elements were processed, or the object that was being 
+processed when <var>aMethod</var> returned <var>False</var> in the <var>Continue</var> parameter.
+</descr>
+<seealso>
+<link id="ForeachCall"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: public -->
+<element name="TFPObjectHashTable.Iterate.Result">
+<short>Nil or the object that caused the iteration to be aborted.</short>
+</element>
+
+<!-- argument Visibility: public -->
+<element name="TFPObjectHashTable.Iterate.aMethod">
+<short>Method to call for each object in the hash table.</short>
+</element>
+
+</module> <!-- contnrs -->
+</package>
+</fpdoc-descriptions>
