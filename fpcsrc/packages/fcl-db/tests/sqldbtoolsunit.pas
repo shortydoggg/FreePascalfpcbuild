@@ -56,6 +56,8 @@ type
     Function InternalGetFieldDataset : TDataSet; override;
   public
     procedure TryDropIfExist(ATableName : String);
+    procedure TryCreateSequence(ASequenceName : String);
+    procedure TryDropSequence(ASequenceName: String);
     destructor Destroy; override;
     constructor Create; override;
     procedure ExecuteDirect(const SQL: string);
@@ -245,14 +247,10 @@ begin
     ssMSSQL, ssSybase:
       // todo: Sybase: copied over MSSQL; verify correctness
       // note: test database should have case-insensitive collation
-      // todo: SQL Server 2008 and later supports DATE, TIME and DATETIME2 data types,
-      //       but these are not supported by FreeTDS yet
       begin
       FieldtypeDefinitions[ftBoolean] := 'BIT';
       FieldtypeDefinitions[ftFloat]   := 'FLOAT';
       FieldtypeDefinitions[ftCurrency]:= 'MONEY';
-      FieldtypeDefinitions[ftDate]    := 'DATETIME';
-      FieldtypeDefinitions[ftTime]    := '';
       FieldtypeDefinitions[ftDateTime]:= 'DATETIME';
       FieldtypeDefinitions[ftBytes]   := 'BINARY(5)';
       FieldtypeDefinitions[ftVarBytes]:= 'VARBINARY(10)';
@@ -358,6 +356,11 @@ begin
       testStringValues[i] := TrimRight(testStringValues[i]);
     end;
 
+  if SQLServerType in [ssMSSQL, ssSQLite, ssSybase] then
+    // Some DB's do not support sql compliant boolean data type.
+    for i := 0 to testValuesCount-1 do
+      testValues[ftBoolean, i] := BoolToStr(testBooleanValues[i], '1', '0');
+
   if SQLServerType in [ssMySQL] then
     begin
     // Some DB's do not support milliseconds in datetime and time fields.
@@ -387,10 +390,7 @@ begin
   if SQLServerType in [ssMSSQL, ssSybase] then
     // Some DB's do not support datetime values before 1753-01-01
     for i := 18 to testValuesCount-1 do
-      begin
-      testValues[ftDate,i] := testValues[ftDate,0];
       testValues[ftDateTime,i] := testValues[ftDateTime,0];
-      end;
 
   // DecimalSeparator must correspond to monetary locale (lc_monetary) set on PostgreSQL server
   // Here we assume, that locale on client side is same as locale on server
@@ -499,46 +499,35 @@ begin
           begin
           sql := sql + ',F' + Fieldtypenames[FType];
           if testValues[FType,CountID] <> '' then
-            case FType of
-              ftBlob, ftBytes, ftGraphic, ftVarBytes:
-                if SQLServerType in [ssOracle] then
-                  // Oracle does not accept string literals in blob insert statements
-                  // convert 'DEADBEEF' hex literal to binary:
-                    sql1 := sql1 + ', HEXTORAW(' + QuotedStr(String2Hex(testValues[FType,CountID])) + ') '
-                  else // other dbs have no problems with the original string values
-                    sql1 := sql1 + ',' + QuotedStr(testValues[FType,CountID]);
-              ftCurrency:
-                sql1 := sql1 + ',' + testValues[FType,CountID];
-              ftDate:
-                // Oracle requires date conversion; otherwise
-                // ORA-01861: literal does not match format string
-                if SQLServerType in [ssOracle] then
-                  // ANSI/ISO date literal:
-                  sql1 := sql1 + ', DATE ' + QuotedStr(testValues[FType,CountID])
-                else
-                  sql1 := sql1 + ',' + QuotedStr(testValues[FType,CountID]);
-              ftDateTime:
-                // similar to ftDate handling
-                if SQLServerType in [ssOracle] then
-                begin
-                  // Could be a real date+time or only date. Does not consider only time.
-                  if pos(' ',testValues[FType,CountID])>0 then
-                    sql1 := sql1 + ', TIMESTAMP ' + QuotedStr(testValues[FType,CountID])
-                  else
-                    sql1 := sql1 + ', DATE ' + QuotedStr(testValues[FType,CountID]);
-                end
-                else
-                  sql1 := sql1 + ',' + QuotedStr(testValues[FType,CountID]);
-              ftTime:
-                // similar to ftDate handling
-                if SQLServerType in [ssOracle] then
-                  // More or less arbitrary default time; there is no time-only data type in Oracle.
-                  sql1 := sql1 + ', TIMESTAMP ' + QuotedStr('0001-01-01 '+testValues[FType,CountID])
-                else
-                  sql1 := sql1 + ',' + QuotedStr(testValues[FType,CountID]);
-              else
-                sql1 := sql1 + ',' + QuotedStr(testValues[FType,CountID])
+            if FType in [ftBoolean, ftCurrency] then
+               sql1 := sql1 + ',' + testValues[FType,CountID]
+            else if (FType in [ftBlob, ftBytes, ftGraphic, ftVarBytes]) and
+                    (SQLServerType = ssOracle) then
+               // Oracle does not accept string literals in blob insert statements
+               // convert 'DEADBEEF' hex literal to binary:
+               sql1 := sql1 + ', HEXTORAW(' + QuotedStr(String2Hex(testValues[FType,CountID])) + ') '
+            else if (FType = ftDate) and
+                    (SQLServerType = ssOracle) then
+               // Oracle requires date conversion; otherwise
+               // ORA-01861: literal does not match format string
+               // ANSI/ISO date literal:
+               sql1 := sql1 + ', DATE ' + QuotedStr(testValues[FType,CountID])
+            else if (FType = ftDateTime) and
+                    (SQLServerType = ssOracle) then begin
+               // similar to ftDate handling
+               // Could be a real date+time or only date. Does not consider only time.
+               if pos(' ',testValues[FType,CountID])>0 then
+                  sql1 := sql1 + ', TIMESTAMP ' + QuotedStr(testValues[FType,CountID])
+               else
+                  sql1 := sql1 + ', DATE ' + QuotedStr(testValues[FType,CountID]);
             end
+            else if (FType = ftTime) and
+                    (SQLServerType = ssOracle) then
+               // similar to ftDate handling
+               // More or less arbitrary default time; there is no time-only data type in Oracle.
+               sql1 := sql1 + ', TIMESTAMP ' + QuotedStr('0001-01-01 '+testValues[FType,CountID])
+            else
+               sql1 := sql1 + ',' + QuotedStr(testValues[FType,CountID])
           else
             sql1 := sql1 + ',NULL';
           end;
@@ -696,6 +685,53 @@ begin
     FTransaction.RollbackRetaining;
   end;
 end;
+
+procedure TSQLDBConnector.TryDropSequence(ASequenceName: String);
+
+var
+  NoSeq : Boolean;
+
+begin
+  NoSeq:=False;
+  try
+    case SQLServerType of
+      ssInterbase,
+      ssFirebird: FConnection.ExecuteDirect('DROP GENERATOR '+ASequenceName);
+      ssOracle,
+      ssPostgreSQL,
+      ssSybase,
+      ssMSSQL : FConnection.ExecuteDirect('DROP SEQUENCE '+ASequenceName+' START WITH 1 INCREMENT BY 1');
+      ssSQLite : FConnection.ExecuteDirect('delete from sqlite_sequence where (name='''+ASequenceName+''')');
+    else
+      NoSeq:=True;
+    end;
+  except
+    FTransaction.RollbackRetaining;
+  end;
+  if NoSeq then
+    Raise EDatabaseError.Create('Engine does not support sequences');
+end;
+
+procedure TSQLDBConnector.TryCreateSequence(ASequenceName: String);
+
+var
+  NoSeq : Boolean;
+
+begin
+  NoSeq:=False;
+  case SQLServerType of
+    ssInterbase,
+    ssFirebird: FConnection.ExecuteDirect('CREATE GENERATOR '+ASequenceName);
+    ssOracle,
+    ssPostgreSQL,
+    ssSybase,
+    ssMSSQL : FConnection.ExecuteDirect('CREATE SEQUENCE '+ASequenceName+' START WITH 1 INCREMENT BY 1');
+    ssSQLite : FConnection.ExecuteDirect('insert into sqlite_sequence (name,seq) values ('''+ASequenceName+''',1)');
+  else
+    Raise EDatabaseError.Create('Engine does not support sequences');
+  end;
+end;
+
 
 procedure TSQLDBConnector.ExecuteDirect(const SQL: string);
 begin

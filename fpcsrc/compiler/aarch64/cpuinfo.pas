@@ -14,6 +14,8 @@
 
 Unit CPUInfo;
 
+{$i fpcdefs.inc}
+
 Interface
 
   uses
@@ -48,6 +50,12 @@ Type
      (ct_none
      );
 
+   tcontrollerdatatype = record
+      controllertypestr, controllerunitstr: string[20];
+      cputype: tcputype; fputype: tfputype;
+      flashbase, flashsize, srambase, sramsize, eeprombase, eepromsize, bootbase, bootsize: dword;
+   end;
+
 
 Const
    { Is there support for dealing with multiple microcontrollers available }
@@ -55,8 +63,6 @@ Const
    ControllerSupport = false; (* Not yet at least ;-) *)
    {# Size of native extended floating point type }
    extended_size = 8;
-   {# Size of a multimedia register               }
-   mmreg_size = 16;
    { target cpu string (used by compiler options) }
    target_cpu_string = 'aarch64';
 
@@ -66,7 +72,7 @@ Const
     {$WARN 3177 OFF}
    embedded_controllers : array [tcontrollertype] of tcontrollerdatatype =
    (
-      (controllertypestr:''; controllerunitstr:''; flashbase:0; flashsize:0; srambase:0; sramsize:0));
+      (controllertypestr:''; controllerunitstr:''; cputype:cpu_none; fputype:fpu_none; flashbase:0; flashsize:0; srambase:0; sramsize:0));
    {$POP}
 
    { calling conventions supported by the code generator }
@@ -103,12 +109,12 @@ Const
                                  { no need to write info about those }
                                  [cs_opt_level1,cs_opt_level2,cs_opt_level3]+
                                  [cs_opt_regvar,cs_opt_loopunroll,cs_opt_tailrecursion,
-				  cs_opt_stackframe,cs_opt_nodecse,cs_opt_reorder_fields,cs_opt_fastmath];
+				  cs_opt_nodecse,cs_opt_reorder_fields,cs_opt_fastmath];
 
    level1optimizerswitches = genericlevel1optimizerswitches;
    level2optimizerswitches = genericlevel2optimizerswitches + level1optimizerswitches +
      [cs_opt_regvar,cs_opt_stackframe,cs_opt_tailrecursion,cs_opt_nodecse];
-   level3optimizerswitches = genericlevel3optimizerswitches + level2optimizerswitches + [cs_opt_scheduler{,cs_opt_loopunroll}];
+   level3optimizerswitches = genericlevel3optimizerswitches + level2optimizerswitches + [{,cs_opt_loopunroll}];
    level4optimizerswitches = genericlevel4optimizerswitches + level3optimizerswitches + [];
 
 Implementation

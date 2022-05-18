@@ -10,11 +10,6 @@ set -e
 # if it is not equal to yes, the documentation is assumed present in a file doc-pdf.tar.gz
 MAKEDOCS=no
 
-# Set this to "no" if you want don't want to check for libgdb.a
-if [ "$CHECKLIBGDB" = "" ]; then
-  CHECKLIBGDB=yes
-fi
-
 # avoid abort of script if FPCDIR isn't set
 FPCDIR=dummy
 unset FPCDIR
@@ -26,12 +21,25 @@ unset FPCDIR
 FULLVERSION=`grep '^version *=' fpcsrc/Makefile.fpc | sed 's+[^=]*= *\(.*\)+\1+'`
 VERSION=`grep '^version *=' fpcsrc/Makefile.fpc | sed 's+[^=]*= *\([0-9\.]*\).*+\1+'`
 
+
+if [ -z "$FPC" ] ; then
+  FPC=fpc
+fi
+
+FULL_DIR_FPC=`which $FPC`
+if [ -z "$FULL_DIR_FPC" ] ; then
+  echo "Compiler $FPC not found"
+  exit 1
+else
+  FPC="$FULL_DIR_FPC"
+fi
+
 # Retrieve current system info by calling FPC. We need
 # to use the | head -n1 to fix a bug in fpc 1.9.4 and earlier
 # that uses exitcode 1 also when printing info resulting in
 # fpc binary to print an error line (PFV)
-SOURCECPU=`fpc -iSP | head -n1`
-SOURCEOS=`fpc -iSO | head -n1`
+SOURCECPU=`$FPC -iSP | head -n1`
+SOURCEOS=`$FPC -iSO | head -n1`
 
 # retrieve real OS.
 HOSTOS=`uname -s | tr "[:upper:]" "[:lower:]"`
@@ -41,20 +49,24 @@ TAR=tar
 
 case "$HOSTOS" in
  *freebsd*) MAKE=gmake
-	EXTRAOPT="-Fl/usr/local/lib -Fl/usr/X11R6/lib  -dFREEBSD5"
+	EXTRAOPT+=" -Fl/usr/local/lib -Fl/usr/X11R6/lib  -dFREEBSD5"
   ;;
  *netbsd*) MAKE=gmake
-	EXTRAOPT="-Fl/usr/pkg/lib"
+	EXTRAOPT+=" -Fl/usr/pkg/lib"
   ;;
 
  *sunos*) MAKE=gmake
+     # Use system linker if on solaris machine
+     if [ "$SOURCEOS" == "solaris" ]; then
+       EXTRAOPT+=" -Xn"
+     fi
      # Use GNU tar if present
      if [ "`which gtar`" != "" ]; then
        TAR=`which gtar`
      fi
  ;;
  *openbsd*) MAKE=gmake
-	EXTRAOPT="-Fl/usr/local/lib"
+	EXTRAOPT+=" -Fl/usr/local/lib"
   ;;
 esac
 
@@ -68,6 +80,37 @@ if [ $# -ne 0 ]; then
 else
   TARGETCPU=$SOURCECPU
   TARGETOS=$SOURCEOS
+fi
+
+# Set this to "no" if you want don't want to check for libgdb.a
+# Retrieve GDBMI_DEFAULT_OS_LIST from Makefile.fpc
+GDBMI_DEFAULT_OS_LIST=`grep '^GDBMI_DEFAULT_OS_LIST *=' Makefile.fpc | sed 's+[^=]*= *\(.*\)+\1+'`
+
+# Use of GDBMI for text mode IDE, starting with version 3.1.1
+if  [ "X${VERSION#3.0.}" == "X${VERSION}" ] ; then
+  if  [ "X${NOGDB}" == "X" ] ; then
+#  Determine if we should use GDBMI for Text Mode IDE compilation
+    if [ "X${NOGDBMI}" == "X" ]; then
+      if [ "X${GDBMI_DEFAULT_OS_LIST/%{TARGETOS}}" != "X${GDBMI_DEFAULT_LIST}" ] ; then
+        echo "Use GDBMI"
+        export GDBMI=1
+      fi
+    fi
+  fi #NOGDB
+fi #Not 3.0.X version
+
+if [ "X${GDBMI}" != "X" ] ; then
+if [ "X${GDBMI}" == "X0" ] ; then
+if [ "$CHECKLIBGDB" = "" ]; then
+  CHECKLIBGDB=yes
+fi
+else
+CHECKLIBGDB=no
+fi
+else
+if [ "$CHECKLIBGDB" = "" ]; then
+  CHECKLIBGDB=yes
+fi
 fi
 
 FULLTARGET=$TARGETCPU-$TARGETOS
@@ -86,7 +129,13 @@ if [ "$FULLTARGET" != "$FULLSOURCE" ]; then
 else
    CROSS=
    CROSSPREFIX=
-   export IDE=ide
+   # Starting with version 3.1.1, the IDE is not a separate part anymore, but part of utils
+   if [ "X${VERSION#3.0.}" != "X${VERSION}" ] ; then
+     # Version 3.0.x, add the IDE as separate part
+     export IDE=ide
+   else
+     export IDE=
+   fi
 fi
 
 
@@ -101,7 +150,9 @@ if [ "$CROSS" = "" ]; then
       exit 1
     fi
   else
-    export NOGDB=1
+    if [ "X${GDBMI}" == "X" ]; then
+      export NOGDB=1
+    fi
   fi
 fi
 
@@ -120,11 +171,33 @@ if [ "$CROSS" = "" ]; then
       fi
     fi
   fi
-  echo "Starting ${MAKE}  demozip CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS FPC_VERSION=$VERSION MAKEPACK=1"
-  ${MAKE}  demozip CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS FPC_VERSION=$VERSION MAKEPACK=1
+  echo "Starting ${MAKE} demozip CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS FPC_VERSION=$VERSION MAKEPACK=1 FPC=$FPC"
+  ${MAKE} demozip CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS FPC_VERSION=$VERSION MAKEPACK=1 FPC=$FPC
   if [ $? != 0 ]; then
     echo "Failed to make demo source archive."
     exit 1
+  fi
+fi
+
+# Special code for 32-bit linux powerpc
+if [[ ( "$FULLSOURCE" == "powerpc-linux" ) && ( -z "$CROSS" ) ]]; then
+  export TEST_BINUTILSPREFIX=powerpc-linux-
+  export BINUTILSPREFIX=powerpc-linux-
+  GCC_EXTRA_OPTS="$GCC_EXTRA_OPTS -m32"
+  export EXTRAOPT="${EXTRAOPT} -Xd -Fl/usr/lib -Fl/lib -Fd"
+  export FPMAKE_SKIP_CONFIG="-n -XPpowerpc-linux-"
+fi
+
+if [ -z "$GCC" ] ; then
+  GCC=`which gcc`
+fi
+
+if [ -n "$GCC" ] ; then
+  LIBGCC_FILENAME=`gcc -print-libgcc-file-name $GCC_EXTRA_OPTS`
+  LIBGCC_DIR=`dirname $LIBGCC_FILENAME`
+  if [ -d "$LIBGCC_DIR" ] ; then
+    echo "Adding $LIBGCC_DIR directory to library directory list"
+    export EXTRAOPT="${EXTRAOPT} -Fl$LIBGCC_DIR"
   fi
 fi
 
@@ -136,11 +209,17 @@ if [ ! "$CROSS" = "" ]; then
   fi
 fi
 
+if [ -n "${FPCCPUOPT:-}" ] ; then
+  MAKE_EXTRA="${MAKE_EXTRA:-} FPCCPUOPT=\"$FPCCPUOPT\""
+elif [ -z "${MAKE_EXTRA:-}" ] ; then
+  MAKE_EXTRA=""
+fi
+
 # Build everything using the makefiles
-echo "Starting ${MAKE} distclean CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS"
-${MAKE} distclean CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS
-echo "Starting ${MAKE} ${CROSS}zipinstall CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS OPT="${EXTRAOPT}" FPC_VERSION=$VERSION"
-${MAKE} ${CROSS}zipinstall CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS OPT="${EXTRAOPT}" FPC_VERSION=$VERSION
+echo "Starting ${MAKE} distclean CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS FPC=$FPC"
+${MAKE} distclean CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS FPC=$FPC
+echo "Starting ${MAKE} ${CROSS}zipinstall CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS OPT="${EXTRAOPT}" FPC_VERSION=$VERSION FPC=$FPC $MAKE_EXTRA"
+${MAKE} ${CROSS}zipinstall CPU_TARGET=$TARGETCPU OS_TARGET=$TARGETOS OPT="${EXTRAOPT}" FPC_VERSION=$VERSION FPC=$FPC $MAKE_EXTRA
 if [ $? != 0 ]; then
   echo "Failed to make distribution archive."
   exit 1
@@ -187,10 +266,21 @@ fi
 DIRNAME=${CROSSPREFIX}fpc-$FULLVERSION.$FULLSOURCE
 TARNAME=${DIRNAME}.tar
 echo "Creating $TARNAME"
+# Erase directory if it exists
+if [ -d $DIRNAME ] ; then
+  rm -Rf $DIRNAME
+fi
+# Erase tar file if it already exists
+if [ -f $TARNAME ] ; then
+  rm -f $TARNAME
+fi
+
 mkdir $DIRNAME
 mv $RELFILES $DIRNAME
 ${TAR} cf $TARNAME $DIRNAME
 if [ $? != 0 ]; then
   echo "Failed to create $TARNAME"
   exit 1
+else
+  echo "Successfully created `pwd`/$TARNAME"
 fi

@@ -1,3 +1,4 @@
+{ %FILES=tcext6.o }
 { Tests passing of different records by value to C methods.
  One type of these records has one field which is a simple array of bytes,
  the other consists of a few fields of atomic size.
@@ -64,6 +65,14 @@ end;
 procedure CheckStack;
 var
   newval : pointer;
+{$ifdef cpui386}
+  { Test tag word of coprocessor }
+  {$asmmode att}
+  fpusave : record
+    Ctrl, Status,Tag : dword;
+    other : array [1..512] of byte;
+  end;
+{$endif}
 begin
 {$ifdef HAS_GET_FRAME}
   newval:=Get_Frame;
@@ -75,6 +84,14 @@ begin
         ' to 0x',hexstr(ptruint(newval),2*sizeof(ptruint)));
       Stackval:=newval;
     end;
+ {$ifdef cpui386}
+    asm
+      fnsave fpusave
+      frstor fpusave
+    end;
+    if ((fpusave.tag and $ffff)<>$ffff) then
+      Writeln('Tag word not $ffff, ',hexstr((fpusave.tag and $ffff),4));
+  {$endif}
 end;
 {$endif UseStackCheck}
 

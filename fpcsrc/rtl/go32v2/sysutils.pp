@@ -298,7 +298,13 @@ begin
 end;
 
 
-function FileExists (const FileName: RawByteString): boolean;
+function FileGetSymLinkTarget(const FileName: RawByteString; out SymLinkRec: TRawbyteSymLinkRec): Boolean;
+begin
+  Result := False;
+end;
+
+
+function FileExists (const FileName: RawByteString; FollowLink : Boolean): boolean;
 var
   L: longint;
 begin
@@ -314,7 +320,7 @@ begin
 end;
 
 
-Function DirectoryExists (Const Directory : RawByteString) : Boolean;
+Function DirectoryExists (Const Directory : RawByteString; FollowLink : Boolean) : Boolean;
 Var
   Dir : RawByteString;
   drive : byte;
@@ -755,7 +761,8 @@ begin
     DosMemGet(CountryInfo.UpperCaseTable shr 16, 2 + CountryInfo.UpperCaseTable and 65535, UpperCaseTable[128], 128);
     for i := 128 to 255 do
        begin
-       if UpperCaseTable[i] <> chr(i) then
+       { Never modify the lowercase of any char if ord(char) < 127 }
+       if (UpperCaseTable[i] <> chr(i)) and (ord(UpperCaseTable[i])>=128) then
           LowerCaseTable[ord(UpperCaseTable[i])] := chr(i);
        end;
     end;
@@ -797,7 +804,7 @@ begin
 end;
 
 
-function ExecuteProcess(Const Path: AnsiString; Const ComLine: AnsiString;Flags:TExecuteFlags=[]):integer;
+function ExecuteProcess(Const Path: RawByteString; Const ComLine: RawByteString;Flags:TExecuteFlags=[]):integer;
 var
   e : EOSError;
   CommandLine: AnsiString;
@@ -819,11 +826,50 @@ begin
 end;
 
 
-function ExecuteProcess (const Path: AnsiString;
-                                  const ComLine: array of AnsiString;Flags:TExecuteFlags=[]): integer;
+function ExecuteProcess (const Path: RawByteString;
+                                  const ComLine: array of RawByteString;Flags:TExecuteFlags=[]): integer;
 
 var
-  CommandLine: AnsiString;
+  CommandLine: RawByteString;
+  I: integer;
+
+begin
+  Commandline := '';
+  for I := 0 to High (ComLine) do
+   if Pos (' ', ComLine [I]) <> 0 then
+    CommandLine := CommandLine + ' ' + '"' + ComLine [I] + '"'
+   else
+    CommandLine := CommandLine + ' ' + Comline [I];
+  ExecuteProcess := ExecuteProcess (Path, CommandLine);
+end;
+
+function ExecuteProcess(Const Path: unicodeString; Const ComLine: unicodeString;Flags:TExecuteFlags=[]):integer;
+var
+  e : EOSError;
+  CommandLine: UnicodeString;
+
+begin
+  dos.exec_ansistring(path,comline);
+
+  if (Dos.DosError <> 0) then
+    begin
+      if ComLine <> '' then
+       CommandLine := Path + ' ' + ComLine
+      else
+       CommandLine := Path;
+      e:=EOSError.CreateFmt(SExecuteProcessFailed,[CommandLine,Dos.DosError]);
+      e.ErrorCode:=Dos.DosError;
+      raise e;
+    end;
+  Result := DosExitCode;
+end;
+
+
+function ExecuteProcess (const Path: unicodeString;
+                                  const ComLine: array of unicodeString;Flags:TExecuteFlags=[]): integer;
+
+var
+  CommandLine: UnicodeString;
   I: integer;
 
 begin
@@ -874,5 +920,6 @@ Initialization
   InitInternational;    { Initialize internationalization settings }
   OnBeep:=@SysBeep;
 Finalization
+  FreeTerminateProcs;
   DoneExceptions;
 end.

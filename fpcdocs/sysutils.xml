@@ -45,7 +45,7 @@ Functions for handling strings.
 <tr><td><link id="AnsiExtractQuotedStr"/></td><td>Removes quotes from string</td></tr>
 <tr><td><link id="AnsiLastChar"/></td><td>Get last character of string</td></tr>
 <tr><td><link id="AnsiLowerCase"/></td><td>Convert string to all-lowercase</td></tr>
-<tr><td><link id="AnsiQuotedStr"/></td><td>Qoutes a string</td></tr>
+<tr><td><link id="AnsiQuotedStr"/></td><td>Quotes a string</td></tr>
 <tr><td><link id="AnsiStrComp"/></td><td>Compare strings case-sensitive</td></tr>
 <tr><td><link id="AnsiStrIComp"/></td><td>Compare strings case-insensitive</td></tr>
 <tr><td><link id="AnsiStrLComp"/></td><td>Compare L characters of strings case sensitive</td></tr>
@@ -60,7 +60,7 @@ Functions for handling strings.
 <tr><td><link id="CompareText"/></td><td>Compare two strings case insensitive</td></tr>
 <tr><td><link id="DisposeStr"/></td><td>Remove string from heap</td></tr>
 <tr><td><link id="IsValidIdent"/></td><td>Is string a valid pascal identifier</td></tr>
-<tr><td><link id="LastDelimiter"/></td><td>Last occurance of character in a string</td></tr>
+<tr><td><link id="LastDelimiter"/></td><td>Last occurrence of character in a string</td></tr>
 <tr><td><link id="LeftStr"/></td><td>Get first N characters of a string</td></tr>
 <tr><td><link id="LoadStr"/></td><td>Load string from resources</td></tr>
 <tr><td><link id="LowerCase"/></td><td>Convert string to all-lowercase</td></tr>
@@ -115,8 +115,8 @@ The following characters can be used to control the date and time formatting:
 <dt>dddd</dt><dd>day of week (full)</dd>
 <dt>ddddd</dt><dd>shortdateformat</dd>
 <dt>dddddd</dt><dd>longdateformat</dd>
-<dt>m</dt><dd>month</dd>
-<dt>mm</dt><dd>month (leading zero)</dd>
+<dt>m</dt><dd>month or minutes if preceded by h or hh specifiers.</dd>
+<dt>mm</dt><dd>month or minutes if preceded by h or hh specifiers, with leading zero.</dd>
 <dt>mmm</dt><dd>month (abbreviation)</dd>
 <dt>mmmm</dt><dd>month (full)</dd>
 <dt>y</dt><dd>year (2 digits)</dd>
@@ -132,13 +132,22 @@ The following characters can be used to control the date and time formatting:
 <dt>tt</dt><dd>longtimeformat</dd>
 <dt>am/pm</dt><dd>use 12 hour clock and display am and pm accordingly</dd>
 <dt>a/p</dt><dd>use 12 hour clock and display a and p accordingly</dd>
-<dt>/</dt><dd>insert date seperator</dd>
-<dt>:</dt><dd>insert time seperator</dd>
+<dt>/</dt><dd>insert date separator</dd>
+<dt>:</dt><dd>insert time separator</dd>
 <dt>"xx"</dt><dd>literal text</dd>
 <dt>'xx'</dt><dd>literal text</dd>
 <dt>z</dt><dd>milliseconds</dd>
 <dt>zzz</dt><dd>milliseconds(leading zero)</dd>
+<dt>[h]</dt><dd>hours including the hours of the full days (i.e. can be > 24). </dd>
+<dt>[hh]</dt><dd>hours with leading zero, including the hours of the full days (i.e. can be > 24)</dd>
+<dt>[n]</dt><dd>minutes including the minutes of the full hours and days</dd>
+<dt>[nn]</dt><dd>minutes with leading zero, including the minutes of the full hours and days</dd>
+<dt>[s]</dt><dd>seconds including the seconds of the full minutes, hours and days.</dd>
+<dt>[ss]</dt><dd>seconds with leading zero, including the seconds of the full minutes, hours and days.</dd>
 </dl>
+<p>
+The forms in square brackets are only allowed if the <link id="TFormatDateTimeOption">fdoInterval</link> option is included in the <var>Options</var> argument of FormatDateTime.
+</p>
 <p>
 The date and time separators are taken from the <link id="DefaultFormatSettings"/> record, unless a
 <link id="TFormatSettings"/> record is passed to the <link
@@ -153,6 +162,7 @@ string, they must be enclosed in double quotes.
 <link id="DefaultFormatSettings"/>
 <link id="TFormatSettings"/>
 <link id="FormatDateTime"/>
+<link id="TFormatDateTimeOption"/>
 </seealso>
 </topic>
 
@@ -230,7 +240,7 @@ Functions for reading/writing to file.
 </topic>
 
 <topic name="FileNameRoutines">
-<short>FileName handling routines</short>
+<short>File Name handling routines</short>
 <descr>
 <p>
 Functions for file manipulation.
@@ -253,7 +263,7 @@ Functions for file manipulation.
 <tr><td><link id="ExtractFileDrive"/></td><td>Extract drive part of filename</td></tr>
 <tr><td><link id="ExtractFileExt"/></td><td>Extract extension part of filename</td></tr>
 <tr><td><link id="ExtractFileName"/></td><td>Extract name part of filename</td></tr>
-<tr><td><link id="ExtractFilePath"/></td><td>Extrct path part of filename</td></tr>
+<tr><td><link id="ExtractFilePath"/></td><td>Extract path part of filename</td></tr>
 <tr><td><link id="ExtractRelativePath"/></td><td>Construct relative path between two files</td></tr>
 <tr><td><link id="FileAge"/></td><td>Return file age</td></tr>
 <tr><td><link id="FileDateToDateTime"/></td><td>Convert file date to system date</td></tr>
@@ -307,7 +317,7 @@ Functions for date and time handling.
 <tr><td><link id="StrToTime"/></td><td>Convert string to time</td></tr>
 <tr><td><link id="SystemTimeToDateTime"/></td><td>Convert system time to datetime</td></tr>
 <tr><td><link id="TimeStampToDateTime"/></td><td>Convert time stamp to DateTime</td></tr>
-<tr><td><link id="TimeStampToMSecs"/></td><td>Convert Timestamp to number of millicseconds</td></tr>
+<tr><td><link id="TimeStampToMSecs"/></td><td>Convert Timestamp to number of milliseconds</td></tr>
 <tr><td><link id="TimeToStr"/></td><td>return string representation of Time</td></tr>
 <tr><td><link id="Time"/></td><td>Get current time</td></tr>
 </table>
@@ -330,7 +340,7 @@ Functions for various conversions.
 <tr><td><link id="FormatFloat"/></td><td>Format a floating point value</td></tr>
 <tr><td><link id="GetDirs"/></td><td>Split string in list of directories</td></tr>
 <tr><td><link id="IntToHex"/></td><td>return hexadecimal representation of integer</td></tr>
-<tr><td><link id="IntToStr"/></td><td>return decumal representation of integer</td></tr>
+<tr><td><link id="IntToStr"/></td><td>return decimal representation of integer</td></tr>
 <tr><td><link id="StrToIntDef"/></td><td>Convert string to integer with default value</td></tr>
 <tr><td><link id="StrToInt"/></td><td>Convert string to integer</td></tr>
 <tr><td><link id="StrToFloat"/></td><td>Convert string to float</td></tr>
@@ -344,9 +354,9 @@ Functions for various conversions.
 <descr>
 <p>
 The many functions that deal with filenames in the sysutils routines have been changed 
-from <var>AnsiString</var> to RawByteString so they do not perform implict codepage conversions
-to the ansi code page. At the same time, overloaded versions that accept a
-unicode string have been created.
+from <var>AnsiString</var> to RawByteString so they do not perform implicit codepage conversions
+to the ANSI code page. At the same time, overloaded versions that accept a
+Unicode string have been created.
 </p>
 <p>
 For routines that access actual OS functions using single-byte string APIS,
@@ -356,7 +366,7 @@ This encoding is normally the <link id="#rtl.system.DefaultFileSystemCodePage">D
 encoding.
 </p>
 <p>
-On systems with a unicode I/O API (2-byte strings), the native API is used, meaning that unicode 
+On systems with a Unicode I/O API (2-byte strings), the native API is used, meaning that Unicode 
 strings will be passed on as-is, but single-byte strings will be converted (implicitly) to Unicode.
 </p>
 <p>
@@ -443,7 +453,7 @@ internationalization settings (date/time format, currency, language etc) are
 also initialized correctly on these platforms.
 </p>
 <p>
-On unixes, the widestring support is in a separate unit:
+On Unixes, the widestring support is in a separate unit:
 <file>cwstring</file>, which loads the various needed 
 functions from the C library. It should be added manually to the uses clause
 of your program. No internationalization (or localisation) settings are  
@@ -550,7 +560,7 @@ None.
 <p>
 <var>DateTimeToStr</var> returns a string representation of
 <var>DateTime</var> using the formatting specified in
-<var>LongDateTimeFormat</var>. It corresponds to a call to
+<var>ShortDateFormat</var> and <var>LongTimeFormat</var>. It corresponds to a call to
 <var>FormatDateTime('c',DateTime)</var> (see <link id="formatchars"/>).
 </p>
 <p>
@@ -562,6 +572,7 @@ None.
 </errors>
 <seealso>
 <link id="FormatDateTime"/>
+<link id="DefaultFormatSettings"/>
 </seealso>
 <example file="sysutex/ex3"/>
 </element>
@@ -694,7 +705,7 @@ None.
 <element name="DecodeTime">
 <short>Decode a <var>TDateTime</var> to a hour,minute,second,millisec quartet</short>
 <descr>
-<var>DecodeDate</var> decodes the hours, minutes, second and milliseconds stored
+<var>DecodeTime</var> decodes the hours, minutes, second and milliseconds stored
 in <var>Time</var>, and returns them in the <var>Hour</var>, <var>Minute</var> and
 <var>Second</var> and <var>MilliSecond</var> variables.
 </descr>
@@ -722,7 +733,7 @@ The parameters must lie withing valid ranges (boundaries included):
 <dl>
 <dt>Year</dt><dd>must be between 1 and 9999.</dd>
 <dt>Month</dt><dd>must be within the range 1-12.</dd>
-<dt>Day</dt><dd>msut be between 1 and 31.</dd>
+<dt>Day</dt><dd>must be between 1 and 31.</dd>
 </dl>
 </descr>
 <errors>
@@ -1121,7 +1132,7 @@ Drive is the number of the disk drive:
 </dl>
 <remark>
 Under Linux, and Unix in general, the concept of disk is
-different than the dos one, since the filesystem is seen as one big
+different than the dos one, since the file system is seen as one big
 directory tree. For this reason, the <var>DiskFree</var> and <link id="DiskSize"/>
 functions must be mimicked using filenames that reside on the partitions.
 For more information, see <link id="AddDisk"/>.
@@ -1148,12 +1159,12 @@ Drive is the number of the disk drive:
 <dt>0</dt><dd>for the current drive.</dd>
 <dt>1</dt><dd>for the first floppy drive.</dd>
 <dt>2</dt><dd>for the second floppy drive.</dd>
-<dt>3</dt><dd>for the first hard-disk parttion.</dd>
+<dt>3</dt><dd>for the first hard-disk partition.</dd>
 <dt>4-26</dt><dd>for all other drives and partitions.</dd>
 </dl>
 <remark>
 Under Linux, and Unix in general, the concept of disk is
-different than the dos one, since the filesystem is seen as one big
+different than the dos one, since the file system is seen as one big
 directory tree. For this reason, the <link id="DiskFree"/> and <var>DiskSize</var>
 functions must be mimicked using filenames that reside on the partitions.
 For more information, see <link id="AddDisk"/>
@@ -1189,11 +1200,11 @@ None.
 </element>
 
 <element name="RemoveDir">
-<short>Remove a directory from the filesystem.</short>
+<short>Remove a directory from the file system.</short>
 <descr>
 <p>
 <var>RemoveDir</var> removes directory <var>Dir</var> from the disk.
-If the directory is not absolue, it is appended to the current working
+If the directory is not absolute, it is appended to the current working
 directory.
 </p>
 <p>
@@ -1213,7 +1224,7 @@ In case of error (e.g. the directory isn't empty) the function returns
 <short>Set the current directory of the application.</short>
 <descr>
 <var>SetCurrentDir</var> sets the current working directory of your program
-to <var>NewDir</var>. It returns <var>True</var> if the function was successfull,
+to <var>NewDir</var>. It returns <var>True</var> if the function was successful,
 <var>False</var> otherwise.
 </descr>
 <errors>
@@ -1255,7 +1266,7 @@ None.
 
 
 <element name="DeleteFile">
-<short>Delete a file from the filesystem.</short>
+<short>Delete a file from the file system.</short>
 <descr>
 <var>DeleteFile</var> deletes file <var>FileName</var> from disk. The function
 returns <var>True</var> if the file was successfully removed, <var>False</var>
@@ -1302,6 +1313,9 @@ system first.
 </p>
 <p>
 If an empty filename is passed, it is expanded to the current directory.
+</p>
+<p>
+If BasePath is not passed, the current directory is used as base path.
 </p>
 </descr>
 <errors>
@@ -1356,11 +1370,13 @@ None.
 <element name="ExpandUNCFileName">
 <short>Expand a relative filename to an absolute UNC filename.</short>
 <descr>
+<p>
 <var>ExpandUNCFileName</var> runs <link id="ExpandFileName"/> on <var>FileName</var>
 and then attempts to replace the drive letter by the name of a shared disk.
+</p>
 </descr>
 <errors>
-None.
+If an unexpected error occurs while determining the name of the shared disk, an empty string is returned.
 </errors>
 <seealso>
 <link id="ExpandFileName"/>
@@ -1378,7 +1394,7 @@ None.
 <short>Extract the drive and directory part of a filename.</short>
 <descr>
 <var>ExtractFileDir</var> returns only the directory part of <var>FileName</var>,
-including a driveletter. The directory name has NO ending directory
+including a drive letter. The directory name has NO ending directory
 separator, in difference with <link id="ExtractFilePath"/>.
 </descr>
 <errors>
@@ -1454,7 +1470,7 @@ The filename consists of all characters after the last directory separator
 character ('/' or '\') or drive letter.
 </p>
 <p>
-The full filename can always be reconstucted by concatenating the result
+The full filename can always be reconstructed by concatenating the result
 of <link id="ExtractFilePath"/> and <var>ExtractFileName</var>.
 </p>
 <p>
@@ -1479,14 +1495,14 @@ None.
 <short>Extract the path from a filename.</short>
 <descr>
 <p>
-<var>ExtractFilePath</var> returns the path part (including driveletter) from
+<var>ExtractFilePath</var> returns the path part (including drive letter) from
 <var>FileName</var>. The path consists of all characters before the last
 directory separator character ('/' or '\'), including the directory
 separator itself.
 In case there is only a drive letter, that will be returned.
 </p>
 <p>
-The full filename can always be reconstucted by concatenating the result
+The full filename can always be reconstructed by concatenating the result
 of <var>ExtractFilePath</var> and <link id="ExtractFileName"/>.
 </p>
 <p>
@@ -1510,11 +1526,15 @@ None.
 <element name="ExtractRelativePath">
 <short>Extract a relative path from a filename, given a base directory.</short>
 <descr>
+<p>
 <var>ExtractRelativePath</var> constructs a relative path to go from
 <var>BaseName</var> to <var>DestName</var>. If <var>DestName</var> is on another drive
 (Not on Unix-like platforms) then the whole <var>Destname</var> is returned.
-
-<em>Note:</em> This function does not exist in the Delphi unit.
+</p>
+<p>
+Note that directories must end on a path delimiter for this function to work correctly. 
+If not, the last part is stripped and treated as a file name.
+</p>
 </descr>
 <errors>
 None.
@@ -1583,14 +1603,27 @@ None.
 <var>FileCreate</var> creates a new file with name <var>FileName</var> on the disk and
 returns a file handle which can be used to read or write from the file with
 the <link id="FileRead"/> and <link id="FileWrite"/> functions.
-</p><p>
+</p>
+<p>
 If a file with name <var>FileName</var> already existed on the disk, it is
 overwritten.
-</p><p>
-The optional <var>Mode</var> parameter only has an effect under unix,
+</p>
+<p>
+The <var>ShareMode</var> parameter determines how file sharing is handled for the new file. It can have one or more of the following values, OR-ed together:
+</p>
+<table>
+<th><td>Name</td><td>Description</td></th>
+<tr><td>fmShareCompat</td><td><printshort id="fmShareCompat"/></td></tr>
+<tr><td>fmShareDenyNone</td><td><printshort id="fmShareDenyNone"/></td></tr>
+<tr><td>fmShareDenyRead</td><td><printshort id="fmShareDenyRead"/></td></tr>
+<tr><td>fmShareDenyWrite</td><td><printshort id="fmShareDenyWrite"/></td></tr>
+<tr><td>fmShareExclusive</td><td><printshort id="fmShareExclusive"/></td></tr>
+</table>
+<p>
+The optional <var>Rights</var> parameter only has an effect under UNIX,
 where it can be used to set the mode (read, write, execute, sticky bit,
 setgid and setuid flags) of the created file to the specified custom value.
-On other platfors, the <var>Mode</var> parameter is ignored.
+On other platforms, the <var>Rights</var> parameter is ignored.
 </p>
 </descr>
 <errors>
@@ -1611,14 +1644,14 @@ returns <var>THandle(-1)</var>.
 
 
 <element name="FileExists">
-<short>Check whether a particular file exists in the filesystem.</short>
+<short>Check whether a particular file exists in the file system.</short>
 <descr>
 <p>
 <var>FileExists</var> returns <var>True</var> if a file with name <var>FileName</var>
 exists on the disk, <var>False</var> otherwise. On windows, this function
 will return <var>False</var> if a directory is passed as <var>FileName</var>.
-On unices, passing a directory name will result in <var>True</var>. The
-rationale is that on unix, a directory is a file as well.
+On Unixes, passing a directory name will result in <var>True</var>. The
+rationale is that on UNIX, a directory is a file as well.
 </p>
 <p>
 Note that this function accepts a single filename as an argument, without
@@ -1650,14 +1683,14 @@ of the following constants:
 <dt>faReadOnly</dt><dd>The file is read-only.</dd>
 <dt>faHidden</dt>
 <dd>
-The file is hidden. (On unix, this means that the filename starts with a dot)
+The file is hidden. (On UNIX, this means that the filename starts with a dot)
 </dd>
 <dt>faSysFile</dt>
 <dd>
-The file is a system file (On unix, this means that the file is a character, block or FIFO file).
+The file is a system file (On UNIX, this means that the file is a character, block or FIFO file).
 </dd>
 <dt>faVolumeId</dt>
-<dd>Volume Label. Only for DOS/Windows on a plain FAT (not VFAT or Fat32) filesystem.</dd>
+<dd>Volume Label. Only for DOS/Windows on a plain FAT (not VFAT or Fat32) file system.</dd>
 <dt>faDirectory</dt><dd>File is a directory.</dd>
 <dt>faArchive</dt><dd>file should be archived. Not possible on Unix</dd>
 </dl>
@@ -1678,7 +1711,7 @@ In case of error, -1 is returned.
 <element name="FileGetDate">
 <short>Return the file time of an opened file.</short>
 <descr>
-<var>FileGetdate</var> returns the filetime of the opened file with filehandle
+<var>FileGetdate</var> returns the filetime of the opened file with file handle
 <var>Handle</var>. It is the same as <link id="FileAge"/>, with this difference that
 <var>FileAge</var> only needs the file name, while <var>FilegetDate</var> needs an
 open file handle.
@@ -1695,7 +1728,7 @@ On error, -1 is returned.
 
 
 <element name="FileOpen">
-<short>Open an existing file and return a filehandle</short>
+<short>Open an existing file and return a file handle</short>
 <descr>
 <p>
 <var>FileOpen</var> opens a file with name <var>FileName</var> with mode <var>Mode</var>.
@@ -1775,7 +1808,7 @@ On Error, <var>THandle(-1)</var> is returned.
 </element>
 
 <element name="FileRead">
-<short>Read data from a filehandle in a buffer.</short>
+<short>Read data from a file handle in a buffer.</short>
 <descr>
 <p>
 <var>FileRead</var> reads <var>Count</var> bytes from file-handle <var>Handle</var> and
@@ -1853,11 +1886,11 @@ This means that <var>Offset</var> can only be zero or negative in this case.
 </dd>
 </dl>
 <p>
-If successfull, the function returns the new file position, relative to the
+If successful, the function returns the new file position, relative to the
 beginning of the file.
 </p>
 <remark>
-The abovementioned constants do not exist in Delphi.
+The above mentioned constants do not exist in Delphi.
 </remark>
 </descr>
 <errors>
@@ -1880,7 +1913,7 @@ On error, -1 is returned.
 <p>
 <var>FileSetAttr</var> sets the attributes of <var>FileName</var> to <var>Attr</var>.
 If the function was successful, 0 is returned, -1 otherwise.
-<var>Attr</var> can be set to an OR-ed combination of the pre-defined
+<var>Attr</var> can be set to an OR-ed combination of the predefined
 <var>faXXX</var> constants.
 </p>
 <p>
@@ -1907,11 +1940,11 @@ or to <var>Age</var>, where <var>Age</var> is a DOS date-and-time stamp value.
 </p>
 <p>
 Alternatively, the filename may be specified with the <var>FileName</var> argument.
-This variant of the call is mandatory on unices, since there is no OS support for 
+This variant of the call is mandatory on Unixes, since there is no OS support for 
 setting a file timestamp based on a handle. (the handle may not be a real file at all).
 </p>
 <p>
-The function returns zero if successfull. 
+The function returns zero if successful. 
 </p>
 </descr>
 <errors>
@@ -1951,7 +1984,7 @@ On error, the function returns <var>False</var>.
 
 
 <element name="FileWrite">
-<short>Write data from a buffer to a given filehandle.</short>
+<short>Write data from a buffer to a given file handle.</short>
 <descr>
 <p>
 <var>FileWrite</var> writes <var>Count</var> bytes from <var>Buffer</var> to the file with
@@ -2017,12 +2050,13 @@ otherwise.
 <var>Attr</var> is an or-ed combination of the following constants:
 </p>
 <dl>
+<dt>faAnyFile</dt><dd>Find any file (this is a combination of the other flags).</dd>
 <dt>faReadOnly</dt><dd>The file is read-only.</dd>
-<dt>faHidden</dt><dd>The file is hidden. (On unix, this means that the filename starts with a dot)</dd>
+<dt>faHidden</dt><dd>The file is hidden. (On UNIX, this means that the filename starts with a dot)</dd>
 <dt>faSysFile</dt><dd>The file is a system file (On unix, this means that the file is a character,
 block or FIFO file).</dd>
 <dt>faVolumeId</dt><dd>Drive volume Label. Not possible under unix, and on
-Windows-like systems, this works only for plan FAT (not Fat32 of VFAT) filesystems.</dd>
+Windows-like systems, this works only for plan FAT (not Fat32 of VFAT) file systems.</dd>
 <dt>faDirectory</dt><dd>File is a directory.</dd>
 <dt>faArchive</dt><dd>file needs to be archived. Not possible on Unix</dd>
 </dl>
@@ -2042,9 +2076,10 @@ The <var>Rslt</var> record can be fed to subsequent calls to <var>FindNext</var>
 order to find other files matching the specifications.
 </p>
 <remark> 
-A <var>FindFirst</var> call must <em>always</em> be followed by a
+A successful <var>FindFirst</var> call must <em>always</em> be followed by a
 <link id="FindClose">FindClose</link> call with the same <var>Rslt</var> record. Failure to do so will
-result in memory loss.
+result in memory leaks. If the findfirst call failed (i.e. returned a nonzero handle) there is no need 
+to call <var>FindClose</var>.
 </remark>
 </descr>
 <errors>
@@ -2114,9 +2149,9 @@ otherwise it will be assumed to be a filename relative to the current working
 directory.
 
 <em>Remark:</em> The implementation of <var>RenameFile</var> relies on the
-undelying OS's support for renaming/moving a file. Whether or not a file can
-be renamed accros disks or partitions depends entirely on the OS. On
-unix-like OS-es, the rename function will fail when used accross partitions.
+underlying OS's support for renaming/moving a file. Whether or not a file can
+be renamed across disks or partitions depends entirely on the OS. On
+unix-like OS-es, the rename function will fail when used across partitions.
 On Windows, it will work.
 </descr>
 <errors>
@@ -2199,8 +2234,8 @@ If no more memory is available, a runtime error occurs.
 <descr>
 <p>
 <var>StrDispose</var> frees any memory allocated for <var>Str</var>. This function
-will only function correctly if <var>Str</var> has been allocated using
-<link id="StrAlloc">StrAlloc</link> from the <file>SysUtils</file> unit.
+will only function correctly if <var>Str</var> has been allocated on the heap, for example 
+using <link id="StrAlloc">StrAlloc</link> or <link id="StrNew">StrNew</link>  from the <file>SysUtils</file> unit.
 </p>
 <p>
 For an example, see <link id="StrBufSize"/>.
@@ -2213,7 +2248,7 @@ If an invalid pointer is passed, or a pointer not allocated with
 <seealso>
 <link id="StrBufSize"/>
 <link id="StrAlloc"/>
-<link id="StrDispose"/>
+<link id="StrNew"/>
 </seealso>
 </element>
 
@@ -2308,9 +2343,9 @@ result:
 <dt>&gt; 0</dt><dd>if <var>S1&gt;S2</var>.</dd>
 </dl>
 <p>
-The comparision takes into account Ansi characters, i.e. it takes
+The comparison takes into account Ansi characters, i.e. it takes
 care of strange accented characters. Contrary to <link id="AnsiCompareText"/>,
-the comparision is case sensitive.
+the comparison is case sensitive.
 </p>
 <remark>
 A widestring manager must be installed in order for this function to work
@@ -2340,9 +2375,9 @@ result:
 <dt>&gt;0</dt><dd>if <var>S1&gt;S2</var>.</dd>
 </dl>
 <p>
-the comparision takes into account Ansi characters, i.e. it takes
+the comparison takes into account Ansi characters, i.e. it takes
 care of strange accented characters. Contrary to <link id="AnsiCompareStr"/>,
-the comparision is case insensitive.
+the comparison is case insensitive.
 </p>
 <remark>
 A widestring manager must be installed in order for this function to work
@@ -2367,7 +2402,7 @@ None.
 string has with <var>Quote</var> characters removed from the beginning and 
 end of the string (if they are present), and double <var>Quote</var> 
 characters replaced by a single <var>Quote</var> characters. 
-As such, it revereses the action of <link id="AnsiQuotedStr"/>.
+As such, it reverses the action of <link id="AnsiQuotedStr"/>.
 </descr>
 <errors>
 None.
@@ -2465,7 +2500,7 @@ result:
 <dt>&gt;0</dt><dd>if <var>S1>S2</var>.</dd>
 </dl>
 <p>
-The comparision of the two strings is case-sensitive.
+The comparison of the two strings is case-sensitive.
 </p>
 <remark>
 A widestring manager must be installed in order for this function to work
@@ -2495,7 +2530,7 @@ result:
 <dt>>0</dt><dd>if <var>S1>S2</var>.</dd>
 </dl>
 <p>
-The comparision of the two strings is case-insensitive.
+The comparison of the two strings is case-insensitive.
 </p>
 <remark>
 A widestring manager must be installed in order for this function to work
@@ -2548,7 +2583,7 @@ result:
 <dt>&gt;0</dt><dd>if <var>S1&gt;S2</var>.</dd>
 </dl>
 <p>
-The comparision of the two strings is case-insensitive.
+The comparison of the two strings is case-insensitive.
 </p>
 <remark>
 A widestring manager must be installed in order for this function to work
@@ -2749,7 +2784,7 @@ result:
 <dt>&gt;0</dt><dd>if <var>S1&gt;S2</var>.</dd>
 </dl>
 <p>
-The comparision of the two strings is case-sensitive.
+The comparison of the two strings is case-sensitive.
 The function does not take internationalization settings into account, it
 simply compares ASCII values.
 </p>
@@ -2781,7 +2816,7 @@ result:
 <dt>&gt;0</dt><dd>if <var>S1&gt;S2</var>.</dd>
 </dl>
 <p>
-The comparision of the two strings is case-insensitive.
+The comparison of the two strings is case-insensitive.
 The function does not take internationalization settings into account, it
 simply compares ASCII values.
 </p>
@@ -2873,7 +2908,7 @@ parameter. It can have one of the following values:
 <dt>ffcurrency</dt>
 <dd>Money format. <var>Value</var> is converted to a string using
 the global variables <var>CurrencyString</var>, <var>CurrencyFormat</var> and
-<var>NegCurrFormat</var>. The <var>Digits</var> paramater specifies the number of digits
+<var>NegCurrFormat</var>. The <var>Digits</var> parameter specifies the number of digits
 following the decimal point and should be in the range -1 to 18. If Digits
 equals <var>-1</var>, <var>CurrencyDecimals</var> is assumed. The <var>Precision</var> parameter is ignored.
 </dd>
@@ -2894,7 +2929,7 @@ If the number is too large then the result will be in scientific notation.
 </dd>
 <dt>ffGeneral</dt>
 <dd>General number format. The argument is converted to a
-string using <var>ffExponent</var> or <var>ffFixed</var> format, depending on wich one
+string using <var>ffExponent</var> or <var>ffFixed</var> format, depending on which one
 gives the shortest string. There will be no trailing zeroes. If <var>Value</var>
 is less than <var>0.00001</var> or if the number of decimals left of the decimal
 point is larger than <var>Precision</var> then scientific notation is used, and
@@ -2923,7 +2958,7 @@ None.
 <p>
 <var>FloatToText</var> converts the floating point variable <var>Value</var> to a
 string representation and stores it in <var>Buffer</var>.  The conversion is
-governed by <var>format</var>, <var>Precisison</var> and <var>Digits</var>.
+governed by <var>format</var>, <var>Precision</var> and <var>Digits</var>.
 more information on these parameters can be found in <link id="FloatToStrF"/>.
 <var>Buffer</var> should point to enough space to hold the result. No checking on
 this is performed.
@@ -3025,7 +3060,7 @@ If needed, the string is (left) padded with zeroes.
 Scientific format. The next argument in the <var>Args</var> array should
 be a Floating point value. The argument is converted to a decimal string
 using scientific notation, using <link id="FloatToStrF"/>, where the optional
-precision is used to specify the total number of decimals. (defalt a valueof
+precision is used to specify the total number of decimals. (default a value of
 15 is used). The exponent is formatted using maximally 3 digits.
 </p>
 <p>
@@ -3152,7 +3187,7 @@ format specifications for positive, negative or zero values (separated by
 a semicolon).
 </p>
 <p>
-If the formatspecifier is empty or the value needs more than 18 digits to
+If the format specifier is empty or the value needs more than 18 digits to
 be correctly represented, the result is formatted with a call to 
 <link id="FloatToStrF"/> with the <var>ffGeneral</var> format option.
 </p>
@@ -3178,7 +3213,7 @@ character.
 </dd>
 <dt>,</dt>
 <dd>determines the use of the thousand separator character in the
-output string. If the format string contains one or more ',' charactes, 
+output string. If the format string contains one or more ',' characters, 
 then thousand separators will be used. The <var>ThousandSeparator</var> character
 is used.
 </dd>
@@ -3248,7 +3283,7 @@ None.
 <short>Check whether a string is a valid identifier name.</short>
 <descr>
 <var>IsValidIdent</var> returns <var>True</var> if <var>Ident</var> can be used as a
-compoent name. It returns <var>False</var> otherwise. <var>Ident</var> must consist of
+component name. It returns <var>False</var> otherwise. <var>Ident</var> must consist of
 a letter or underscore, followed by a combination of letters, numbers or
 underscores to be a valid identifier.
 </descr>
@@ -3547,12 +3582,17 @@ None.
 <descr>
 <p>
 <var>TextToFloat</var> converts the string in <var>Buffer</var> to a floating point 
-value. <var>Buffer</var> should contain a valid stroing representation of a 
+value. <var>Buffer</var> should contain a valid string representation of a 
 floating point value (either in decimal or scientific notation). 
-If the buffer contains a decimal value, then the decimal separator 
-character can either be a '.' or the value of the <var>DecimalSeparator</var> 
-variable.
 </p>
+<p>
+If the buffer contains a decimal value, then the decimal separator 
+character must be the value of the <var>DecimalSeparator</var> 
+variable. 
+</p>
+<remark>
+Note that this behaviour has changed, earlier implementations also allowed the use of '.' in addition to the decimal separator character.
+</remark>
 <p>
 The function returns <var>True</var> if the conversion was successful.
 </p>
@@ -3642,7 +3682,7 @@ None.
 <var>UpperCase</var> returns the uppercase equivalent of <var>S</var>. Ansi characters
 are not taken into account, only ASCII codes below 127 are converted. It is
 completely equivalent to the <var>UpCase</var> function of the system unit, and is
-provided for compatiibility only.
+provided for compatibility only.
 </descr>
 <errors>
 None.
@@ -3758,7 +3798,7 @@ For an example, <link id="GetEnvironmentVariableCount"/>.
 <remark>
 Note that on Windows, environment strings can start with an equal sign (=).
 This is a trick used to pass the current working directory to a newly created
-proces. In this case, extracting the variable name as the characters before
+process. In this case, extracting the variable name as the characters before
 the first equal sign will result in an empty name.
 </remark>
 </descr>
@@ -4272,7 +4312,7 @@ formatted in the <link id="FloatToText"/> function.
 
 <!-- enumeration value Visibility: default -->
 <element name="TFloatFormat.ffNumber">
-<short>Fixed point format with thousand separatord</short>
+<short>Fixed point format with thousand separator</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
@@ -4346,9 +4386,9 @@ the (untyped) buffer used by the <link id="TextToFloat"/> function.
 
 <!-- record type Visibility: default -->
 <element name="TFloatRec">
-<short>Record descriing a float value</short>
+<short>Record describing a float value</short>
 <descr>
-<var>TFloatRec</var> is used to descibe a floating point value by the
+<var>TFloatRec</var> is used to describe a floating point value by the
 <link id="FloatToDecimal"/> function.
 </descr>
 <seealso>
@@ -4560,7 +4600,7 @@ None.
 <short>Try to convert a string to an integer, and report on success.</short>
 <descr>
 <var>TryStrToInt</var> tries to convert the string <var>S</var> to an
-integer, and returns <var>True</var> if this was succesful. In that case the
+integer, and returns <var>True</var> if this was successful. In that case the
 converted integer is returned in <var>I</var>. If the conversion failed,
 (an invalid string, or the value is out of range) then <var>False</var> is returned.
 </descr>
@@ -4608,7 +4648,7 @@ On error, a <link id="EConvertError"/> exception is raised.
 <p>
 <var>TryStrToInt64</var> tries to convert the string <var>S</var> to a Int64 value, and
 returns this value in <var>I</var> if successful. If the conversion was
-succesful, the function result is <var>True</var>, or <var>False</var>
+successful, the function result is <var>True</var>, or <var>False</var>
 otherwise.
 The string can only contain numerical characters, and
 optionally a minus sign as the first character. Whitespace is not allowed.
@@ -4826,7 +4866,7 @@ None.
 <var>StringReplace</var> searches the string <var>S</var> for
 occurrences of the string <var>OldPattern</var> and, if it is found,
 replaces it with <var>NewPattern</var>. It returns the resulting string. The
-behaviour of <var>StringReplace</var> can be runed with <var>Flags</var>,
+behaviour of <var>StringReplace</var> can be tuned with <var>Flags</var>,
 which is of type <link id="TReplaceFlags"/>. Standard behaviour is to
 replace only the first occurrence of <var>OldPattern</var>, and to search
 case sensitively.
@@ -5097,7 +5137,7 @@ size fits in a single integer.
 <descr>
 <var>LongRec</var> can be used to extract the parts of an long Integer: the
 high and low word, or the 4 separate bytes as a zero-based array of bytes.
-Note that the meaning of High and Low parts are different on various CPUs.
+Note that the meaning (or ordering) of High and Low parts are different on various CPUs, and may differ from what is shown in the declaration: the ordering depends on the endianness of the CPU.
 </descr>
 <seealso>
 <link id="WordRec"/>
@@ -5188,7 +5228,7 @@ a word array.
 
 <!-- array type Visibility: default -->
 <element name="TWordArray">
-<short></short>
+<short>Array of word (Unsigned 16 bit integer)</short>
 <descr>
 <var>TWordArray</var> is a generic array definition, mostly for use as a
 base type of the <link id="PWordArray"/> type.
@@ -5287,7 +5327,7 @@ Construction may fail if there is not enough memory on the heap.
 <!-- constructor Visibility: public -->
 <element name="Exception.CreateResFmt">
 <short>Constructs a new exception object and formats the message from a
-reasource.</short>
+resource.</short>
 <descr>
 <var>CreateResFmt</var> does the same as <link
 id="Exception.CreateFmt">CreateFmt</link>, but fetches
@@ -5962,7 +6002,7 @@ available, so a shortstring is used to display the message.
 <descr>
 <var>OutOfMemoryError</var> raises an <link id="EOutOfMemory"/> exception,
 with an exception object that has been allocated on the heap at program
-startup. The program should neved create an <link id="EOutOfMemory"/>
+startup. The program should never create an <link id="EOutOfMemory"/>
 exception, but always call this routine.
 </descr>
 <seealso>
@@ -6302,7 +6342,7 @@ Alias for <link id="TextRec"/> for Delphi compatibility.
 <short>Type for case conversion tables.</short>
 <descr>
 <var>TCaseTranslationTable</var> is the type for a lookup table that can
-convert 255 ascii characters.
+convert 255 ASCII characters.
 </descr>
 <seealso>
 <link id="UpperCaseTable"/>
@@ -7463,7 +7503,7 @@ Kylix compatibility)
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeSearchRec.Name">
-<short>File name, unicode aware (no path)</short>
+<short>File name, Unicode aware (no path)</short>
 </element>
 
 <!-- variable Visibility: default -->
@@ -7498,9 +7538,9 @@ internal use only. (<var>PathOnly</var> for example, is only provided for
 Kylix compatibility)
 </remark>
 <remark>
-Note that for files with unicode filenames this is a converted value from
-the unicode filename. Depending on the codepage, this may or may not be a
-correct rendering of the correct unicode filename.
+Note that for files with Unicode filenames this is a converted value from
+the Unicode filename. Depending on the codepage, this may or may not be a
+correct rendering of the correct Unicode filename.
 </remark>
 </descr>
 <seealso>
@@ -7601,7 +7641,7 @@ Kylix compatibility)
 
 <!-- variable Visibility: default -->
 <element name="TSearchRec.PathOnly">
-<short>For kylix compatibility, on Unices only (do not use).</short>
+<short>For Kylix compatibility, on Unixes only (do not use).</short>
 </element>
 
 <!-- constant Visibility: default -->
@@ -7647,7 +7687,7 @@ Used in <link id="TSearchRec"/> and <link id="FindFirst"/>
 
 <!-- constant Visibility: default -->
 <element name="faVolumeId">
-<short>Volume id (Fat filesystem, Dos/Windows only)</short>
+<short>Volume id (Fat file system, Dos/Windows only)</short>
 <descr>
 Attribute of a file, meaning the  entry contains the volume ID. 
 Used in <link id="TSearchRec"/> and <link id="FindFirst"/>
@@ -7849,7 +7889,7 @@ call that a seek operation should be started at the last position in the file.
 <short>Check whether a directory exists in the file system.</short>
 <descr>
 <var>DirectoryExists</var> checks whether <var>Directory</var> exists in the
-filesystem and is actually a directory. If this is the case, the function
+file system and is actually a directory. If this is the case, the function
 returns <var>True</var>, otherwise <var>False</var> is returned.
 </descr>
 <seealso>
@@ -7862,7 +7902,7 @@ returns <var>True</var>, otherwise <var>False</var> is returned.
 <short>Check whether a file is read-only.</short>
 <descr>
 <var>FileIsReadOnly</var> checks whether <var>FileName</var> exists in the
-filesystem and is a read-only file. If this is the case, the function
+file system and is a read-only file. If this is the case, the function
 returns <var>True</var>, otherwise <var>False</var> is returned.
 </descr>
 <seealso>
@@ -8097,7 +8137,7 @@ id="TSysLocale"/>
 <var>ForceDirectories</var> tries to create any missing directories in
 <var>Dir</var> till the whole path in <var>Dir</var> exists. It returns
 <var>True</var> if <var>Dir</var> already existed or was created
-succesfully. If it failed to create any of the parts, <var>False</var> is
+successfully. If it failed to create any of the parts, <var>False</var> is
 returned.
 </descr>
 </element>
@@ -8116,7 +8156,7 @@ widestring manager to do this.
 <descr>
 <var>TryStrToFloat</var> tries to convert the string <var>S</var> to a
 floating point value, and stores the result in <var>Value</var>. It returns
-<var>True</var> if the operation was succesful, and <var>False</var> if it
+<var>True</var> if the operation was successful, and <var>False</var> if it
 failed. This operation takes into account the system settings for floating
 point representations.
 </descr>
@@ -8141,9 +8181,9 @@ result:
 <dt>&gt; 0</dt><dd>if <var>S1&gt;S2</var>.</dd>
 </dl>
 <p>
-The comparision takes into account wide characters, i.e. it takes
+The comparison takes into account wide characters, i.e. it takes
 care of strange accented characters. Contrary to <link id="WideCompareText"/>,
-the comparision is case sensitive.
+the comparison is case sensitive.
 </p>
 </descr>
 <errors>
@@ -8169,9 +8209,9 @@ result:
 <dt>&gt; 0</dt><dd>if <var>S1&gt;S2</var>.</dd>
 </dl>
 <p>
-The comparision takes into account wide characters, i.e. it takes
+The comparison takes into account wide characters, i.e. it takes
 care of strange accented characters. Contrary to <link id="WideCompareStr"/>,
-the comparision is case insensitive.
+the comparison is case insensitive.
 </p>
 </descr>
 <errors>
@@ -8671,11 +8711,11 @@ None.
 
 <!-- function Visibility: default -->
 <element name="ExceptFrames">
-<short></short>
+<short>Return the current exception stack frames</short>
 <descr>
+<var>ExceptFrames</var> returns the current list frames on the exception stack. 
+If there is no exception in progress, <var>Nil</var> is returned.
 </descr>
-<errors>
-</errors>
 <seealso>
 <link id="ExceptFrameCount"/>
 <link id="ExceptAddr"/>
@@ -8720,7 +8760,7 @@ to create the unique value. The function should return a valid GUID in the
 <p>
 <var>CreateGUID</var> can be called to create a new GUID (Globally Unique Identifier) value.
 The function returns the new <var>GUID</var> value in <var>GUID</var> and returns zero in 
-case the GUID was created succesfully. If no GUID was created, a nonzero error code is returned.
+case the GUID was created successfully. If no GUID was created, a nonzero error code is returned.
 </p>
 <p>
 The default mechanism for creating a new GUID is system dependent. If operating system support 
@@ -8729,7 +8769,7 @@ is used.
 </p>
 <p>
 The <var>OnCreateGUID</var> callback can be set to hook a custom mechanism behind the 
-<var>CreateGUID</var> function. This can be used to lt the GUID be created by an 
+<var>CreateGUID</var> function. This can be used to let the GUID be created by an 
 external GUID creation library. 
 </p>
 </descr>
@@ -8821,7 +8861,7 @@ simultaneous access, depending on the implementation.
 <descr>
 <p>
 <var>BeginRead</var> indicates that a read operation is about to be started. 
-If a write operation is in progress, then the call will block untill the write 
+If a write operation is in progress, then the call will block until the write 
 operation finished. Depending on the implementation the call may also block if
 another read operation is in progress.
 </p>
@@ -8858,7 +8898,7 @@ If there was any blocked write operation, that will be unblocked by a call to <v
 <descr>
 <var>BeginWrite</var> signals the begin of a write operation. 
 This call will block if any other read or write operation is currently in progress. 
-It will resumt only after all other read or write operations have finished.
+It will resume only after all other read or write operations have finished.
 </descr>
 <seealso>
 <link id="IReadWriteSync.EndRead"/>
@@ -9385,7 +9425,7 @@ None.
 
 <!-- array type Visibility: default -->
 <element name="TWeekNameArray">
-<short></short>
+<short>Array of 7 Strings for week day names</short>
 <descr>
 <var>TWeekNameArray</var> is used in the day long and short name arrays.
 </descr>
@@ -9514,12 +9554,19 @@ The date part remains untouched.
 
 <!-- function Visibility: default -->
 <element name="AnsiDequotedStr">
-<short></short>
+<short>Extract string without quotes</short>
 <descr>
+<var>AnsiDequotedStr</var> is, similar to <link id="AnsiExtractQuotedStr"/>, a method to extract a string 
+that was quoted using <link id="AnsiQuotedStr"/>. The string <var>S</var> must start and end with the quote 
+character <var>AQuote</var> (they will be removed from the result) and all double occurrences of the quote character
+<var>AQuote</var> will be reduced to a single quote character.
 </descr>
 <errors>
+If the string does not start and end with the quote character or has length less than 2, the original string is returned.
 </errors>
 <seealso>
+<link id="AnsiExtractQuotedStr"/>
+<link id="AnsiQuotedStr"/>
 </seealso>
 </element>
 
@@ -9547,7 +9594,7 @@ returned.
 boolean value, and returns this value in <var>Value</var>. In this case, the
 function returns <var>True</var>. If <var>S</var> does not contain a valid 
 boolean string, the function returns <var>False</var>, and the contents of 
-<var>Value</var> is indetermined.
+<var>Value</var> is undetermined.
 </p>
 <p>
 Valid boolean string constants are in the <link id="FalseBoolStrs"/> (for
@@ -10262,7 +10309,7 @@ initializes the critical section for use in the various methods.
 <short>Acquire a write lock</short>
 <descr>
 <var>Beginwrite</var> waits till all other threads have released their read
-or write locks on the object, and then aquires a write lock on the object.
+or write locks on the object, and then acquires a write lock on the object.
 </descr>
 <seealso>
 <link id="TSimpleRWSync.BeginRead"/>
@@ -10288,7 +10335,7 @@ allowing other threads to acquire a read or write lock on the object.
 <short>Acquire a read lock</short>
 <descr>
 <var>BeginRead</var> waits till all other threads have released their read
-or write locks on the object, and then aquires a read lock on the object.
+or write locks on the object, and then acquires a read lock on the object.
 </descr>
 <seealso>
 <link id="TSimpleRWSync.BeginWrite"/>
@@ -10365,7 +10412,7 @@ typecast e.g. strings to manipulate them byte for byte.
 <descr>
 <var>EArgumentException</var> is raised by many character
 conversion/handling routines to indicate an erroneous argument was passed to
-the function (usually indicating an invalid codepoint in a unicode string).
+the function (usually indicating an invalid codepoint in a Unicode string).
 </descr>
 <errors>
 None.
@@ -10387,7 +10434,7 @@ None.
 <descr>
 <var>EArgumentOutOfRangeException</var> is raised by many character
 conversion/handling routines to indicate an erroneous argument was passed to
-the function (indicating an invalid character index in a unicode string).
+the function (indicating an invalid character index in a Unicode string).
 </descr>
 <seealso>
 <link id="EArgumentException"/>
@@ -10560,8 +10607,8 @@ id="TFormatDateTimeOptions"/>, and is used in the last argument of
 <element name="GetTickCount">
 <short>Get tick count (32-bit, deprecated)</short>
 <descr>
-<var>GetTickCount</var> returns an increasing clock tick count. It is useful for
-time measurements, but no assumtions should be made as to the interval
+<var>GetTickCount</var> returns an increasing clock tick count in milliseconds. 
+It is useful for time measurements, but no assumptions should be made as to the interval
 between the ticks. This function is provided for Delphi compatibility, use
 <link id="GetTickCount64"/> instead.
 </descr>
@@ -10577,8 +10624,8 @@ between the ticks. This function is provided for Delphi compatibility, use
 <element name="GetTickCount64">
 <short>Get tick count (64-bit)</short>
 <descr>
-<var>GetTickCount64</var> returns an increasing clock tick count. It is useful for
-time measurements, but no assumtions should be made as to the interval
+<var>GetTickCount64</var> returns an increasing clock tick count in milliseconds. 
+It is useful for time measurements, but no assumptions should be made as to the interval
 between the ticks.
 </descr>
 <errors>
@@ -10650,7 +10697,7 @@ exception will be raised.
 <descr>
 <p><var>TryStrToDWord</var> will try to convert the string 
 <var>S</var> to a <var>DWord</var> value. It returns <var>True</var> 
-if the conversion was succesful, and in that case returns the value in <var>D</var>.
+if the conversion was successful, and in that case returns the value in <var>D</var>.
 </p>
 <p>
 If the conversion failed or the value was outside of the valid range for DWord values, 
@@ -10669,7 +10716,7 @@ If the conversion failed or the value was outside of the valid range for DWord v
 <descr>
 <p><var>StrToDWordDef</var> will try to convert the string 
 <var>S</var> to a <var>DWord</var> value. 
-If the conversion was succesful, it returns the value. 
+If the conversion was successful, it returns the value. 
 </p>
 <p>
 If the conversion failed, the fallback  value  in <var>Default</var> is returned.
@@ -10839,7 +10886,7 @@ This exception class is provided for Delphi compatibility, but is not actually u
 <var>WideStringReplace</var> searches the string <var>S</var> for
 occurrences of the string <var>OldPattern</var> and, if it is found,
 replaces it with <var>NewPattern</var>. It returns the resulting string. The
-behaviour of <var>StringReplace</var> can be runed with <var>Flags</var>,
+behaviour of <var>StringReplace</var> can be tuned with <var>Flags</var>,
 which is of type <link id="TReplaceFlags"/>. Standard behaviour is to
 replace only the first occurrence of <var>OldPattern</var>, and to search
 case sensitively.
@@ -10895,7 +10942,7 @@ to indicate that a returned file is a temporary file.
 <short>Compressed file attribute</short>
 <descr>
 <var>faTemporary</var> can be returned by <link id="FindFirst"/> or <link id="FindNext"/> 
-to indicate that a returned file is compressed (on filesystems that support this).
+to indicate that a returned file is compressed (on file systems that support this).
 </descr>
 <seealso>
 <link id="faDirectory"/>
@@ -10913,7 +10960,7 @@ to indicate that a returned file is compressed (on filesystems that support this
 <short>Encrypted file attribute</short>
 <descr>
 <var>faEncrypted</var> can be returned by <link id="FindFirst"/> or <link id="FindNext"/> 
-to indicate that a returned file is encrypted (on filesystems that support this).
+to indicate that a returned file is encrypted (on file systems that support this).
 </descr>
 <seealso>
 <link id="faDirectory"/>
@@ -10931,7 +10978,7 @@ to indicate that a returned file is encrypted (on filesystems that support this)
 <short>Virtual file attribute</short>
 <descr>
 <var>faVirtual</var> can be returned by <link id="FindFirst"/> or <link id="FindNext"/> 
-to indicate that a returned file is virtual (on filesystems that support this).
+to indicate that a returned file is virtual (on file systems that support this).
 </descr>
 <seealso>
 <link id="faDirectory"/>
@@ -10970,7 +11017,7 @@ The drive ID can then be used in the <link id="DiskSize"/> and <link id="DiskFre
 </p>
 <p>
 This definition is provided for Delphi compatibility only, it is not needed in Free Pascal, 
-where 2 array types are equal if they element types are equal.
+where 2 array types are equal if their element types are equal.
 </p>
 </descr>
 <seealso>
@@ -11095,7 +11142,7 @@ various components of the GUID.</dd>
 <short>Convert to array of bytes</short>
 <descr>
 <var>ToByteArray</var> converts the TGUID to an array of bytes
-(of length <var>SizeOf(TGUID)</var>). The bytes will be ordered accoring to <var>DataEndian</var>.
+(of length <var>SizeOf(TGUID)</var>). The bytes will be ordered according to <var>DataEndian</var>.
 
 </descr>
 <seealso>
@@ -11141,7 +11188,7 @@ various components of the GUID.</dd>
 
 <!-- enumeration type Visibility: default -->
 <element name="TStringSplitOptions">
-<short>String split options used in <var>TSTringHelper.Split</var></short>
+<short>String split options used in <var>TStringHelper.Split</var></short>
 <descr>
 <var>TStringSplitOptions</var> describes the possible options for 
 <link id="TStringHelper.Split"/>.
@@ -11752,7 +11799,7 @@ position <var>StartIndex</var>, which is by default 0.
 <short>Find the position (index) of any string or character in a list.</short>
 <descr>
 <p>
-<var>IndexOfAny</var> returns the zero-based index of the first matching element in an array of charaters or strings
+<var>IndexOfAny</var> returns the zero-based index of the first matching element in an array of characters or strings
 (<var>AnyOf</var>). 
 </p>
 <p>
@@ -11768,7 +11815,7 @@ If <var>ACount</var> is given, at most <var>ACount</var> characters in the sourc
 This count includes the starting character. Not specifying this argument is equivalent to specifying the amount of remaining characters.
 </p>
 <p>
-If <var>AMatch</var> is specified, on succesful return it will contain the index of the element in the array that
+If <var>AMatch</var> is specified, on successful return it will contain the index of the element in the array that
 contains the found match. 
 </p>
 </descr>
@@ -11788,7 +11835,7 @@ contains the found match.
 <descr>
 <p>
 <var>IndexOfAnyUnQuoted</var> returns the zero-based index of the first matching
-element in an array of charaters or strings (<var>AnyOf</var>), but disregards 
+element in an array of characters or strings (<var>AnyOf</var>), but disregards 
 any quoted parts in the string. A quoted part is determined by a starting <var>StartQuote</var> and
 end-quote character <var>EndQuote</var>.
 </p>
@@ -11808,7 +11855,7 @@ This count includes the starting character. Not specifying this argument is
 equivalent to specifying the amount of remaining characters.
 </p>
 <p> 
-If <var>AMatch</var> is specified, on succesful return it will contain the
+If <var>AMatch</var> is specified, on successful return it will contain the
 index of the element in the array that
 contains the found match. 
 </p>
@@ -11869,7 +11916,7 @@ is returned.
 <element name="TStringHelper.LastDelimiter">
 <short>Return the last position of one of a series of delimiters</short>
 <descr>
-<var>LastDelimiter</var> searches the string backwards for an occurence of
+<var>LastDelimiter</var> searches the string backwards for an occurrence of
 one of the characters in <var>Delims</var>, and returns the corresponding
 (zero-based) index in the string. If no occurrence is found, -1 is returned.
 </descr>
@@ -11920,7 +11967,7 @@ This count includes the starting character. Not specifying this argument is equi
 <short>Find the last position (index) of any string or character in a list.</short>
 <descr>
 <p>
-<var>LasyIndexOfAny</var> returns the zero-based index of the first matching element in an array of charaters or strings
+<var>LastIndexOfAny</var> returns the zero-based index of the first matching element in an array of characters or strings
 (<var>AnyOf</var>). 
 </p>
 <p>
@@ -12046,7 +12093,8 @@ The default behaviour is to supply all strings.
 <p>
 if <var>Options</var> contains <var>ExcludeEmpty</var> then no empty strings
 will be included in the result. Empty strings may be included if multiple 
-succesive separator characters are found in the source string.
+successive separator characters are found in the source string, but not for the last character: 
+If the last characters is a separator string, the 'empty string' behind it is not added to the result.
 </p>
 <p>
 If <var>AQuoteStart</var> and <var>AQuoteEnd</var> are supplied, 
@@ -12092,7 +12140,7 @@ If <var>ALen</var> is omitted, then all remaining characters are returned.
 
 <!-- function Visibility: public -->
 <element name="TStringHelper.ToCharArray">
-<short>Return the string ar an array of characters.</short>
+<short>Return the string as an array of characters.</short>
 <descr>
 <var>ToCharArray</var> returns part of the string (<var>Self</var>) as an array of
 characters. The characters are copied starting at (zero-based) index
@@ -12359,7 +12407,7 @@ The <link id="IntToStr"/> function is used to do the conversion.
 <descr>
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to a
-byte, and reports the success of the attempt. If the attempt is succesful,
+byte, and reports the success of the attempt. If the attempt is successful,
 then <var>True</var> is returned, and the actual value of the byte is
 returned in <var>AValue</var>.
 </p>
@@ -12559,7 +12607,7 @@ The <link id="IntToStr"/> function is used to do the conversion.
 <descr>
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to a
-ShortInt, and reports the success of the attempt. If the attempt is succesful,
+ShortInt, and reports the success of the attempt. If the attempt is successful,
 then <var>True</var> is returned, and the actual value of the ShortInt is
 returned in <var>AValue</var>.
 </p>
@@ -12758,7 +12806,7 @@ The <link id="IntToStr"/> function is used to do the conversion.
 <descr>
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to a
-SmallInt, and reports the success of the attempt. If the attempt is succesful,
+SmallInt, and reports the success of the attempt. If the attempt is successful,
 then <var>True</var> is returned, and the actual value of the SmallInt is
 returned in <var>AValue</var>.
 </p>
@@ -12957,7 +13005,7 @@ The <link id="IntToStr"/> function is used to do the conversion.
 <descr>
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to a
-Word, and reports the success of the attempt. If the attempt is succesful,
+Word, and reports the success of the attempt. If the attempt is successful,
 then <var>True</var> is returned, and the actual value of the Word is
 returned in <var>AValue</var>.
 </p>
@@ -13158,7 +13206,7 @@ The <link id="IntToStr"/> function is used to do the conversion.
 <descr>
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to a
-Cardinal, and reports the success of the attempt. If the attempt is succesful,
+Cardinal, and reports the success of the attempt. If the attempt is successful,
 then <var>True</var> is returned, and the actual value of the Cardinal is
 returned in <var>AValue</var>.
 </p>
@@ -13358,7 +13406,7 @@ The <link id="IntToStr"/> function is used to do the conversion.
 <descr>
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to a
-Integer, and reports the success of the attempt. If the attempt is succesful,
+Integer, and reports the success of the attempt. If the attempt is successful,
 then <var>True</var> is returned, and the actual value of the Integer is
 returned in <var>AValue</var>.
 </p>
@@ -13557,7 +13605,7 @@ The <link id="IntToStr"/> function is used to do the conversion.
 <descr>
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to a
-Int64, and reports the success of the attempt. If the attempt is succesful,
+Int64, and reports the success of the attempt. If the attempt is successful,
 then <var>True</var> is returned, and the actual value of the Int64 is
 returned in <var>AValue</var>.
 </p>
@@ -13758,7 +13806,7 @@ The <link id="IntToStr"/> function is used to do the conversion.
 <descr>
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to a
-QWord, and reports the success of the attempt. If the attempt is succesful,
+QWord, and reports the success of the attempt. If the attempt is successful,
 then <var>True</var> is returned, and the actual value of the QWord is
 returned in <var>AValue</var>.
 </p>
@@ -13958,7 +14006,7 @@ The <link id="IntToStr"/> function is used to do the conversion.
 <descr>
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to a
-NativeInt, and reports the success of the attempt. If the attempt is succesful,
+NativeInt, and reports the success of the attempt. If the attempt is successful,
 then <var>True</var> is returned, and the actual value of the NativeInt is
 returned in <var>AValue</var>.
 </p>
@@ -14091,7 +14139,7 @@ It consists mainly of conversion routines to and from other types.
 <var>MaxValue</var> is the biggest value a NativeUInt-typed value can contain.
 </descr>
 <seealso>
-<link id="NativeUInt.MinValue"/>
+<link id="TNativeUIntHelper.MinValue"/>
 </seealso>
 </element>
 
@@ -14102,7 +14150,7 @@ It consists mainly of conversion routines to and from other types.
 <var>MinValue</var> is the smallest value a NativeUInt-typed value can contain.    
 </descr>
 <seealso>
-<link id="NativeUInt.MaxValue"/>
+<link id="TNativeUIntHelper.MaxValue"/>
 </seealso>
 </element>
 
@@ -14118,8 +14166,8 @@ localization is taken into account.
 If the string does not contain a valid NativeUInt value, an <link id="EConvertError"/> exception is raised.
 </errors>
 <seealso>
-<link id="NativeUInt.ToString"/>
-<link id="NativeUInt.TryParse"/>
+<link id="TNativeUIntHelper.ToString"/>
+<link id="TNativeUIntHelper.TryParse"/>
 <link id="StrToInt"/>
 </seealso>
 </element>
@@ -14148,7 +14196,7 @@ a string representation. In the regular method overloaded version of <var>ToStri
 The <link id="IntToStr"/> function is used to do the conversion.
 </descr>
 <seealso>
-<link id="NativeUInt.Parse"/>
+<link id="TNativeUIntHelper.Parse"/>
 <link id="IntToStr"/>
 </seealso>
 </element>
@@ -14159,7 +14207,7 @@ The <link id="IntToStr"/> function is used to do the conversion.
 <descr>
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to a
-NativeUInt, and reports the success of the attempt. If the attempt is succesful,
+NativeUInt, and reports the success of the attempt. If the attempt is successful,
 then <var>True</var> is returned, and the actual value of the NativeUInt is
 returned in <var>AValue</var>.
 </p>
@@ -14169,7 +14217,7 @@ localization is taken into account.
 </p>
 </descr>
 <seealso>
-<link id="NativeUInt.Parse"/>
+<link id="TNativeUIntHelper.Parse"/>
 <link id="#rtl.system.val">Val</link>
 </seealso>
 </element>
@@ -14182,11 +14230,11 @@ localization is taken into account.
 <var>True</var> if the value is nonzero, <var>False</var> if it is zero.
 </descr>
 <seealso>
-<link id="NativeUInt.ToSingle"/>
-<link id="NativeUInt.ToDouble"/>
-<link id="NativeUInt.ToExtended"/>
-<link id="NativeUInt.ToString"/>
-<link id="NativeUInt.ToHexString"/>
+<link id="TNativeUIntHelper.ToSingle"/>
+<link id="TNativeUIntHelper.ToDouble"/>
+<link id="TNativeUIntHelper.ToExtended"/>
+<link id="TNativeUIntHelper.ToString"/>
+<link id="TNativeUIntHelper.ToHexString"/>
 </seealso>
 </element>
 
@@ -14198,11 +14246,11 @@ localization is taken into account.
 value.
 </descr>
 <seealso>
-<link id="NativeUInt.ToBoolean"/>
-<link id="NativeUInt.ToExtended"/>
-<link id="NativeUInt.ToSingle"/>
-<link id="NativeUInt.ToString"/>
-<link id="NativeUInt.ToHexString"/>
+<link id="TNativeUIntHelper.ToBoolean"/>
+<link id="TNativeUIntHelper.ToExtended"/>
+<link id="TNativeUIntHelper.ToSingle"/>
+<link id="TNativeUIntHelper.ToString"/>
+<link id="TNativeUIntHelper.ToHexString"/>
 </seealso>
 </element>
 
@@ -14214,11 +14262,11 @@ value.
 value.
 </descr>
 <seealso>
-<link id="NativeUInt.ToBoolean"/>
-<link id="NativeUInt.ToSingle"/>
-<link id="NativeUInt.ToDouble"/>
-<link id="NativeUInt.ToString"/>
-<link id="NativeUInt.ToHexString"/>
+<link id="TNativeUIntHelper.ToBoolean"/>
+<link id="TNativeUIntHelper.ToSingle"/>
+<link id="TNativeUIntHelper.ToDouble"/>
+<link id="TNativeUIntHelper.ToString"/>
+<link id="TNativeUIntHelper.ToHexString"/>
 </seealso>
 </element>
 
@@ -14233,11 +14281,11 @@ with zeroes if the representation contains less than  <var>AMinDigits</var>
 characters.
 </descr>
 <seealso>
-<link id="NativeUInt.ToBoolean"/>
-<link id="NativeUInt.ToSingle"/>
-<link id="NativeUInt.ToDouble"/>
-<link id="NativeUInt.ToString"/>
-<link id="NativeUInt.ToExtended"/>
+<link id="TNativeUIntHelper.ToBoolean"/>
+<link id="TNativeUIntHelper.ToSingle"/>
+<link id="TNativeUIntHelper.ToDouble"/>
+<link id="TNativeUIntHelper.ToString"/>
+<link id="TNativeUIntHelper.ToExtended"/>
 </seealso>
 </element>
 
@@ -14249,11 +14297,11 @@ characters.
 value.
 </descr>
 <seealso>
-<link id="NativeUInt.ToBoolean"/>
-<link id="NativeUInt.ToDouble"/>
-<link id="NativeUInt.ToExtended"/>
-<link id="NativeUInt.ToString"/>
-<link id="NativeUInt.ToHexString"/>
+<link id="TNativeUIntHelper.ToBoolean"/>
+<link id="TNativeUIntHelper.ToDouble"/>
+<link id="TNativeUIntHelper.ToExtended"/>
+<link id="TNativeUIntHelper.ToString"/>
+<link id="TNativeUIntHelper.ToHexString"/>
 </seealso>
 </element>
 
@@ -14367,7 +14415,7 @@ The conversion is done using the <link id="BoolTostr"/> function.
 <short>Try to convert a string to a boolean value</short>
 <descr>
 <var>TryToParse</var> will attempt to convert the string <var>S</var> to a
-boolean value. If the attempt is succesful, <var>True</var> is returned, and
+boolean value. If the attempt is successful, <var>True</var> is returned, and
 the actual value is returned in <var>AValue</var>. If the attempt failed,
 <var>False</var> is returned.
 </descr>
@@ -14478,7 +14526,7 @@ The conversion is done using the <link id="BoolTostr"/> function.
 <short>Try to convert a string to a ByteBool value</short>
 <descr>
 <var>TryToParse</var> will attempt to convert the string <var>S</var> to a
-ByteBool value. If the attempt is succesful, <var>True</var> is returned, and
+ByteBool value. If the attempt is successful, <var>True</var> is returned, and
 the actual value is returned in <var>AValue</var>. If the attempt failed,
 <var>False</var> is returned.
 </descr>
@@ -14590,7 +14638,7 @@ The conversion is done using the <link id="BoolTostr"/> function.
 <short>Try to convert a string to a WordBool value</short>
 <descr>
 <var>TryToParse</var> will attempt to convert the string <var>S</var> to a
-WordBool value. If the attempt is succesful, <var>True</var> is returned, and
+WordBool value. If the attempt is successful, <var>True</var> is returned, and
 the actual value is returned in <var>AValue</var>. If the attempt failed,
 <var>False</var> is returned.
 </descr>
@@ -14702,7 +14750,7 @@ The conversion is done using the <link id="BoolTostr"/> function.
 <short>Try to convert a string to a LongBool value</short>
 <descr>
 <var>TryToParse</var> will attempt to convert the string <var>S</var> to a
-LongBool value. If the attempt is succesful, <var>True</var> is returned, and
+LongBool value. If the attempt is successful, <var>True</var> is returned, and
 the actual value is returned in <var>AValue</var>. If the attempt failed,
 <var>False</var> is returned.
 </descr>
@@ -14970,7 +15018,7 @@ is called.
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to
 a single-sized floating point value and reports <var>True</var> if the
-conversion was succesful. 
+conversion was successful. 
 In that case the parsed value is returned in <var>AValue</var>.
 </p>
 <p>
@@ -15035,7 +15083,7 @@ floating-point value in <var>m*2^X</var>, i.e. the exponent.
 <element name="TSingleHelper.Mantissa">
 <short>Mantissa of the floating-point</short>
 <descr>
-<var>Mantissa</var> is the value of the significand without the hidden bit.
+<var>Mantissa</var> is the value of the significant without the hidden bit.
 This means it the plain bit pattern as it is stored in memory.
 </descr>
 <seealso>
@@ -15387,7 +15435,7 @@ is called.
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to
 a Double-sized floating point value and reports <var>True</var> if the
-conversion was succesful. 
+conversion was successful. 
 In that case the parsed value is returned in <var>AValue</var>.
 </p>
 <p>
@@ -15804,7 +15852,7 @@ is called.
 <p>
 <var>TryParse</var> attempts to convert the string <var>AString</var> to
 a Extended-sized floating point value and reports <var>True</var> if the
-conversion was succesful. 
+conversion was successful. 
 In that case the parsed value is returned in <var>AValue</var>.
 </p>
 <p>
@@ -15986,6 +16034,1082 @@ correct pointer parameter. Failure to do so may result in run-time errors.
 </descr>
 <seealso>
 <link id="FreeAndNil"/>
+</seealso>
+</element>
+
+<!-- array type Visibility: default -->
+<element name="TUnicodeCharArray">
+<short>Array of <var>UnicodeChar</var></short>
+<descr>
+<var>TUnicodeCharArray</var> is a definition of an array of <var>UnicodeChar</var> elements.
+</descr>
+<seealso>
+<link id="UnicodeChar"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UnicodeUpperCase">
+<short>Return uppercase version of a string</short>
+<descr>
+<var>UnicodeUpperCase</var> returns an all-uppercase version of the unicodestring <var>S</var>.
+It relies on the Unicode manager to do so.
+</descr>
+<seealso>
+<link id="UnicodeLowerCase"/>
+<link id="LowerCase"/>
+<link id="UpperCase"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UnicodeLowerCase">
+<short>Return lowercase version of a string</short>
+<descr>
+<var>UnicodeLowerCase</var> returns an all-lowercase version of the unicodestring <var>S</var>.
+It relies on the Unicode manager to do so.
+</descr>
+<seealso>
+<link id="UnicodeUpperCase"/>
+<link id="UpperCase"/>
+<link id="LowerCase"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UnicodeCompareStr">
+<short>Compare 2 Unicode strings</short>
+<descr>
+<p>
+<var>UnicodeCompareStr</var> compares 2 Unicode strings <var>S1</var> and <var>S2</var> in a case sensitive manner. 
+The result of the function is
+</p>
+<dl>
+<dt>&lt; 0</dt><dd>If <var>S1&lt;S2</var></dd>
+<dt>0</dt><dd>If <var>S1=S2</var></dd>
+<dt>&gt; 0</dt><dd>If <var>S1&gt;S2</var></dd>
+</dl>
+<p>
+This function relies on a widestring manager to perform the actual comparison, as it will take into account various equivalent 
+code points: it is not a simple byte-by-byte comparison.
+</p>
+</descr>
+<seealso>
+<link id="UnicodeCompareText"/>
+<link id="CompareStr"/>
+<link id="CompareText"/>
+<link id="UnicodeSameStr"/> 
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UnicodeSameStr">
+<short>Check whether 2 strings are equal</short>
+<descr>
+<var>UnicodeSameStr</var> checks whether the Unicode strings <var>S1</var> and <var>S2</var> are equal, case sensitively. 
+The function returns <var>True</var> if the strings are equal, <var>False</var> if they are not.
+This function relies on a widestring manager to perform the actual comparison, as it will take into account various equivalent 
+code points: it is not a simple byte-by-byte comparison.
+</descr>
+<errors>
+</errors>
+<seealso>
+<link id="UnicodeCompareText"/>
+<link id="CompareStr"/>
+<link id="CompareText"/>
+<link id="UnicodeSameText"/>
+<link id="SameStr"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UnicodeCompareText">
+<short>Compare 2 strings case insensitively</short>
+<descr>
+<p>
+<var>UnicodeCompareText</var> compares 2 Unicode strings <var>S1</var> and <var>S2</var>, ignoring case.
+The result of the function is
+</p>
+<dl>
+<dt>&lt; 0</dt><dd>If <var>S1&lt;S2</var></dd>
+<dt>0</dt><dd>If <var>S1=S2</var></dd>
+<dt>&gt; 0</dt><dd>If <var>S1&gt;S2</var></dd>
+</dl>
+<p>
+This function relies on a widestring manager to perform the actual comparison, as it will take into account various equivalent 
+code points: it is not a simple byte-by-byte comparison.
+</p>
+</descr>
+<seealso>
+<link id="UnicodeCompareText"/>
+<link id="CompareStr"/>
+<link id="CompareText"/>
+<link id="UnicodeSameStr"/> 
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UnicodeSameText">
+<short>Check whether 2 strings are the same, ignoring case</short>
+<descr>
+<var>UnicodeSameText</var> checks whether the Unicode strings <var>S1</var> and <var>S2</var> are equal, ignoring case. 
+The function returns <var>True</var> if the strings are equal, <var>False</var> if they are not.
+This function relies on a widestring manager to perform the actual comparison, as it will take into account various equivalent 
+code points: it is not a simple byte-by-byte comparison.
+</descr>
+<errors>
+</errors>
+<seealso>
+<link id="UnicodeCompareText"/>
+<link id="CompareStr"/>
+<link id="CompareText"/>
+<link id="UnicodeSameStr"/>
+<link id="SameText"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UnicodeFormat">
+<short>Format Unicode string</short>
+<descr>
+<var>UnicodeFormat</var> is the Unicode equivalent of <link id="Format"/>. It follows the same rules and uses the same formatting strings.
+</descr>
+<errors>
+In case of error, an <link id="EConvertError"/> exception is raised.
+</errors>
+<seealso>
+<link id="Format"/>
+<link id="UnicodeFormatBuf"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UnicodeFormatBuf">
+<short>Format a Unicode string with given arguments and store the result in a unicodebuffer.</short>
+<descr>
+<var>UnicodeFormatBuf</var> is the Unicode equivalent of <link id="FormatBuf"/>. It follows the same rules and uses the same formatting st
+</descr>
+<errors>
+In case of error, an <link id="EConvertError"/> exception is raised.
+</errors>
+<seealso>
+<link id="FormatBuf"/>
+<link id="UnicodeFormat"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="UnicodeFmtStr">
+<short>Format a string with given arguments, procedural version.</short>
+<descr>
+<var>UnicodeFmtStr</var> calls <link id="UnicodeFormat"/> with <var>Fmt</var> and <var>Args</var> 
+as arguments, and stores the result in <var>Res</var>. 
+For more information on how the resulting string is composed, see <link id="UnicodeFormat"/>.
+</descr>
+<errors>
+In case of error, an <link id="EConvertError"/> exception is raised.
+</errors>
+<seealso>
+<link id="UnicodeFormat"/>
+<link id="UnicodeFormatBuf"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="WideStrAlloc">
+<short>Allocate a null-terminated widestring on the heap.</short>
+<descr>
+<p>
+<var>WideStrAlloc</var> reserves memory on the heap for a widestring with length <var>Len</var>,
+(terminating <var>#0#0</var> included), and returns a pointer to it.
+</p>
+<p>
+Additionally, <var>WideStrAlloc</var> allocates 4 extra bytes to store the size of
+the allocated memory. 
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="StrBufSize"/>
+<link id="StrDispose"/>
+<link id="#rtl.strings.StrAlloc">StrAlloc</link>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="StringOf">
+<short>Create a Unicode string from an array of bytes</short>
+<descr>
+<p>
+<var>StringOf</var> converts an array of bytes (<var>Bytes</var>) to a Unicode string. 
+It interprets the bytes as a single-byte string, using  the default codepage.
+</p>
+<p>
+To create a string where the bytes are interpreted as wide chars, use <link id="WideStringOf"/> instead.
+</p>
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="WideBytesOf"/>
+<link id="WideStringOf"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="WideBytesOf">
+<short>Returns the contents of a widestring as an array of bytes</short>
+<descr>
+<var>WideBytesOf</var> returns the contents of the widestring <var>Value</var> as an array of bytes.
+The array will have as length twice the length of the wide string, as each wide character contains 2 bytes. 
+</descr>
+<seealso>
+<link id="StringOf"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="WideStringOf">
+<short>Create Unicode string from array of bytes</short>
+<descr>
+<p>
+<var>WideStringOf</var>  converts an array of bytes (<var>Bytes</var>) to a Unicode string. 
+It considers each pair of bytes in the array as a single wide char.
+The array should have an even length. If the length is uneven, the last byte will be ignored.
+</p>
+<p>
+This function performs the opposite operation of <link id="BytesOf"/>.
+</p>
+<p>
+To create a string where the bytes are interpreted as ansichars, use <link id="StringOf"/> instead.
+</p>
+</descr>
+<seealso>
+<link id="StringOf"/>
+<link id="WideBytesOf"/>
+<link id="BytesOf"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="ByteLength">
+<short>Length (in bytes) of a unicodestring</short>
+<descr>
+<var>ByteLength</var> returns the length of a unicodestring in bytes. 
+This equals the character length of the string (<link id="system.length">Length</link>) multiplied by the number of bytes per character (2).
+</descr>
+<seealso>
+<link id="system.length">Length</link>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UnicodeStringReplace">
+<short>Replace one occurrence of a string with another</short>
+<descr>
+<var>UnicodeStringReplace</var> is the Unicode version of <link id="StringReplace"/>; 
+it follows the same rules and has the same behaviour, but operates on Unicode strings instead of ansistrings.
+</descr>
+<seealso>
+<link id="StringReplace"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #rtl.sysutils.EEncodingError
+  ********************************************************************
+-->
+
+<!-- class Visibility: default -->
+<element name="EEncodingError">
+<short>Exception raised by the <var>TEncoding</var> class.</short>
+<descr>
+<var>EEncodingError</var> is the exception classed used by the <var>TEncoding</var> class to indicate errors.
+</descr>
+<seealso>
+<link id="TEncoding"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #rtl.sysutils.TEncoding
+  ********************************************************************
+-->
+
+<!-- class Visibility: default -->
+<element name="TEncoding">
+<short>Encoding support</short>
+<descr>
+<p>
+<var>TEncoding</var> is a mostly abstract class that contains various methods to deal with different encodings 
+in single- and double-byte strings. In practice, one instance of a descendent of this class for each needed encoding can be 
+instantiated and used. The class contains several class methods and properties to create such instances, and 
+has several often-used instances available as class properties, in particular the default encoding.
+</p>
+<p>
+When using encodings (and in particular <link id="TEncoding.Default"/> or <link id="TEncoding.ANSI"/>),
+if the <link id="#rtl.system.DefaultSystemCodePage">DefaultSystemCodePage</link> changes, 
+you should call <link id="TEncoding.FreeEncodings"/> to regenerate the encodings.
+</p>
+</descr>
+<seealso>
+<link id="TEncoding.ANSI"/>
+<link id="TEncoding.ASCII"/>
+<link id="TEncoding.Default"/>
+<link id="TEncoding.BigEndianUnicode"/>
+<link id="TEncoding.Unicode"/>
+<link id="TEncoding.UTF7"/>
+<link id="TEncoding.UTF8"/>
+</seealso>
+</element>
+
+<!-- class procedure Visibility: public -->
+<element name="TEncoding.FreeEncodings">
+<short>Free all standard encodings</short>
+<descr>
+<var>FreeEncodings</var> frees all the standard encodings <link id="TEncoding.ANSI"/>,
+<link id="TEncoding.ASCII"/>,
+<link id="TEncoding.Default"/>,
+<link id="TEncoding.BigEndianUnicode"/>,
+<link id="TEncoding.Unicode"/>,
+<link id="TEncoding.UTF7"/> and
+<link id="TEncoding.UTF8"/>. There should be no need to call this function directly, it is called automatically w
+hen the program exits.
+</descr>
+<seealso>
+<link id="TEncoding.ANSI"/>
+<link id="TEncoding.ASCII"/>
+<link id="TEncoding.Default"/>
+<link id="TEncoding.BigEndianUnicode"/>
+<link id="TEncoding.Unicode"/>
+<link id="TEncoding.UTF7"/>
+<link id="TEncoding.UTF8"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TEncoding.Clone">
+<short>Clone a <var>TEncoding</var> instance</short>
+<descr>
+<var>Clone</var> creates a copy of a <var>TEncoding</var> instance. This method returns <var>Nil</var> in <var>TEncoding</var>
+and must be implemented in descendent classes.
+</descr>
+<seealso>
+<link id="TEncoding.Create"/>
+</seealso>
+</element>
+
+<!-- class function Visibility: public -->
+<element name="TEncoding.Convert">
+<short>Convert an array of bytes from one encoding to another</short>
+<descr>
+<var>Convert</var> will convert the bytes in <var>Bytes</var> from encoding <var>Source</var> to encoding <var>Destination</var> and returns the converted bytes as an array.
+If <var>StartIndex</var> and <var>Count</var> are specified, the conversion starts at (zero-based) index <var>StartIndex</var>, and only <var>Count</var> bytes will be converted.
+</descr>
+<seealso>
+<link id="TEncoding.GetBytes"/>
+<link id="TEncoding.GetChars"/>
+</seealso>
+</element>
+
+<!-- class function Visibility: public -->
+<element name="TEncoding.IsStandardEncoding">
+<short>Check if the encoding is one of the standard encodings</short>
+<descr>
+<var>IsStandardEncoding</var> will return <var>True</var> is one of the standard encoding instances  <link id="TEncoding.ANSI"/>,
+<link id="TEncoding.ASCII"/>,
+<link id="TEncoding.Default"/>,
+<link id="TEncoding.BigEndianUnicode"/>,
+<link id="TEncoding.Unicode"/>,
+<link id="TEncoding.UTF7"/> or
+<link id="TEncoding.UTF8"/>. Otherwise it returns <var>False</var>.
+</descr>
+<seealso>
+<link id="TEncoding.ANSI"/>
+<link id="TEncoding.ASCII"/>
+<link id="TEncoding.Default"/>
+<link id="TEncoding.BigEndianUnicode"/>
+<link id="TEncoding.Unicode"/>
+<link id="TEncoding.UTF7"/>
+<link id="TEncoding.UTF8"/>
+</seealso>
+</element>
+
+<!-- class function Visibility: public -->
+<element name="TEncoding.GetBufferEncoding">
+<short>Attempt to guess the encoding of a buffer</short>
+<descr>
+<p>
+<var>GetBufferEncoding</var> checks the BOM marker of an array of bytes <var>Buffer</var>, and returns the 
+found encoding in <var>AEncoding</var>. Only the <link id="TEncoding.BigEndianUnicode"/>
+<link id="TEncoding.Unicode"/> and <link id="TEncoding.UTF8"/> encodings will be tried.
+</p>
+<p>
+If <var>AEncoding</var> is non-Nil on entry, it will be used to check  the BOM marker with. 
+No other encoding will be tried in that case.
+</p>
+<p> 
+If <var>ADefaultEncoding</var> is specified, it will be returned in case no match was found.
+</p>
+<p>
+The function returns the number of bytes in the BOM Marker. 
+</p>
+</descr>
+<seealso>
+<link id="TEncoding.BigEndianUnicode"/>
+<link id="TEncoding.Unicode"/>
+<link id="TEncoding.UTF8"/> 
+<link id="TEncoding.GetPreamble"/> 
+</seealso>
+</element>
+
+<!-- class function Visibility: public -->
+<element name="TEncoding.GetEncoding">
+<short>Get an encoding instance for a given codepage.</short>
+<descr>
+<var>GetEncoding</var> will return an instance of <var>TEncoding</var> for the given codepage <var>CodePage</var>. 
+The codepage can also be specified by name <var>EncodingName</var>. The returned instance is an appropriate descendent of 
+<var>TEncoding</var> and needs to be freed by the caller.
+</descr>
+<seealso>
+<link id="TUnicodeEncoding"/>
+<link id="TBigEndianUnicodeEncoding"/>
+<link id="TUTF8Encoding"/>
+<link id="TUTF7Encoding"/>
+<link id="TMBCSEncoding"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TEncoding.GetMaxByteCount">
+<short>Returns the maximum number of bytes needed to represent a string</short>
+<descr>
+<p>
+<var>GetMaxByteCount</var> returns  the maximum number of bytes needed to represent 
+a string of <var>CharCount</var> characters in the given encoding.
+</p>
+<p>
+This is an abstract method, implemented by descendents of <var>TEncoding</var>.
+</p>
+</descr>
+<seealso>
+<link id="TEncoding.GetMaxCharCount"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TEncoding.GetMaxCharCount">
+<short>Return the maximum number of characters that can be represented in a number of bytes</short>
+<descr>
+<p>
+<var>GetMaxCharCount</var> returns the theoretical maximum number of characters that can be represented
+in a buffer of length <var>ByteCount</var> in the given encoding. Note that the actual number of 
+characters that can be represented may well be much less and depends on the encoding and the actual characters.
+</p>
+<p>
+This is an abstract method, implemented by descendents of <var>TEncoding</var>.
+</p>
+</descr>
+<seealso>
+<link id="TEncoding.GetMaxByteCount"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TEncoding.GetPreamble">
+<short>Return the BOM Marker used by the encoding</short>
+<descr>
+<var>GetPreamble</var> returns the BOM marker bytes used by the encoding. 
+This is only meaningful for the UTF8 and Unicode encodings, 
+for all other encodings there is no BOM Marker.
+</descr>
+<seealso>
+<link id="TUnicodeEncoding"/>
+<link id="TBigEndianUnicodeEncoding"/>
+<link id="TUTF8Encoding"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TEncoding.GetString">
+<short>Return a string based on an array of bytes</short>
+<descr>
+<p>
+<var>GetString</var> will return a Unicode string, created from the bytes in the <var>Bytes</var> array.
+The bytes array will be interpreted according to the encoding which the <var>TEncoding</var> represents.
+</p>
+<p>
+If <var>ByteIndex</var> and <var>ByteCount</var> are specified, only the <var>ByteCount</var> 
+bytes starting at position <var>ByteIndex</var> will be converted.
+</p>
+</descr>
+<errors>
+In case of invalid bytes, an <var>EEncodingError</var> exception may be raised.
+</errors>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TEncoding.CodePage">
+<short>Codepage for this encoding</short>
+<descr>
+<var>CodePage</var> is the numerical codepage for this encoding. It is a number as used in the Windows codepage registry.
+</descr>
+<seealso>
+<link id="TEncoding.EncodingName"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TEncoding.EncodingName">
+<short>Name of this encoding</short>
+<descr>
+<var>EncodingName</var> is the  name for this encoding. 
+It's based on the windows name for the encoding and is calculated from the codepage.
+</descr>
+<seealso>
+<link id="TEncoding.CodePage"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TEncoding.IsSingleByte">
+<short>Is the encoding a single-byte encoding or not ?</short>
+<descr>
+<var>IsSingleByte</var> determines whether an encoding is single-byte or not. 
+It is <var>false</var> for all standard encodings.
+</descr>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TEncoding.ANSI">
+<short>Ansi encoding instance</short>
+<descr>
+<var>ANSI</var> is the ANSI codepage encoding instance, it is the default single-byte string codepage on 
+windows (as returned by <link id="DefaultSystemCodePage"/>).
+This instance is created and maintained by the system, it should not be freed.
+</descr>
+<seealso>
+<link ID="TEncoding.ASCII"/>
+<link id="TEncoding.ASCII"/>
+<link id="TEncoding.Default"/>
+<link id="TEncoding.BigEndianUnicode"/>
+<link id="TEncoding.Unicode"/>
+<link id="TEncoding.UTF7"/>
+<link id="TEncoding.UTF8"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TEncoding.ASCII">
+<short>ASCII encoding instance</short>
+<descr>
+<var>ASCII</var> is the ASCII codepage (CP_ASCII) encoding instance.
+This instance is created and maintained by the system, it should not be freed.
+</descr>
+<seealso>
+<link id="TEncoding.ANSI"/>
+<link id="TEncoding.ASCII"/>
+<link id="TEncoding.Default"/>
+<link id="TEncoding.BigEndianUnicode"/>
+<link id="TEncoding.Unicode"/>
+<link id="TEncoding.UTF7"/>
+<link id="TEncoding.UTF8"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TEncoding.BigEndianUnicode">
+<short>Big-endian Unicode (UTF16BE) encoding instance</short>
+<descr>
+<var>BigEndianUnicode</var> is the Big-endian Unicode encoding instance (CP_UTF16BE)
+This instance is created and maintained by the system, it should not be freed.
+</descr>
+<seealso>
+<link ID="TEncoding.ASCII"/>
+<link id="TEncoding.ANSI"/>
+<link id="TEncoding.ASCII"/>
+<link id="TEncoding.Default"/>
+<link id="TEncoding.Unicode"/>
+<link id="TEncoding.UTF7"/>
+<link id="TEncoding.UTF8"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TEncoding.Default">
+<short>Default codepage</short>
+<descr>
+<p>
+<var>Defaulte</var> is the default encoding instance (it equals the ANSI codepage).
+This instance is created and maintained by the system, it should not be freed.
+</p>
+<p>
+if the <link id="#rtl.system.DefaultSystemCodePage">DefaultSystemCodePage</link> changes, 
+you should call <link id="TEncoding.FreeEncodings"/> to regenerate the default encoding using the new code page.
+</p>
+</descr>
+<seealso>
+<link ID="TEncoding.ASCII"/>
+<link id="TEncoding.ANSI"/>
+<link id="TEncoding.ASCII"/>
+<link id="TEncoding.BigEndianUnicode"/>
+<link id="TEncoding.Unicode"/>
+<link id="TEncoding.UTF7"/>
+<link id="TEncoding.UTF8"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TEncoding.Unicode">
+<short>UTF16 encoding instance</short>
+<descr>
+<var>Unicode</var> is the Big-endian Unicode encoding instance (CP_UTF16)
+This instance is created and maintained by the system, it should not be freed.
+</descr>
+<seealso>
+<link ID="TEncoding.ASCII"/>
+<link id="TEncoding.ANSI"/>
+<link id="TEncoding.ASCII"/>
+<link id="TEncoding.Default"/>
+<link id="TEncoding.BigEndianUnicode"/>
+<link id="TEncoding.Unicode"/>
+<link id="TEncoding.UTF7"/>
+<link id="TEncoding.UTF8"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TEncoding.UTF7">
+<short>UTF7 encoding instance</short>
+<descr>
+<var>UTF7</var> is the UTF7 encoding instance (CP_UTF7)
+This instance is created and maintained by the system, it should not be freed.
+</descr>
+<seealso>
+<link ID="TEncoding.ASCII"/>
+<link id="TEncoding.ANSI"/>
+<link id="TEncoding.ASCII"/>
+<link id="TEncoding.Default"/>
+<link id="TEncoding.BigEndianUnicode"/>
+<link id="TEncoding.Unicode"/>
+<link id="TEncoding.UTF8"/>
+</seealso>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TEncoding.UTF8">
+<short>UTF8 encoding instance</short>
+<descr>
+<var>UTF8</var> is the UTF7 encoding instance (CP_UTF7)
+This instance is created and maintained by the system, it should not be freed.
+</descr>
+<seealso>
+<link ID="TEncoding.ASCII"/>
+<link id="TEncoding.ANSI"/>
+<link id="TEncoding.ASCII"/>
+<link id="TEncoding.Default"/>
+<link id="TEncoding.BigEndianUnicode"/>
+<link id="TEncoding.Unicode"/>
+<link id="TEncoding.UTF7"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #rtl.sysutils.TMBCSEncoding
+  ********************************************************************
+-->
+
+<!-- class Visibility: default -->
+<element name="TMBCSEncoding">
+<short>Multi-Byte character set encoding</short>
+<descr>
+<p>
+<var>TMBCSEncoding</var> is the encoding class used for most of the encodings, except the actual Unicode encodings.
+The codepage is specified during creation, and is by default the system codepage. 
+</p>
+<p>
+The name is somewhat misleading, since the MBCS is also used for single-byte encodings.
+</p>
+</descr>
+<seealso>
+<link id="TUnicodeEncoding"/>
+<link id="TUTF8Encoding"/>
+<link id="TUTF7Encoding"/>
+<link id="TBigendianUnicodeEncoding"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TMBCSEncoding.Create">
+<short>Create a new instance of a multi-byte character set encoding</short>
+<descr>
+<p>
+<var>Create</var> instantiates a new instance of the multi-byte character set encoding.
+The <var>ACodePage</var> parameter is optional, and defaults to <link id="DefaultSystemCodePage"/>.
+</p>
+<p>
+The <var>MBToWCharFlags</var> and <var>WCharToMBFlags</var> parameters are stored but are otherwise 
+unused in the Free Pascal implementation of <var>TMBCSEncoding</var>
+</p>
+</descr>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TMBCSEncoding.Clone" link="TEncoding.Clone">
+<short>Clone a <var>TMBCSEncoding</var> instance</short>
+<descr>
+<var>Clone</var> overrides <link id="TEncoding.Clone"/> to provide a clone of the <var>TMBCSEncoding</var> instance.
+</descr>
+<seealso>
+<link id="TEncoding.Clone"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TMBCSEncoding.GetMaxByteCount" link="TEncoding.GetMaxByteCount">
+<short>Return max number of bytes needed to represent a string</short>
+<descr>
+<var>GetMaxByteCount</var> overrides <link id="TEncoding.GetMaxByteCount"/> to return the  
+maximum number of bytes needed to represent a string.
+</descr>
+<seealso>
+<link id="TEncoding.GetMaxByteCount"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TMBCSEncoding.GetMaxCharCount" link="TEncoding.GetMaxCharCount">
+<short>Return max number of characters that can be represented by an array of bytes</short>
+<descr>
+<var>GetMaxCharCount</var> overrides <link id="TEncoding.GetMaxCharCount"/> to return the  
+maximum number of bytes needed to represent a string.
+</descr>
+<seealso>
+<link id="TEncoding.GetMaxCharCount"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TMBCSEncoding.GetPreamble" link="TEncoding.GetPreamble">
+<short>Return BOM marker bytes</short>
+<descr>
+<var>GetPreamble</var> overrides <link id="TEncoding.GetPreamble"/> to return the  
+BOM Marker bytes (none, for this implementation).
+</descr>
+<seealso>
+<link id="TEncoding.GetPreamble"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #rtl.sysutils.TUTF7Encoding
+  ********************************************************************
+-->
+
+<!-- class Visibility: default -->
+<element name="TUTF7Encoding">
+<short>UTF-7 Unicode encoding</short>
+<descr>
+<p>
+<var>TUTF7Encoding</var> is the encoding class used to represent the UTF7 encoding.
+This encoding is not so often used, and the class is provided mostly for completeness.
+</p>
+</descr>
+<seealso>
+<link id="TUnicodeEncoding"/>
+<link id="TUTF8Encoding"/>
+<link id="TMBCSEncoding"/>
+<link id="TBigendianUnicodeEncoding"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TUTF7Encoding.Create">
+<short>Create a new instance of the <var>TUTF7Encoding</var> class</short>
+<descr>
+<var>Create</var> creates a new instance of the <var>TUTF7Encoding</var> class and sets the 
+codepage to <var>CP_UTF7</var>.
+</descr>
+<seealso>
+<link id="TEncoding.CodePage"/>
+<link id="TEncoding"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TUTF7Encoding.Clone" link="TEncoding.Clone">
+<short>Clone a <var>TUTF7Encoding</var> instance</short>
+<descr>
+<var>Clone</var> overrides <link id="TEncoding.Clone"/> to provide a clone of the <var>TUTF7Encoding</var> instance.
+</descr>
+<seealso>
+<link id="TEncoding.Clone"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TUTF7Encoding.GetMaxByteCount" link="TEncoding.GetMaxByteCount">
+<short>Return max number of bytes needed to represent a string</short>
+<descr>
+<var>GetMaxByteCount</var> overrides <link id="TEncoding.GetMaxByteCount"/> to return the  
+maximum number of bytes needed to represent a string.
+</descr>
+<seealso>
+<link id="TEncoding.GetMaxByteCount"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TUTF7Encoding.GetMaxCharCount" link="TEncoding.GetMaxCharCount">
+<short>Return max number of characters that can be represented by an array of bytes</short>
+<descr>
+<var>GetMaxCharCount</var> overrides <link id="TEncoding.GetMaxCharCount"/> to return the  
+maximum number of bytes needed to represent a string.
+</descr>
+<seealso>
+<link id="TEncoding.GetMaxCharCount"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TUTF7Encoding.GetPreamble" link="TEncoding.GetPreamble">
+<short>Return BOM marker bytes</short>
+<descr>
+<var>GetPreamble</var> overrides <link id="TEncoding.GetPreamble"/> to return the  
+BOM Marker bytes (none, for this implementation).
+</descr>
+<seealso>
+<link id="TEncoding.GetPreamble"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #rtl.sysutils.TUTF8Encoding
+  ********************************************************************
+-->
+
+<!-- class Visibility: default -->
+<element name="TUTF8Encoding">
+<short>UTF-8 Unicode encoding</short>
+<descr>
+<p>
+<var>TUTF8Encoding</var> is the encoding class used to represent the UTF-8 encoding.
+</p>
+</descr>
+<seealso>
+<link id="TUnicodeEncoding"/>
+<link id="TUTF7Encoding"/>
+<link id="TMBCSEncoding"/>
+<link id="TBigendianUnicodeEncoding"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TUTF8Encoding.Create">
+<short>Create a new instance of the <var>TUTF8Encoding</var> class</short>
+<descr>
+<var>Create</var> creates a new instance of the <var>TUTF8Encoding</var> class and sets the 
+codepage to <var>CP_UTF8</var>.
+</descr>
+<seealso>
+<link id="TEncoding.CodePage"/>
+<link id="TEncoding"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TUTF8Encoding.Clone" link="TEncoding.Clone">
+<short>Clone a <var>TUTF8Encoding</var> instance</short>
+<descr>
+<var>Clone</var> overrides <link id="TEncoding.Clone"/> to provide a clone of the <var>TUTF8Encoding</var> instance.
+</descr>
+<seealso>
+<link id="TEncoding.Clone"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TUTF8Encoding.GetMaxByteCount" link="TEncoding.GetMaxByteCount">
+<short>Return max number of bytes needed to represent a string</short>
+<descr>
+<var>GetMaxByteCount</var> overrides <link id="TEncoding.GetMaxByteCount"/> to return the  
+maximum number of bytes needed to represent a string.
+</descr>
+<seealso>
+<link id="TEncoding.GetMaxByteCount"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TUTF8Encoding.GetMaxCharCount" link="TEncoding.GetMaxCharCount">
+<short>Return max number of characters that can be represented by an array of bytes</short>
+<descr>
+<var>GetMaxCharCount</var> overrides <link id="TEncoding.GetMaxCharCount"/> to return the  
+maximum number of bytes needed to represent a string.
+</descr>
+<seealso>
+<link id="TEncoding.GetMaxCharCount"/>
+</seealso>
+</element>
+ 
+<!-- function Visibility: public -->
+<element name="TUTF8Encoding.GetPreamble" link="TEncoding.GetPreamble">
+<short>Return BOM marker bytes</short>
+<descr>
+<var>GetPreamble</var> overrides <link id="TEncoding.GetPreamble"/> to return the  
+3 UTF8 BOM Marker bytes ($EF,$BB,$BF).
+</descr>
+<seealso>
+<link id="TEncoding.GetPreamble"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #rtl.sysutils.TUnicodeEncoding
+  ********************************************************************
+-->
+
+<!-- class Visibility: default -->
+<element name="TUnicodeEncoding">
+<short>UTF-16 Unicode encoding</short>
+<descr>
+<p>
+<var>TUnicodeEncoding</var> is the encoding class used to represent the UTF-16 encoding.
+</p>
+</descr>
+<seealso>
+<link id="TUnicodeEncoding"/>
+<link id="TUTF7Encoding"/>
+<link id="TMBCSEncoding"/>
+<link id="TBigendianUnicodeEncoding"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TUnicodeEncoding.Create">
+<short>Create a new instance of the <var>TUnicodeEncoding</var> class</short>
+<descr>
+<var>Create</var> creates a new instance of the <var>TUnicodeEncoding</var> class and sets the 
+codepage to <var>CP_UTF16</var>.
+</descr>
+<seealso>
+<link id="TEncoding.CodePage"/>
+<link id="TEncoding"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TUnicodeEncoding.Clone" link="TEncoding.Clone">
+<short>Clone a <var>TUnicodeEncoding</var> instance</short>
+<descr>
+<var>CLone</var> overrides <link id="TEncoding.Clone"/> to provide a clone of the <var>TUnicodeEncoding</var> instance.
+</descr>
+<seealso>
+<link id="TEncoding.Clone"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TUnicodeEncoding.GetMaxByteCount" link="TEncoding.GetMaxByteCount">
+<short>Return max number of bytes needed to represent a string</short>
+<descr>
+<var>GetMaxByteCount</var> overrides <link id="TEncoding.GetMaxByteCount"/> to return the  
+maximum number of bytes needed to represent a string.
+</descr>
+<seealso>
+<link id="TEncoding.GetMaxByteCount"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TUnicodeEncoding.GetMaxCharCount" link="TEncoding.GetMaxCharCount">
+<short>Return max number of characters that can be represented by an array of bytes</short>
+<descr>
+<var>GetMaxCharCount</var> overrides <link id="TEncoding.GetMaxCharCount"/> to return the  
+maximum number of bytes needed to represent a string.
+</descr>
+<seealso>
+<link id="TEncoding.GetMaxCharCount"/>
+</seealso>
+</element>
+ 
+<!-- function Visibility: public -->
+<element name="TUnicodeEncoding.GetPreamble" link="TEncoding.GetPreamble">
+<short>Return BOM marker bytes</short>
+<descr>
+<var>GetPreamble</var> overrides <link id="TEncoding.GetPreamble"/> to return the  
+2 UTF-16 BOM Marker bytes ($FF,$FE).
+</descr>
+<seealso>
+<link id="TEncoding.GetPreamble"/>
+</seealso>
+</element>
+
+<!--
+  ********************************************************************
+    #rtl.sysutils.TBigEndianUnicodeEncoding
+  ********************************************************************
+-->
+
+<!-- class Visibility: default -->
+<element name="TBigEndianUnicodeEncoding">
+<short>Big-endian UTF-16 Unicode encoding</short>
+<descr>
+<p>
+<var>TBigEndianUnicodeEncoding</var> is the encoding class used to represent the UTF-16 big-endian encoding.
+</p>
+</descr>
+<seealso>
+<link id="TBigEndianUnicodeEncoding"/>
+<link id="TUTF7Encoding"/>
+<link id="TMBCSEncoding"/>
+<link id="TBigendianUnicodeEncoding"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TBigEndianUnicodeEncoding.Create">
+<short>Create a new instance of the <var>TBigEndianUnicodeEncoding</var> class</short>
+<descr>
+<var>Create</var> creates a new instance of the <var>TBigEndianUnicodeEncoding</var> class and sets the 
+codepage to <var>CP_UTF16BE</var>.
+</descr>
+<seealso>
+<link id="TEncoding.CodePage"/>
+<link id="TEncoding"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TBigEndianUnicodeEncoding.Clone" link="TEncoding.Clone">
+<short>Clone a <var>TBigEndianUnicodeEncoding</var> instance</short>
+<descr>
+<var>CLone</var> overrides <link id="TEncoding.Clone"/> to provide a clone of the <var>TBigEndianUnicodeEncoding</var> instance.
+</descr>
+<seealso>
+<link id="TEncoding.Clone"/>
+</seealso>
+</element>
+
+ 
+<!-- function Visibility: public -->
+<element name="TBigEndianUnicodeEncoding.GetPreamble" link="TEncoding.GetPreamble">
+<short>Return BOM marker bytes</short>
+<descr>
+<var>GetPreamble</var> overrides <link id="TEncoding.GetPreamble"/> to return the  
+2 UTF-16 BOM Marker bytes ($FF,$FE).
+</descr>
+<seealso>
+<link id="TEncoding.GetPreamble"/>
 </seealso>
 </element>
 

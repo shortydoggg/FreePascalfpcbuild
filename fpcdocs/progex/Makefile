@@ -48,11 +48,14 @@ ifdef UNITDIR
 PPOPTS:=$(PPOPTS) -Up$(UNITDIR);
 endif
 
+PPOPTS+=-Cg
+CFLAGS+=-L. -Wl,-rpath,.
+
 .SUFFIXES: .pp .tex
 
 .PHONY: all tex clean
 
-OBJECTS=plsubs psubs 
+OBJECTS=plsubs psubs
 COBJECTS=ctest ctest2
 LIBOBJECT=libsubs.so
 TEXOBJECTS=$(addsuffix .tex, $(OBJECTS))
@@ -66,10 +69,10 @@ tex : $(TEXOBJECTS) $(CTEXOBJECTS) subs.tex
 onetex : tex
 	$(MAKETEX) $(TEXOBJECTS)
 
-clean : 
+clean :
 	-rm -f *.o *.s *.so $(OBJECTS) $(COBJECTS) $(TEXOBJECTS) $(CTEXOBJECTS)
 	-rm -f *.ow *.sw *.exe *.dll
- 
+
 $(OBJECTS): %: %.pp $(LIBOBJECT)
 	$(FPC) $(PPOPTS) $*
 
@@ -83,7 +86,7 @@ libsubs.so: subs.pp
 	$(FPC) $(PPOPTS) $<
 
 ctest: ctest.c libsubs.so
-	$(CC) -o ctest ctest.c -lsubs
+	$(CC) $(CFLAGS) -o ctest ctest.c -lsubs
 
 ctest2: ctest2.c libsubs.so
-	$(CC) -o ctest2 ctest2.c -ldl
+	$(CC) $(CFLAGS) -o ctest2 ctest2.c -ldl

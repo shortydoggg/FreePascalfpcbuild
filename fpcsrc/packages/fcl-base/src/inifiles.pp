@@ -139,7 +139,9 @@ type
                     ifoEscapeLineFeeds, // Escape linefeeds when reading file.
                     ifoCaseSensitive,   // Use Case sensitive section/key names
                     ifoStripQuotes,     // Strip quotes when reading string values.
-                    ifoFormatSettingsActive); // Use format settings when writing date/float etc.
+                    ifoFormatSettingsActive, // Use format settings when writing date/float etc.
+                    ifoWriteStringBoolean // Write booleans as string
+                    );
   TIniFileOptions = Set of TIniFileOption;
 
   TSectionValuesOption = (svoIncludeComments,svoIncludeInvalid, svoIncludeQuotes);
@@ -149,17 +151,26 @@ type
 
   TCustomIniFile = class
   Private
+    FBoolFalseStrings: TStringArray;
+    FBoolTrueStrings: TStringArray;
+    FEncoding: TEncoding;
     FFileName: string;
     FOptions: TIniFileOptions;
+    FOwnsEncoding: Boolean;
     FSectionList: TIniFileSectionList;
     function GetOption(AIndex: TIniFileOption): Boolean;
     procedure SetOption(AIndex: TIniFileOption; AValue: Boolean);
     procedure SetOptions(AValue: TIniFileOptions);
+  protected
+    procedure SetEncoding(const aEncoding: TEncoding); virtual;
   public
     FormatSettings: TFormatSettings;
+    constructor Create(const AFileName: string; ADefaultEncoding: TEncoding; AOptions : TIniFileOptions = []);
+    constructor Create(const AFileName: string; ADefaultEncoding: TEncoding; AOwnsEncoding: Boolean; AOptions : TIniFileOptions = []);
     constructor Create(const AFileName: string; AOptions : TIniFileOptions = []); virtual;
     constructor Create(const AFileName: string; AEscapeLineFeeds : Boolean); virtual;
     destructor Destroy; override;
+    Procedure SetBoolStringValues(ABoolValue : Boolean; Values : Array of string);
     function SectionExists(const Section: string): Boolean; virtual;
     function ReadString(const Section, Ident, Default: string): string; virtual; abstract;
     procedure WriteString(const Section, Ident, Value: String); virtual; abstract;
@@ -187,12 +198,16 @@ type
     procedure DeleteKey(const Section, Ident: String); virtual; abstract;
     procedure UpdateFile; virtual; abstract;
     function ValueExists(const Section, Ident: string): Boolean; virtual;
+    property Encoding: TEncoding read FEncoding write SetEncoding;
     property FileName: string read FFileName;
     Property Options : TIniFileOptions Read FOptions Write SetOptions;
     property EscapeLineFeeds: boolean index ifoEscapeLineFeeds Read GetOption ;deprecated 'Use options instead';
     Property CaseSensitive : Boolean index ifoCaseSensitive Read GetOption Write SetOption; deprecated  'Use options instead';
     Property StripQuotes : Boolean index ifoStripQuotes Read GetOption Write SetOption; deprecated 'Use options instead';
     Property FormatSettingsActive : Boolean index ifoFormatSettingsActive Read GetOption Write SetOption;deprecated  'Use options instead';
+    Property BoolTrueStrings : TStringArray Read FBoolTrueStrings Write FBoolTrueStrings;
+    Property BoolFalseStrings : TStringArray Read FBoolFalseStrings Write FBoolFalseStrings;
+    Property OwnsEncoding: Boolean Read FOwnsEncoding;
   end;
 
   { TIniFile }
@@ -202,35 +217,44 @@ type
     FStream: TStream;
     FCacheUpdates: Boolean;
     FDirty : Boolean;
-    FBOM : String;
+    FWriteBOM: Boolean;
     procedure FillSectionList(AStrings: TStrings);
     Procedure DeleteSection(ASection : TIniFileSection);
     Procedure MaybeDeleteSection(ASection : TIniFileSection);
     procedure SetCacheUpdates(const AValue: Boolean);
+    procedure SetWriteBOM(const aWriteBOM: Boolean);
   protected
+    procedure ReadIniValues;
     procedure MaybeUpdateFile;
     property Dirty : Boolean Read FDirty;
+    procedure SetEncoding(const aEncoding: TEncoding); override;
   public
     constructor Create(const AFileName: string; AOptions : TIniFileoptions = []); overload; override;
     constructor Create(AStream: TStream; AOptions : TIniFileoptions = []); overload;
     constructor Create(AStream: TStream; AEscapeLineFeeds : Boolean); overload; deprecated 'Use Options argument instead';
+    constructor Create(AStream: TStream; ADefaultEncoding: TEncoding; AOptions : TIniFileOptions = []);
+    constructor Create(AStream: TStream; ADefaultEncoding: TEncoding; AOwnsEncoding: Boolean; AOptions : TIniFileOptions = []);
     destructor Destroy; override;
     function ReadString(const Section, Ident, Default: string): string; override;
     procedure WriteString(const Section, Ident, Value: String); override;
     procedure ReadSection(const Section: string; Strings: TStrings); override;
     procedure ReadSectionRaw(const Section: string; Strings: TStrings);
     procedure ReadSections(Strings: TStrings); override;
-    procedure ReadSectionValues(const Section: string; Strings: TStrings; AOptions : TSectionValuesOptions = []); overload; override;
+    procedure ReadSectionValues(const Section: string; Strings: TStrings; AOptions : TSectionValuesOptions = [svoIncludeInvalid]); overload; override;
     procedure EraseSection(const Section: string); override;
     procedure DeleteKey(const Section, Ident: String); override;
     procedure UpdateFile; override;
     property Stream: TStream read FStream;
     property CacheUpdates : Boolean read FCacheUpdates write SetCacheUpdates;
+    property WriteBOM: Boolean Read FWriteBOM Write SetWriteBOM;
   end;
+
+  { TMemIniFile }
 
   TMemIniFile = class(TIniFile)
   public
-    constructor Create(const AFileName: string; AEscapeLineFeeds : Boolean = False); overload; override;
+    constructor Create(const AFileName: string; AOptions : TIniFileoptions = []); overload; override;
+    constructor Create(const AFileName: string; AEscapeLineFeeds : Boolean); overload; override;
     procedure Clear;
     procedure GetStrings(List: TStrings);
     procedure Rename(const AFileName: string; Reload: Boolean);
@@ -263,9 +287,7 @@ end;
 
 function IsComment(const AString: string): boolean;
 begin
-  Result := False;
-  if AString > '' then
-    Result := (Copy(AString, 1, 1) = Comment);
+  Result:=(Length(aString)>0) and (Copy(AString, 1, 1) = Comment);
 end;
 
 { TStringHash }
@@ -337,7 +359,10 @@ begin
   if not FValueHashValid then
     UpdateValueHash;
 
-  I := FValueHash.FindIndexOf(S);
+  if CaseSensitive then
+    I := FValueHash.FindIndexOf(S)
+  else
+    I := FValueHash.FindIndexOf(AnsiUpperCase(S));
   if I >= 0 then
     Result := Integer(FValueHash[I])-1
   else
@@ -351,7 +376,10 @@ begin
   if not FNameHashValid then
     UpdateNameHash;
 
-  I := FNameHash.FindIndexOf(Name);
+  if CaseSensitive then
+    I := FNameHash.FindIndexOf(Name)
+  else
+    I := FNameHash.FindIndexOf(AnsiUpperCase(Name));
   if I >= 0 then
     Result := Integer(FNameHash[I])-1
   else
@@ -374,7 +402,10 @@ begin
   else
     FValueHash.Clear;
   for I := 0 to Count - 1 do
-    FValueHash.Add(Strings[I], Pointer(I+1));
+    if CaseSensitive then
+      FValueHash.Add(Strings[I], Pointer(I+1))
+    else
+      FValueHash.Add(AnsiUpperCase(Strings[I]), Pointer(I+1));
   FValueHashValid := True;
 end;
 
@@ -387,7 +418,10 @@ begin
   else
     FNameHash.Clear;
   for I := 0 to Count - 1 do
-    FNameHash.Add(Names[I], Pointer(I+1));
+    if CaseSensitive then
+      FNameHash.Add(Names[I], Pointer(I+1))
+    else
+      FNameHash.Add(AnsiUpperCase(Names[I]), Pointer(I+1));
   FNameHashValid := True;
 end;
 
@@ -580,10 +614,57 @@ begin
     Create(AFileName,[])
 end;
 
+constructor TCustomIniFile.Create(const AFileName: string;
+  ADefaultEncoding: TEncoding; AOwnsEncoding: Boolean;
+  AOptions: TIniFileOptions);
+begin
+  FEncoding := ADefaultEncoding;
+  if FEncoding <> nil then
+    FOwnsEncoding := AOwnsEncoding and not TEncoding.IsStandardEncoding(FEncoding);
+  Create(AFileName, AOptions);
+end;
+
+constructor TCustomIniFile.Create(const AFileName: string;
+  ADefaultEncoding: TEncoding; AOptions: TIniFileOptions);
+begin
+  FEncoding := ADefaultEncoding;
+  if FEncoding <> nil then
+    FOwnsEncoding := not TEncoding.IsStandardEncoding(FEncoding);
+  Create(AFileName, AOptions);
+end;
+
 destructor TCustomIniFile.Destroy;
 begin
   FSectionList.Free;
+  if FOwnsEncoding then
+    FEncoding.Free;
   inherited Destroy;
+end;
+
+procedure TCustomIniFile.SetBoolStringValues(ABoolValue: Boolean;
+  Values: array of string);
+
+Var
+  A : TstringArray;
+  I : Integer;
+
+begin
+  SetLength(A,Length(Values));
+  For I:=0 to length(Values)-1 do
+    A[i]:=Values[i];
+  If AboolValue then
+    FBoolTrueStrings:=A
+  else
+    FBoolFalseStrings:=A;
+end;
+
+procedure TCustomIniFile.SetEncoding(const aEncoding: TEncoding);
+begin
+  if FEncoding = aEncoding then Exit;
+  if FOwnsEncoding then
+    FEncoding.Free;
+  FEncoding := aEncoding;
+  FOwnsEncoding := Assigned(FEncoding) and not TEncoding.IsStandardEncoding(FEncoding);
 end;
 
 function TCustomIniFile.SectionExists(const Section: string): Boolean;
@@ -618,19 +699,59 @@ begin
   WriteString(Section, Ident, IntToStr(Value));
 end;
 
+function IndexOfString(A : TStringArray; S : String) : integer;
+
+begin
+  Result:=Length(A)-1;
+  While (Result>=0) and (CompareText(A[Result],S)<>0) do
+    Dec(Result);
+end;
+
 function TCustomIniFile.ReadBool(const Section, Ident: string; Default: Boolean): Boolean;
+
 var
   s: string;
 begin
   Result := Default;
-  s := ReadString(Section, Ident, '');
+  s:=ReadString(Section, Ident, '');
   if s > '' then
-    Result := CharToBool(s[1]);
+    if (Length(FBoolTrueStrings)>0) or (Length(FBoolFalseStrings)>0) then
+      begin
+      if IndexOfString(FBoolTrueStrings,S)>=0 then
+        Result:=True
+      else if IndexOfString(FBoolFalseStrings,S)>=0 then
+        Result:=False
+      end
+    else
+      Result := CharToBool(s[1]);
 end;
 
 procedure TCustomIniFile.WriteBool(const Section, Ident: string; Value: Boolean);
+
+Var
+  S : String;
+
 begin
-  WriteString(Section, Ident, BoolToChar(Value));
+  if (ifoWriteStringBoolean in options) then
+    begin
+    if Value then
+      begin
+      if Length(BoolTrueStrings)>0 then
+        S:=BoolTrueStrings[0]
+      else
+        S:='true';
+      end
+    else
+      begin
+      if Length(BoolFalseStrings)>0 then
+        S:=BoolFalseStrings[0]
+      else
+        S:='false';
+      end;
+    end
+  else
+    S:=BoolToChar(Value);
+  WriteString(Section, Ident, S);
 end;
 
 function TCustomIniFile.ReadDate(const Section, Ident: string; Default: TDateTime): TDateTime;
@@ -820,32 +941,19 @@ end;
 procedure TCustomIniFile.ReadSectionValues(const Section: string;
   Strings: TStrings);
 begin
-  ReadSectionValues(Section,Strings,[]);
+  ReadSectionValues(Section,Strings,[svoIncludeInvalid]);
 end;
 
 { TIniFile }
 
 
-constructor TIniFile.Create(const AFileName: string; AOptions : TIniFileOptions = []);
-var
-  slLines: TStringList;
+constructor TIniFile.Create(const AFileName: string; AOptions: TIniFileoptions);
 begin
-  FBOM := '';
   If Not (self is TMemIniFile) then
-    StripQuotes:=True;
+    Include(AOptions,ifoStripQuotes);
   inherited Create(AFileName,AOptions);
   FStream := nil;
-  slLines := TStringList.Create;
-  try
-    if FileExists(FFileName) then
-      begin
-      // read the ini file values
-      slLines.LoadFromFile(FFileName);
-      FillSectionList(slLines);
-      end
-  finally
-    slLines.Free;
-  end;
+  ReadIniValues;
 end;
 
 constructor TIniFile.Create(AStream: TStream; AEscapeLineFeeds : Boolean);
@@ -857,26 +965,44 @@ begin
     Create(AStream,[]);
 end;
 
-constructor TIniFile.Create(AStream: TStream; AOptions : TIniFileOptions = []);
+constructor TIniFile.Create(AStream: TStream; ADefaultEncoding: TEncoding;
+  AOwnsEncoding: Boolean; AOptions: TIniFileOptions);
+begin
+  FEncoding := ADefaultEncoding;
+  if FEncoding <> nil then
+    FOwnsEncoding := AOwnsEncoding and not TEncoding.IsStandardEncoding(FEncoding);
+  Create(AStream, AOptions);
+end;
+
+constructor TIniFile.Create(AStream: TStream; ADefaultEncoding: TEncoding;
+  AOptions: TIniFileOptions);
+begin
+  FEncoding := ADefaultEncoding;
+  if FEncoding <> nil then
+    FOwnsEncoding := not TEncoding.IsStandardEncoding(FEncoding);
+  Create(AStream, AOptions);
+end;
+
+constructor TIniFile.Create(AStream: TStream; AOptions: TIniFileoptions);
 
 var
   slLines: TStringList;
 
 begin
-  FBOM := '';
   inherited Create('',AOptions);
   FStream := AStream;
   slLines := TStringList.Create;
   try
     // read the ini file values
-    slLines.LoadFromStream(FStream);
+    slLines.LoadFromStream(FStream, FEncoding);
     FillSectionList(slLines);
+    FWriteBOM := Assigned(FEncoding) and ((FEncoding.CodePage=CP_UTF16) or (FEncoding.CodePage=CP_UTF16BE)); // write BOM for UTF16 by default
   finally
     slLines.Free;
   end;
 end;
 
-destructor TIniFile.destroy;
+destructor TIniFile.Destroy;
 begin
   If FDirty and FCacheUpdates then
     try
@@ -888,11 +1014,8 @@ begin
 end;
 
 procedure TIniFile.FillSectionList(AStrings: TStrings);
-const
-  Utf8Bom    = #$EF#$BB#$BF;        { Die einzelnen BOM Typen }
-
 var
-  i,j: integer;
+  i,j,sLen: integer;
   sLine, sIdent, sValue: string;
   oSection: TIniFileSection;
 
@@ -928,14 +1051,10 @@ begin
   FSectionList.Clear;
   if EscapeLineFeeds then
     RemoveBackslashes;
-  if (AStrings.Count > 0) and (copy(AStrings.Strings[0],1,Length(Utf8Bom)) = Utf8Bom) then
-  begin
-    FBOM := Utf8Bom;
-    AStrings.Strings[0] := copy(AStrings.Strings[0],Length(Utf8Bom)+1,Length(AStrings.Strings[0]));
-  end;
   for i := 0 to AStrings.Count-1 do begin
     sLine := Trim(AStrings[i]);
-    if sLine > '' then
+    sLen:=Length(sLine);
+    if (sLen>0)  then
       begin
       if IsComment(sLine) and (oSection = nil) then
         begin
@@ -947,10 +1066,10 @@ begin
           end;
         continue;
         end;
-      if (Copy(sLine, 1, 1) = Brackets[0]) and (Copy(sLine, length(sLine), 1) = Brackets[1]) then
+      if (sLine[1]=Brackets[0]) and (sLine[sLen]= Brackets[1]) then
         begin
         // regular section
-        oSection := TIniFileSection.Create(Copy(sLine, 2, Length(sLine) - 2));
+        oSection := TIniFileSection.Create(Copy(sLine, 2, sLen - 2));
         FSectionList.Add(oSection);
         end
       else if oSection <> nil then
@@ -976,7 +1095,7 @@ begin
            begin
            AddKey:=True;
            sIdent:=Trim(Copy(sLine, 1,  j - 1));
-           sValue:=Trim(Copy(sLine, j + 1, Length(sLine) - j));
+           sValue:=Trim(Copy(sLine, j + 1, sLen - j));
            end;
         end;
         if AddKey then
@@ -1017,6 +1136,22 @@ begin
   if FCacheUpdates and not AValue and FDirty then
     UpdateFile;
   FCacheUpdates := AValue;
+end;
+
+procedure TIniFile.SetEncoding(const aEncoding: TEncoding);
+begin
+  if FEncoding = aEncoding then Exit;
+  inherited SetEncoding(aEncoding);
+  if Assigned(FEncoding) and ((FEncoding.CodePage=CP_UTF16) or (FEncoding.CodePage=CP_UTF16BE)) then
+    FWriteBOM := True;
+  MaybeUpdateFile;
+end;
+
+procedure TIniFile.SetWriteBOM(const aWriteBOM: Boolean);
+begin
+  if FWriteBOM = aWriteBOM then Exit;
+  FWriteBOM := aWriteBOM;
+  MaybeUpdateFile;
 end;
 
 procedure TIniFile.WriteString(const Section, Ident, Value: String);
@@ -1074,7 +1209,6 @@ begin
     oSection := FSectionList.SectionByName(Section,CaseSensitive);
     if oSection <> nil then with oSection.KeyList do
       for i := 0 to Count-1 do
-        if not IsComment(Items[i].Ident) then
          begin
            if Items[i].Ident<>'' then
             Strings.Add(Items[i].Ident + Separator +Items[i].Value)
@@ -1101,7 +1235,7 @@ begin
   end;
 end;
 
-procedure TIniFile.ReadSectionValues(const Section: string; Strings: TStrings; AOptions : TSectionValuesOptions = []);
+procedure TIniFile.ReadSectionValues(const Section: string; Strings: TStrings; AOptions : TSectionValuesOptions = [svoIncludeInvalid]);
 var
   oSection: TIniFileSection;
   s: string;
@@ -1157,7 +1291,7 @@ begin
   ASection.Free;
 end;
 
-Procedure TIniFile.MaybeDeleteSection(ASection : TIniFileSection);
+procedure TIniFile.MaybeDeleteSection(ASection: TIniFileSection);
 
 begin
   If Asection.Empty then
@@ -1222,20 +1356,19 @@ begin
         if (i < FSectionList.Count-1) and not IsComment(Name) then
           slLines.Add('');
       end;
-    if slLines.Count > 0 then
-      slLines.Strings[0] := FBOM + slLines.Strings[0];
+    slLines.WriteBOM := FWriteBOM;
     if FFileName > '' then
       begin
       D:=ExtractFilePath(FFileName);
       If D <> '' Then
         if not ForceDirectories(D) then
           Raise EInoutError.CreateFmt(SErrCouldNotCreatePath,[D]);
-      slLines.SaveToFile(FFileName);
+      slLines.SaveToFile(FFileName, FEncoding);
       end
     else if FStream <> nil then
       begin
       Fstream.Size:=0;
-      slLines.SaveToStream(FStream);
+      slLines.SaveToStream(FStream, FEncoding);
       end;
     FillSectionList(slLines);
     FDirty := false;
@@ -1252,9 +1385,55 @@ begin
     UpdateFile;
 end;
 
+procedure TIniFile.ReadIniValues;
+var
+  slLines: TStringList;
+begin
+  FSectionList.Clear;
+
+  if FileExists(FFileName) then
+  begin
+    slLines := TStringList.Create;
+    try
+      // read the ini file values
+      if FEncoding<>nil then
+        slLines.DefaultEncoding := FEncoding; // TStrings clones the encoding.
+      slLines.Options := slLines.Options + [soPreserveBOM];
+      slLines.LoadFromFile(FFileName, nil);
+      if (FEncoding=nil) or (FEncoding.CodePage<>slLines.Encoding.CodePage) then
+      begin
+        if FOwnsEncoding then
+          FEncoding.Free;
+        if TEncoding.IsStandardEncoding(slLines.Encoding) then
+        begin
+          FEncoding := slLines.Encoding;
+          FOwnsEncoding := False;
+        end else
+        begin
+          FEncoding := slLines.Encoding.Clone;
+          FOwnsEncoding := True;
+        end;
+      end;
+      FWriteBOM := slLines.WriteBOM;
+      FillSectionList(slLines);
+    finally
+      slLines.Free;
+    end;
+  end else
+  begin
+    FWriteBOM := Assigned(FEncoding) and ((FEncoding.CodePage=CP_UTF16) or (FEncoding.CodePage=CP_UTF16BE)); // write BOM for UTF16 by default
+  end;
+end;
+
 { TMemIniFile }
 
-constructor TMemIniFile.Create(const AFileName: string; AEscapeLineFeeds : Boolean = False);
+constructor TMemIniFile.Create(const AFileName: string; AOptions: TIniFileoptions);
+begin
+  inherited;
+  FCacheUpdates:=True;
+end;
+
+constructor TMemIniFile.Create(const AFileName: string; AEscapeLineFeeds : Boolean);
 
 begin
   Inherited;
@@ -1296,20 +1475,11 @@ begin
 end;
 
 procedure TMemIniFile.Rename(const AFileName: string; Reload: Boolean);
-var
-  slLines: TStringList;
 begin
   FFileName := AFileName;
   FStream := nil;
-  if Reload then begin
-    slLines := TStringList.Create;
-    try
-      slLines.LoadFromFile(FFileName);
-      FillSectionList(slLines);
-    finally
-      slLines.Free;
-    end;
-  end;
+  if Reload then
+    ReadIniValues;
 end;
 
 procedure TMemIniFile.SetStrings(List: TStrings);

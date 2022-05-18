@@ -159,10 +159,6 @@ end;
 
   procedure TStream.FakeSeekForward(Offset: Int64;  const Origin: TSeekOrigin; const Pos: Int64);
 
-  var
-    Buffer: Pointer;
-    BufferSize, i: LongInt;
-
   begin
     if Origin=soBeginning then
        Dec(Offset,Pos);
@@ -566,9 +562,21 @@ begin
 
   If (THandle(FHandle)=feInvalidHandle) then
     If Mode=fmcreate then
+    begin
+      {$if declared(GetLastOSError)}
+      raise EFCreateError.createfmt(SFCreateErrorEx,[AFileName, SysErrorMessage(GetLastOSError)])
+      {$else}
       raise EFCreateError.createfmt(SFCreateError,[AFileName])
+      {$endif}
+    end
     else
+    begin
+      {$if declared(GetLastOSError)}
+      raise EFOpenError.Createfmt(SFOpenErrorEx,[AFilename, SysErrorMessage(GetLastOSError)]);
+      {$else}
       raise EFOpenError.Createfmt(SFOpenError,[AFilename]);
+      {$endif}
+    end;
 end;
 
 
@@ -671,14 +679,18 @@ end;
 
 function TMemoryStream.Realloc(var NewCapacity: PtrInt): Pointer;
 
+Var
+  GC : PtrInt;
+
 begin
   If NewCapacity<0 Then
     NewCapacity:=0
   else
     begin
+      GC:=FCapacity + (FCapacity div 4);
       // if growing, grow at least a quarter
-      if (NewCapacity>FCapacity) and (NewCapacity < (5*FCapacity) div 4) then
-        NewCapacity := (5*FCapacity) div 4;
+      if (NewCapacity>FCapacity) and (NewCapacity < GC) then
+        NewCapacity := GC;
       // round off to block size.
       NewCapacity := (NewCapacity + (TMSGrow-1)) and not (TMSGROW-1);
     end;
@@ -796,95 +808,190 @@ begin
     end;
 end;
 
+
 {****************************************************************************}
 {*                             TStringStream                                *}
 {****************************************************************************}
 
-function TStringStream.GetSize: Int64;
+function TStringStream.GetDataString: string;
 begin
-  Result:=Length(FDataString);
+  Result:=FEncoding.GetAnsiString(Bytes,0,Size);
 end;
 
-function TStringStream.GetPosition: Int64;
+function TStringStream.GetUnicodeDataString: UnicodeString;
 begin
-  Result:=FPosition;
+  Result:=FEncoding.GetString(Bytes, 0, Size);
 end;
 
-procedure TStringStream.SetSize(NewSize: Longint);
+constructor TStringStream.Create(const AString: string = '');
 
 begin
- Setlength(FDataString,NewSize);
- If FPosition>NewSize then FPosition:=NewSize;
+  Create(AString,TEncoding.Default, False);
 end;
 
-
-constructor TStringStream.Create(const AString: string);
-
+constructor TStringStream.Create(const ABytes: TBytes);
 begin
-  Inherited create;
-  FDataString:=AString;
-  UniqueString(FDataString);
+  inherited Create(ABytes);
+  FEncoding:=TEncoding.Default;
+  FOwnsEncoding:=False;
 end;
 
+constructor TStringStream.CreateRaw(const AString: RawByteString);
 
-function TStringStream.Read(var Buffer; Count: Longint): Longint;
+var
+  CP: TSystemCodePage;
 
 begin
-  Result:=Length(FDataString)-FPosition;
-  If Result>Count then Result:=Count;
-  // This supposes FDataString to be of type AnsiString !
-  if Result>0 then
-   begin
-   Move (Pchar(FDataString)[FPosition],Buffer,Result);
-   FPosition:=FPosition+Result;
-   end;
+  CP:=StringCodePage(AString);
+  if (CP=CP_ACP) or (CP=TEncoding.Default.CodePage) then
+    begin
+    FEncoding:=TEncoding.Default;
+    FOwnsEncoding:=False;
+    end
+  else
+    begin
+    FEncoding:=TEncoding.GetEncoding(CP);
+    FOwnsEncoding:=True;
+    end;
+  inherited Create(BytesOf(AString));
+end;
+
+constructor TStringStream.Create(const AString: string; AEncoding: TEncoding; AOwnsEncoding: Boolean);
+begin
+  FOwnsEncoding:=AOwnsEncoding and not TEncoding.IsStandardEncoding(AEncoding);
+  FEncoding:=AEncoding;
+  Inherited Create(AEncoding.GetAnsiBytes(AString));
+end;
+
+constructor TStringStream.Create(const AString: string; ACodePage: Integer);
+begin
+  Create(AString,TEncoding.GetEncoding(ACodePage),true);
+end;
+
+constructor TStringStream.Create(const AString: UnicodeString);
+begin
+  Create(AString,TEncoding.Unicode,false);
+end;
+
+constructor TStringStream.Create(const AString: UnicodeString; AEncoding: TEncoding; AOwnsEncoding: Boolean);
+begin
+  FOwnsEncoding:=AOwnsEncoding and not TEncoding.IsStandardEncoding(AEncoding);
+  FEncoding:=AEncoding;
+  Inherited Create(AEncoding.GetBytes(AString));
+end;
+
+constructor TStringStream.Create(const AString: UnicodeString; ACodePage: Integer);
+
+begin
+  Create(AString,TEncoding.GetEncoding(ACodePage),true);
+end;
+
+destructor TStringStream.Destroy;
+begin
+  If FOwnsEncoding then
+    FreeAndNil(FEncoding);
+  inherited Destroy;
 end;
 
 
 function TStringStream.ReadString(Count: Longint): string;
 
-Var NewLen : Longint;
+begin
+  Result:=ReadAnsiString(Count);
+end;
+
+function TStringStream.ReadUnicodeString(Count: Longint): UnicodeString;
+
+Var
+  NewLen,SLen : Longint;
 
 begin
-  NewLen:=Length(FDataString)-FPosition;
+  NewLen:=Size-FPosition;
   If NewLen>Count then NewLen:=Count;
-  SetLength(Result,NewLen);
-  Read (Pointer(Result)^,NewLen);
+  Result:=FEncoding.GetString(FBytes,FPosition,NewLen);
 end;
-
-
-function TStringStream.Seek(Offset: Longint; Origin: Word): Longint;
-
-begin
-  Case Origin of
-    soFromBeginning : FPosition:=Offset;
-    soFromEnd       : FPosition:=Length(FDataString)+Offset;
-    soFromCurrent   : FPosition:=FPosition+Offset;
-  end;
-  If FPosition>Length(FDataString) then
-    FPosition:=Length(FDataString)
-  else If FPosition<0 then
-    FPosition:=0;
-  Result:=FPosition;
-end;
-
-
-function TStringStream.Write(const Buffer; Count: Longint): Longint;
-
-begin
-  Result:=Count;
-  if FPosition+Count>Size then
-    SetSize(FPosition+Count);
-  // This supposes that FDataString is of type AnsiString)
-  Move (Buffer,PChar(FDataString)[Fposition],Count);
-  FPosition:=FPosition+Count;
-end;
-
 
 procedure TStringStream.WriteString(const AString: string);
 
 begin
-  Write (PChar(Astring)[0],Length(AString));
+  WriteAnsiString(AString);
+end;
+
+procedure TStringStream.WriteUnicodeString(const AString: UnicodeString);
+Var
+  B: TBytes;
+
+begin
+  B:=FEncoding.GetBytes(AString);
+  if Length(B)>0 then
+    WriteBuffer(B[0],Length(Bytes));
+end;
+
+function TStringStream.ReadAnsiString(Count: Longint): AnsiString;
+
+Var
+  NewLen : Longint;
+
+begin
+  NewLen:=Size-FPosition;
+  If NewLen>Count then NewLen:=Count;
+  Result:=FEncoding.GetAnsiString(FBytes,FPosition,NewLen);
+end;
+
+procedure TStringStream.WriteAnsiString(const AString: AnsiString);
+
+Var
+  B: TBytes;
+
+begin
+  B:=FEncoding.GetAnsiBytes(AString);
+  if Length(B)>0 then
+    WriteBuffer(B[0],Length(B));
+end;
+
+
+
+{****************************************************************************}
+{*                          TRawByteStringStream                            *}
+{****************************************************************************}
+
+constructor TRawByteStringStream.Create(const aData: RawByteString);
+begin
+  Inherited Create;
+  If Length(aData)>0 then
+    begin
+    WriteBuffer(aData[1],Length(aData));
+    Position:=0;
+    end;
+end;
+
+function TRawByteStringStream.DataString: RawByteString;
+begin
+  Result:='';
+  SetLength(Result,Size);
+  if Size>0 then
+    Move(Memory^, Result[1], Size);
+end;
+
+function TRawByteStringStream.ReadString(Count: Longint): RawByteString;
+Var
+  NewLen : Longint;
+
+begin
+  NewLen:=Size-FPosition;
+  If NewLen>Count then NewLen:=Count;
+  Result:='';
+  if NewLen>0 then
+    begin
+    SetLength(Result, NewLen);
+    Move(FBytes[FPosition],Result[1],NewLen);
+    end;
+end;
+
+procedure TRawByteStringStream.WriteString(const AString: RawByteString);
+begin
+  if Length(AString)>0 then
+    WriteBuffer(AString[1],Length(AString));
 end;
 
 
@@ -1038,7 +1145,7 @@ begin
   Result := S_OK;
 end;
 
-function TStreamAdapter.Seek(dlibMove: LargeUint; dwOrigin: Longint; out libNewPosition: LargeUint): HResult; stdcall;
+function TStreamAdapter.Seek(dlibMove: LargeInt; dwOrigin: DWORD; out libNewPosition: LargeUint): HResult; stdcall;
 var
   newpos: QWord;
 begin
@@ -1118,7 +1225,7 @@ begin
   Result := S_OK;
 end;
 
-function TStreamAdapter.Commit(grfCommitFlags: Longint): HResult; stdcall;
+function TStreamAdapter.Commit(grfCommitFlags: DWORD): HResult; stdcall;
 begin
   if m_bReverted then
     Result := STG_E_REVERTED
@@ -1133,19 +1240,19 @@ begin
 end;
 
 
-function TStreamAdapter.LockRegion(libOffset: LargeUint; cb: LargeUint; dwLockType: Longint): HResult; stdcall;
+function TStreamAdapter.LockRegion(libOffset: LargeUint; cb: LargeUint; dwLockType: DWORD): HResult; stdcall;
 begin
   Result := STG_E_INVALIDFUNCTION;
 end;
 
 
-function TStreamAdapter.UnlockRegion(libOffset: LargeUint; cb: LargeUint; dwLockType: Longint): HResult; stdcall;
+function TStreamAdapter.UnlockRegion(libOffset: LargeUint; cb: LargeUint; dwLockType: DWORD): HResult; stdcall;
 begin
   Result := STG_E_INVALIDFUNCTION;
 end;
 
 
-function TStreamAdapter.Stat(out statstg: TStatStg; grfStatFlag: Longint): HResult; stdcall;
+function TStreamAdapter.Stat(out statstg: TStatStg; grfStatFlag: DWORD): HResult; stdcall;
 begin
   if m_bReverted then
     begin

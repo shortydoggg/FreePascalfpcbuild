@@ -40,9 +40,9 @@ implementation
     uses
       systems,
       cutils,cclasses,verbose,globals,constexp,
-      symconst,symdef,symsym,symtable,symcreat,defutil,paramgr,
+      symconst,symdef,symsym,symtable,defutil,procdefutil,pparautl,symcreat,
       aasmbase,aasmtai,aasmdata,
-      procinfo,pass_2,parabase,
+      procinfo,pass_2,parabase,paramgr,
       pass_1,ncnv,nmem,nld,ncon,nadd,nutils,
       cgutils,cgobj,hlcgobj,
       tgobj,ncgutil,objcgutl
@@ -109,7 +109,7 @@ implementation
         else
           begin
             result:=caddrnode.create_internal(cloadnode.create(current_procinfo.procdef.parentfpstruct,current_procinfo.procdef.parentfpstruct.owner));
-            include(result.flags,nf_typedaddr);
+            include(taddrnode(result).addrnodeflags,anf_typedaddr);
             currpi:=current_procinfo;
           end;
         { follow the chain of parentfpstructs until we arrive at the one we

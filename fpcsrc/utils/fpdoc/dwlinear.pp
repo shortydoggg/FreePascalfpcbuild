@@ -1,7 +1,7 @@
 {$mode objfpc}
 {$H+}
 unit dwlinear;
-
+{$WARN 5024 off : Parameter "$1" not used}
 interface
 
 uses
@@ -47,7 +47,8 @@ Type
     // Procedures which MAY be overridden in descendents
     procedure WriteBeginDocument; virtual;
     procedure WriteEndDocument; virtual;
-    Function  EscapeText(S : String) : String; virtual;
+    Function  EscapeText(S : UnicodeString) : String; overload;
+    Function  EscapeText(S : String) : String; virtual; overload;
     Function  StripText(S : String) : String; virtual;
     Procedure StartProcedure; Virtual;
     Procedure EndProcedure; Virtual;
@@ -396,10 +397,12 @@ var
   Member: TPasElement;
   i: Integer;
 begin
+  DocNode := Engine.FindDocNode(ClassDecl);
+  if Assigned(DocNode) and DocNode.IsSkipped then
+    Exit;
   StartSection(ClassDecl.Name);
   WriteLabel(ClassDecl);
   WriteIndex(ClassDecl);
-  DocNode := Engine.FindDocNode(ClassDecl);
   if Assigned(DocNode) and ((not IsDescrNodeEmpty(DocNode.Descr)) or
     (not IsDescrNodeEmpty(DocNode.ShortDescr))) then
   begin
@@ -482,6 +485,8 @@ begin
         L:=StripText(GetLabel(Member));
         N:=EscapeText(Member.Name);
         DocNode := Engine.FindDocNode(Member);
+        if Assigned(DocNode) and DocNode.IsSkipped then
+          Continue;
         if Assigned(DocNode) then
         begin
           if FDupLinkedDoc and (DocNode.Link <> '') then
@@ -519,7 +524,7 @@ procedure TLinearWriter.WriteClassInterfacesOverview(ClassDecl: TPasClassType);
 var
   lInterface: TPasElement;
   i: Integer;
-  L,N,S,A: String;
+  L,N,S: String;
   DocNode: TDocNode;
   List : TStringList;
   lNode: TDocNode;
@@ -544,6 +549,8 @@ begin
         L := StripText(GetLabel(lInterface));
         N := EscapeText(lInterface.Name);
         DocNode := Engine.FindDocNode(lInterface);
+        if Assigned(DocNode) and DocNode.IsSkipped then
+          Continue;
         if Assigned(DocNode) then
         begin
           if FDupLinkedDoc and (DocNode.Link <> '') then
@@ -595,7 +602,7 @@ begin
   If (Engine.OutPut='') then
     Engine.Output:=PackageName+FileNameExtension
   else if (ExtractFileExt(Engine.output)='') and (FileNameExtension<>'') then
-    Engine.Output:=ChangeFileExt(Engine.output,FileNameExtension);  
+    Engine.Output:=ChangeFileExt(Engine.output,FileNameExtension);
   FStream:=TFileStream.Create(Engine.Output,fmCreate);
   try
     WriteBeginDocument;
@@ -682,7 +689,7 @@ begin
     begin
       ResStrDecl := TPasResString(ASection.ResStrings[i]);
       StartListing(false, '');
-      DescrWriteText(ResStrDecl.GetDeclaration(True)); // instead of WriteLn() so we can do further processing like manual line wrapping in descendants
+      DescrWriteText(UTF8Decode(ResStrDecl.GetDeclaration(True))); // instead of WriteLn() so we can do further processing like manual line wrapping in descendants
       EndListing;
       WriteLabel(ResStrDecl);
       WriteIndex(ResStrDecl);
@@ -863,10 +870,8 @@ end;
 
 procedure TLinearWriter.WriteTypes(ASection: TPasSection);
 var
-  i,j: Integer;
+  i: Integer;
   TypeDecl: TPasType;
-  Recdecl: TPasRecordType;
-  Member : TPasElement;
   DocNode : TDocNode;
 begin
   if ASection.Types.Count > 0 then
@@ -875,12 +880,14 @@ begin
     for i := 0 to ASection.Types.Count - 1 do
       begin
       TypeDecl := TPasType(ASection.Types[i]);
+      DocNode := Engine.FindDocNode(TypeDecl);
+      if Assigned(DocNode) and DocNode.IsSkipped then
+        Continue;
       if not ((TypeDecl is TPasRecordType) and TPasRecordType(TypeDecl).IsAdvancedRecord) then
         begin
         DescrBeginParagraph;
         WriteTypeDecl(TypeDecl);
         StartListing(False,'');
-        DocNode := Engine.FindDocNode(TypeDecl);
         If Assigned(DocNode) and
            Assigned(DocNode.Node) and
            (Docnode.Node['opaque']='1') then
@@ -953,6 +960,9 @@ var
 begin
   With ProcDecl do
     begin
+    DocNode := Engine.FindDocNode(ProcDecl);
+    if Assigned(DocNode) and DocNode.IsSkipped then
+      Exit;
     if Not (Assigned(Parent) and ((Parent.InheritsFrom(TPasClassType)) or Parent.InheritsFrom(TPasRecordType))) then
       begin
       StartSubSection(Name);
@@ -966,7 +976,6 @@ begin
       WriteIndex(Parent.Name+'.'+Name);
       end;
     StartProcedure;
-    DocNode := Engine.FindDocNode(ProcDecl);
     if Assigned(DocNode) and Assigned(DocNode.ShortDescr) then
       begin
       StartSynopsis;
@@ -1065,11 +1074,13 @@ var
 begin
   With PropDecl do
     begin
+    DocNode := Engine.FindDocNode(PropDecl);
+    if Assigned(DocNode) and DocNode.IsSkipped then
+      Exit;
     StartSubSection(Parent.Name+'.'+Name);
     WriteLabel(PropDecl);
     WriteIndex(Parent.Name+'.'+Name);
     StartProperty;
-    DocNode := Engine.FindDocNode(PropDecl);
     if Assigned(DocNode) then
     begin
       if FDupLinkedDoc and (DocNode.Link <> '') then
@@ -1097,7 +1108,7 @@ begin
       Writeln(VisibilityNames[Visibility])
       end;
     StartAccess;
-    Setlength(S,0);
+    S:='';
     If Length(ReadAccessorName) > 0 then
       S:='Read';
     if Length(WriteAccessorName) > 0 then
@@ -1138,7 +1149,7 @@ procedure TLinearWriter.WriteSeeAlso(ADocNode: TDocNode);
 
 var
   Node: TDOMNode;
-  s: String;
+  s: DOMString;
   First : Boolean;
 
 begin
@@ -1288,6 +1299,8 @@ begin
         L:=StripText(GetLabel(Member));
         N:=EscapeText(Member.Name);
         DocNode := Engine.FindDocNode(Member);
+        if Assigned(DocNode) and DocNode.IsSkipped then
+          Continue;
         If Assigned(DocNode) then
           S:=GetDescrString(Member, DocNode.ShortDescr)
         else
@@ -1468,6 +1481,11 @@ end;
 procedure TLinearWriter.WriteEndDocument;
 begin
   // do nothing
+end;
+
+function TLinearWriter.EscapeText(S: UnicodeString): String;
+begin
+  Result:=EscapeText(UTF8Encode(S));
 end;
 
 function TLinearWriter.InterpretOption(const Cmd, Arg: String): Boolean;

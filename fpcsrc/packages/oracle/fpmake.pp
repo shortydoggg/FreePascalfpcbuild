@@ -17,10 +17,12 @@ begin
 {$ifdef ALLPACKAGES}
     P.Directory:=ADirectory;
 {$endif ALLPACKAGES}
-    P.Version:='3.0.2';
+    P.Version:='3.2.0';
     P.SourcePath.Add('src');
     P.IncludePath.Add('src');
     P.OSes := AllUnixOSes+AllWindowsOSes-[qnx];
+    if Defaults.CPU=jvm then
+      P.OSes := P.OSes - [java,android];
 
     T:=P.Targets.AddUnit('ocidyn.pp');
       with T.Dependencies do

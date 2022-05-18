@@ -33,7 +33,7 @@ the functionality available on each separate platform, in the interest of
 portability.
 </p>
 <p>
-On unix platforms, using this unit will cause the program to be linked to
+On UNIX platforms, using this unit will cause the program to be linked to
 the C library, as most shared libraries are implemented in C and the
 dynamical linker too.
 </p>
@@ -121,8 +121,8 @@ If the symbol cannot be found, <var>Nil</var> is returned.
 <short>Unload a previously loaded library</short>
 <descr>
 <var>UnloadLibrary</var> unloads a previously loaded library (specified by
-the handle <var>lib</var>). The call returns <var>True</var> if succesful,
-<var>False</var> otherwisa.
+the handle <var>lib</var>). The call returns <var>True</var> if successful,
+<var>False</var> otherwise.
 </descr>
 <errors>
 On error, <var>False</var> is returned.
@@ -508,15 +508,16 @@ symbol definitions pointed to by <var>Symbols</var>.
 
 <!-- function Visibility: default -->
 <element name="GetLoadErrorStr">
-<short>Return a textual description of the last load error</short>
+<short>Return a description of the last error during load/get procedure address operations.</short>
 <descr>
 <var>GetLoadErrorStr</var> returns a textual description of the last library
-loading or unloading error.
+loading or unloading error, or a call to <link id="GetProcedureAddress"/>.
 No other system calls may be made between the load call and the call of
-<var>GetLoadErrorStr</var>
+<var>GetLoadErrorStr</var>.
 </descr>
 <seealso>
 <link id="LoadLibrary"/>
+<link id="GetProcedureAddress"/>
 </seealso>
 </element>
 

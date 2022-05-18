@@ -89,7 +89,7 @@ uses
   
      You should have received a copy of the GNU General Public License
      along with this program; if not, write to the Free Software
-     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA  }
+     Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA  }
 
     type
        my_bool = cchar;
@@ -1832,7 +1832,8 @@ uses
 Function InitialiseMysql(Const LibraryName : AnsiString) : Integer;
 Function InitialiseMysql(Const LibraryName : AnsiString; argc: cint; argv:PPchar = Nil; groups:PPchar = nil) : Integer;
 Function InitialiseMysql(argc:cint = -1; argv:PPchar = nil; groups:PPchar = nil) : Integer;
-Procedure ReleaseMysql;
+Procedure ReleaseMySQL;
+Function DoReleaseMysql : Integer;
 
 var MysqlLibraryHandle : TLibHandle;
   MysqlLoadedLibrary : String;
@@ -2015,7 +2016,13 @@ begin
     end;
 end;
 
-Procedure ReleaseMysql;
+Procedure ReleaseMySQL;
+
+begin
+  DoReleaseMysql;
+end;
+
+Function DoReleaseMysql : Integer;
 
 begin
   if RefCount> 1 then
@@ -2029,7 +2036,8 @@ begin
       MysqlLibraryHandle := NilHandle;
       MysqlLoadedLibrary:='';
       end
-    end
+    end;
+  Result:=RefCount;
 end;
 
 {$ENDIF}

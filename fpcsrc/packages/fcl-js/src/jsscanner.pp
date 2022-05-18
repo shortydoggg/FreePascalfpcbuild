@@ -79,7 +79,6 @@ Type
     FCurToken: TJSToken;
     FCurTokenString: string;
     FCurLine: string;
-    FDefines: TStrings;
     TokenStr: PChar;
     FWasEndOfLine : Boolean;
     FSourceStream : TStream;
@@ -377,7 +376,7 @@ function TJSScanner.DoStringLiteral: TJSToken;
 Var
   Delim : Char;
   TokenStart : PChar;
-  Len,OLen,I : Integer;
+  Len,OLen: Integer;
   S : String;
 
 begin
@@ -499,34 +498,24 @@ begin
   TokenStart := TokenStr;
   repeat
     Inc(TokenStr);
-    If (TokenStr[0]='\') and (TokenStr[1]='u') then
+    //If (TokenStr[0]='\') and (TokenStr[1]='u') then
   until not (TokenStr[0] in ['A'..'Z', 'a'..'z', '0'..'9', '_','$']);
   Len:=(TokenStr-TokenStart);
   SetLength(FCurTokenString,Len);
   if Len > 0 then
     Move(TokenStart^,FCurTokenString[1],Len);
- // Check if this is a keyword or identifier
- // !!!: Optimize this!
-  I:=FirstKeyword;
-  While (Result=tjsIdentifier) and (I<=Lastkeyword) do
-    begin
-    if (CurTokenString=TokenInfos[i]) then
+  // Check if this is a keyword or identifier
+  // !!!: Optimize this!
+  for i:=FirstKeyword to Lastkeyword do
+    if CurTokenString=TokenInfos[i] then
       begin
       Result := i;
       FCurToken := Result;
       exit;
       end;
-    I:=Succ(I);
-    end
 end;
 
 Function TJSScanner.FetchToken: TJSToken;
-
-
-var
-  TokenStart, CurPos: PChar;
-  i: TJSToken;
-  OldLength, SectionLength, NestingLevel, Index: Integer;
 
 begin
   if not (FCurtoken in [tjsWhiteSpace,tjsComment]) then
@@ -541,7 +530,7 @@ begin
         exit;
         end;
       end;
-    CurPos:=TokenStr;
+    //CurPos:=TokenStr;
     FCurTokenString := '';
     case TokenStr[0] of
       #0:         // Empty line

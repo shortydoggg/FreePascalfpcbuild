@@ -19,11 +19,13 @@ begin
 {$ifdef ALLPACKAGES}
     P.Directory:=ADirectory;
 {$endif ALLPACKAGES}
-    P.Version:='3.0.2';
-    P.OSes := P.OSes - [embedded,nativent,msdos];
+    P.Version:='3.2.0';
+    P.OSes := P.OSes - [embedded,msdos,win16,macos,palmos];
+    if Defaults.CPU=jvm then
+      P.OSes := P.OSes - [java,android];
 
     D:=P.Dependencies.Add('hash');
-      D.Version:='3.0.2';
+      D.Version:='3.2.0';
 
     P.SourcePath.Add('src');
     P.IncludePath.Add('src');

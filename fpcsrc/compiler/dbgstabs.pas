@@ -148,6 +148,11 @@ interface
 implementation
 
     uses
+{$ifdef MIPS}
+      { we need taicpu definition to add .set nomips16 pseudo-instruction
+        before any procedure/function reference }
+      aasmcpu,
+{$endif}
       SysUtils,cutils,cfileutl,
       globals,globtype,verbose,constexp,
       defutil, cgutils, parabase,
@@ -245,6 +250,7 @@ implementation
       varcounter:=0;
       varptr:=@varvaluedata[0];
       varvalues[0]:=nil;
+      result:='';
       while i<=length(s) do
         begin
           if (s[i]='$') and (i<length(s)) then
@@ -690,6 +696,7 @@ implementation
             case def.ordtype of
               uvoid :
                 ss:=def_stab_number(def);
+              pasbool1,
               pasbool8,
               pasbool16,
               pasbool32,
@@ -701,7 +708,9 @@ implementation
                 ss:=def_stabstr_evaluate(def,'r${numberstring};0;255;',[]);
               u32bit,
               s64bit,
-              u64bit :
+              u64bit,
+              s128bit,
+              u128bit:
                 ss:=def_stabstr_evaluate(def,'r${numberstring};0;-1;',[]);
               else
                 ss:=def_stabstr_evaluate(def,'r${numberstring};$1;$2;',[tostr(longint(def.low.svalue)),tostr(longint(def.high.svalue))]);
@@ -716,6 +725,7 @@ implementation
                 ss:='-20;';
               uwidechar :
                 ss:='-30;';
+              pasbool1,
               pasbool8,
               bool8bit :
                 ss:='-21;';
@@ -1673,7 +1683,7 @@ implementation
         if not(target_info.system in systems_darwin) then
           begin
             new_section(current_asmdata.asmlists[al_stabs],sec_data,GetSymTableName(current_module.localsymtable),sizeof(pint));
-            current_asmdata.asmlists[al_stabs].concat(tai_symbol.Createname_global(make_mangledname('DEBUGINFO',current_module.localsymtable,''),AT_DATA,0));
+            current_asmdata.asmlists[al_stabs].concat(tai_symbol.Createname_global(make_mangledname('DEBUGINFO',current_module.localsymtable,''),AT_METADATA,0,voidpointertype));
           end
         else
           new_section(current_asmdata.asmlists[al_stabs],sec_code,GetSymTableName(current_module.localsymtable),sizeof(pint));
@@ -1811,7 +1821,12 @@ implementation
         infile:=current_module.sourcefiles.get_file(1);
         new_section(current_asmdata.asmlists[al_start],sec_code,make_mangledname('DEBUGSTART',current_module.localsymtable,''),sizeof(pint),secorder_begin);
         if not(target_info.system in systems_darwin) then
-          current_asmdata.asmlists[al_start].concat(tai_symbol.Createname_global(make_mangledname('DEBUGSTART',current_module.localsymtable,''),AT_DATA,0));
+          current_asmdata.asmlists[al_start].concat(tai_symbol.Createname_global(make_mangledname('DEBUGSTART',current_module.localsymtable,''),AT_METADATA,0,voidpointertype));
+{$ifdef MIPS}
+       { at least mipsel needs an explicit '.set nomips16' before any reference to
+         procedure/function, see bug report 32138 }
+        current_asmdata.asmlists[al_start].concat(Taicpu.op_none(A_P_SET_NOMIPS16));
+{$endif MIPS}
         current_asmdata.asmlists[al_start].concat(Tai_stab.Create_str(stabsdir,'"'+BsToSlash(FixPath(getcurrentdir,false))+'",'+
           base_stabs_str(stabs_n_sourcefile,'0','0',hlabel.name)));
         current_asmdata.asmlists[al_start].concat(Tai_stab.Create_str(stabsdir,'"'+BsToSlash(FixPath(infile.path,false))+FixFileName(infile.name)+'",'+
@@ -1826,7 +1841,7 @@ implementation
         current_asmdata.getlabel(hlabel,alt_dbgfile);
         new_section(current_asmdata.asmlists[al_end],sec_code,make_mangledname('DEBUGEND',current_module.localsymtable,''),sizeof(pint),secorder_end);
         if not(target_info.system in systems_darwin) then
-          current_asmdata.asmlists[al_end].concat(tai_symbol.Createname_global(make_mangledname('DEBUGEND',current_module.localsymtable,''),AT_DATA,0));
+          current_asmdata.asmlists[al_end].concat(tai_symbol.Createname_global(make_mangledname('DEBUGEND',current_module.localsymtable,''),AT_METADATA,0,voidpointertype));
         current_asmdata.asmlists[al_end].concat(Tai_stab.Create_str(stabsdir,'"",'+base_stabs_str(stabs_n_sourcefile,'0','0',hlabel.name)));
         current_asmdata.asmlists[al_end].concat(tai_label.create(hlabel));
       end;
@@ -1844,7 +1859,7 @@ implementation
         { make sure the debuginfo doesn't get stripped out }
         if (target_info.system in systems_darwin) then
           begin
-            dbgtable:=tai_symbol.createname('DEBUGINFOTABLE',AT_DATA,0);
+            dbgtable:=tai_symbol.createname('DEBUGINFOTABLE',AT_METADATA,0,voidpointertype);
             list.concat(tai_directive.create(asd_no_dead_strip,dbgtable.sym.name));
             list.concat(dbgtable);
           end;
@@ -1852,7 +1867,7 @@ implementation
         hp:=tmodule(loaded_units.first);
         while assigned(hp) do
           begin
-            If (hp.flags and uf_has_stabs_debuginfo)=uf_has_stabs_debuginfo then
+            If ((hp.flags and uf_has_stabs_debuginfo)=uf_has_stabs_debuginfo) and not assigned(hp.package) then
               begin
                 list.concat(Tai_const.Createname(make_mangledname('DEBUGINFO',hp.localsymtable,''),0));
                 list.concat(Tai_const.Createname(make_mangledname('DEBUGSTART',hp.localsymtable,''),0));

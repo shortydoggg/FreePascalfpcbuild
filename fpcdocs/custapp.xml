@@ -46,6 +46,11 @@ application terminates.
 <short><var>TComponent</var> support</short>
 </element>
 
+<!-- unresolved type reference Visibility: default -->
+<element name="singleinstance">
+<short>Single instance application support</short>
+</element>
+
 <!-- procedure type Visibility: default -->
 <element name="TExceptionEvent">
 <short>Exception handling event prototype</short>
@@ -80,7 +85,7 @@ events in <var>TCustomApplication</var>.
 <short>Ancestor class for <var>TApplication</var> classes.</short>
 <descr>
 <p>
-<var>TCustomApplication</var> is the ancestor class for classes that whish
+<var>TCustomApplication</var> is the ancestor class for classes that wish
 to implement a global application class instance. It introduces several
 application-wide functionalities.
 </p>
@@ -647,7 +652,7 @@ id="#rtl.system.IsConsole">IsConsole</link> constant.
 <descr>
 <var>Location</var> returns the directory part of the application binary.
 This property works on most platforms, although some platforms do not
-allow to retrieve this information (Mac OS under certain circumstances). 
+allow to retrieve this information (Mac OS for example has no reliable way to get this information). 
 See the discussion of <link id="#rtl.system.paramstr">Paramstr</link> in the
 RTL documentation.
 </descr>

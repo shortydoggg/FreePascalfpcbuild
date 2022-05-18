@@ -48,7 +48,7 @@ unit optcse;
     uses
       globtype,globals,
       cutils,cclasses,
-      nutils,
+      nutils,compinnr,
       nbas,nld,ninl,ncal,nadd,nmem,
       pass_1,
       symconst,symdef,symsym,
@@ -66,7 +66,7 @@ unit optcse;
       begin
         if (n.nodetype in cseinvariant) or
           ((n.nodetype=inlinen) and
-           (tinlinenode(n).inlinenumber in [in_assigned_x,in_sqr_real,in_sqrt_real,in_sin_real,in_cos_real,in_abs_long,
+           (tinlinenode(n).inlinenumber in [in_length_x,in_assigned_x,in_sqr_real,in_sqrt_real,in_sin_real,in_cos_real,in_abs_long,
              in_abs_real,in_exp_real,in_ln_real,in_pi_real,in_popcnt_x,in_arctan_real,in_round_real,in_trunc_real,
              { cse on fma will still not work because it would require proper handling of call nodes
                with more than one parameter }
@@ -165,7 +165,10 @@ unit optcse;
             (actualtargetnode(@n)^.flags*[nf_write,nf_modify,nf_address_taken]=[]) and
             ((((tstoreddef(n.resultdef).is_intregable or tstoreddef(n.resultdef).is_fpuregable or tstoreddef(n.resultdef).is_const_intregable) and
             { is_int/fpuregable allows arrays and records to be in registers, cse cannot handle this }
-            (not(n.resultdef.typ in [arraydef,recorddef]))) or is_dynamic_array(n.resultdef)) and
+            (not(n.resultdef.typ in [arraydef,recorddef]))) or
+             is_dynamic_array(n.resultdef) or
+             ((n.resultdef.typ in [arraydef,recorddef]) and not(is_special_array(tstoreddef(n.resultdef))) and not(tstoreddef(n.resultdef).is_intregable) and not(tstoreddef(n.resultdef).is_fpuregable))
+            ) and
             { same for voiddef }
             not(is_void(n.resultdef)) and
             { adding tempref and callpara nodes itself is worthless but
@@ -281,6 +284,7 @@ unit optcse;
         nodes : tblocknode;
         creates,
         statements : tstatementnode;
+        deletetemp : ttempdeletenode;
         hp : ttempcreatenode;
         addrstored : boolean;
         hp2 : tnode;
@@ -294,14 +298,14 @@ unit optcse;
             if not(csedomain) then
               begin
                 { try to transform the tree to get better cse domains, consider:
-                       +
+                       +    (1)
                       / \
                      +   C
                     / \
                    A   B
 
                   if A is not cse'able but B and C are, then the compiler cannot do cse so the tree is transformed into
-                       +
+                 (2)   +
                       / \
                      A   +
                         / \
@@ -325,6 +329,9 @@ unit optcse;
                    (is_set(n.resultdef))
                    ) then
                   while (n.nodetype=tbinarynode(n).left.nodetype) and
+                    { if node (1) is fully boolean evaluated and node (2) not, we cannot do the swap as this might result in B being evaluated always,
+                      the other way round is no problem, C is still evaluated only if needed }
+                    (not(is_boolean(n.resultdef)) or not(n.nodetype in [andn,orn]) or doshortbooleval(n) or not(doshortbooleval(tbinarynode(n).left))) and
                         { the resulttypes of the operands we'll swap must be equal,
                           required in case of a 32x32->64 multiplication, then we
                           cannot swap out one of the 32 bit operands for a 64 bit one
@@ -340,6 +347,17 @@ unit optcse;
                           foreachnodestatic(pm_postprocess,tbinarynode(tbinarynode(n).left).right,@searchsubdomain,@csedomain);
                           if csedomain then
                             begin
+                              { move the full boolean evaluation of (2) to (1), if it was there (so it again applies to A and
+                                what follows) }
+                              if not(doshortbooleval(tbinarynode(n).left)) and
+                                 doshortbooleval(n) then
+                                begin
+                                  n.localswitches:=n.localswitches+(tbinarynode(n).left.localswitches*[cs_full_boolean_eval]);
+                                  exclude(tbinarynode(n).left.localswitches,cs_full_boolean_eval);
+                                  tbinarynode(n).left.flags:=tbinarynode(n).left.flags+(n.flags*[nf_short_bool]);
+                                  exclude(n.Flags,nf_short_bool);
+                                end;
+
                               hp2:=tbinarynode(tbinarynode(n).left).left;
                               tbinarynode(tbinarynode(n).left).left:=tbinarynode(tbinarynode(n).left).right;
                               tbinarynode(tbinarynode(n).left).right:=tbinarynode(n).right;
@@ -394,7 +412,7 @@ unit optcse;
                         addrstored:=((def.typ in [arraydef,recorddef]) or is_object(def)) and not(is_dynamic_array(def));
 
                         if addrstored then
-                          templist[i]:=ctempcreatenode.create_value(getpointerdef(def),voidpointertype.size,tt_persistent,
+                          templist[i]:=ctempcreatenode.create_value(cpointerdef.getreusable(def),voidpointertype.size,tt_persistent,
                             true,caddrnode.create_internal(tnode(lists.nodelist[i])))
                         else
                           templist[i]:=ctempcreatenode.create_value(def,def.size,tt_persistent,
@@ -404,13 +422,19 @@ unit optcse;
 
                           ttempcreatenode.create normally takes care of the register location but it does not
                           know about immutability so it cannot take care of managed types }
-                        include(ttempcreatenode(templist[i]).tempinfo^.flags,ti_const);
-                        include(ttempcreatenode(templist[i]).tempinfo^.flags,ti_may_be_in_reg);
+                        ttempcreatenode(templist[i]).includetempflag(ti_const);
+                        ttempcreatenode(templist[i]).includetempflag(ti_may_be_in_reg);
 
                         { make debugging easier and set temp. location to the original location }
                         tnode(templist[i]).fileinfo:=tnode(lists.nodelist[i]).fileinfo;
 
                         addstatement(creates,tnode(templist[i]));
+
+                        { the delete node has no semantic use yet, it is just used to clean up memory }
+                        deletetemp:=ctempdeletenode.create(ttempcreatenode(templist[i]));
+                        deletetemp.includetempflag(ti_cleanup_only);
+                        addstatement(tstatementnode(arg^),deletetemp);
+
                         { make debugging easier and set temp. location to the original location }
                         creates.fileinfo:=tnode(lists.nodelist[i]).fileinfo;
 
@@ -502,16 +526,35 @@ unit optcse;
 
 
     function do_optcse(var rootnode : tnode) : tnode;
+      var
+        deletes,
+        statements : tstatementnode;
+        deleteblock,
+        rootblock : tblocknode;
       begin
 {$ifdef csedebug}
-         writeln('====================================================================================');
-         writeln('CSE optimization pass started');
-         writeln('====================================================================================');
-         printnode(rootnode);
-         writeln('====================================================================================');
-         writeln;
+        writeln('====================================================================================');
+        writeln('CSE optimization pass started');
+        writeln('====================================================================================');
+        printnode(rootnode);
+        writeln('====================================================================================');
+        writeln;
 {$endif csedebug}
-        foreachnodestatic(pm_postprocess,rootnode,@searchcsedomain,nil);
+        deleteblock:=internalstatements(deletes);
+        foreachnodestatic(pm_postprocess,rootnode,@searchcsedomain,@deletes);
+        rootblock:=internalstatements(statements);
+        addstatement(statements,rootnode);
+        addstatement(statements,deleteblock);
+        rootnode:=rootblock;
+        do_firstpass(rootnode);
+{$ifdef csedebug}
+        writeln('====================================================================================');
+        writeln('CSE optimization result');
+        writeln('====================================================================================');
+        printnode(rootnode);
+        writeln('====================================================================================');
+        writeln;
+{$endif csedebug}
         result:=nil;
       end;
 

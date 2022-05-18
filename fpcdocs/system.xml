@@ -36,7 +36,7 @@ Functions are listed in alphabetical order. Arguments of functions or
 procedures that are optional are put between square brackets.
 </p>
 <p>
-The pre-defined constants and variables are listed in the first section.
+The predefined constants and variables are listed in the first section.
 The second section contains an overview of all functions, grouped by
 functionality, and the last section contains the supported functions
 and procedures.
@@ -47,7 +47,7 @@ and procedures.
 <short>Run-Time Error behaviour</short>
 <descr>
 <p>
-The sytem unit handles errors by default by generating a run-time error, and
+The system unit handles errors by default by generating a run-time error, and
 halting the program with an exit code equal to the run-time error number.
 </p>
 <p>
@@ -135,6 +135,7 @@ Functions concerning memory issues.
 <tr><td><link id="IndexQWord"/></td><td>Find QWord-sized value in a memory range</td></tr>
 <tr><td><link id="IndexWord"/></td><td>Find word-sized value in a memory range</td></tr>
 <tr><td><link id="IsMemoryManagerSet"/></td><td>Is the memory manager set</td></tr>
+<tr><td><link id="MemSize"/></td><td>Get size of allocation</td></tr>
 <tr><td><link id="Low"/></td><td>Return lowest index of open array or enumerated</td></tr>
 <tr><td><link id="Move"/></td><td>Move data from one location in memory to another</td></tr>
 <tr><td><link id="MoveChar0">MoveChar0</link></td><td>Move data till first zero character</td></tr>
@@ -154,7 +155,7 @@ Functions concerning memory issues.
 <short>Mathematical routines</short>
 <descr>
 <p>
-Functions connected to calculating and coverting numbers.
+Functions connected to calculating and converting numbers.
 </p>
 <table>
 <th><td>Name</td><td>Description</td></th>
@@ -203,7 +204,7 @@ All things connected to string handling.
 <tr><td><link id="OctStr"/></td><td>Construct octal representation of integer</td></tr>
 <tr><td><link id="Pos"/></td><td>Calculate position of one string in another</td></tr>
 <tr><td><link id="SetLength"/></td><td>Set length of a string</td></tr>
-<tr><td><link id="SetString"/></td><td>Set contents and length of a string</td></tr>
+<tr><td><link id="SetString"/></td><td>Set contents and length of a string or dynamic array</td></tr>
 <tr><td><link id="Str"/></td><td>Convert number to string representation</td></tr>
 <tr><td><link id="StringOfChar"/></td><td>Create string consisting of a number of characters</td></tr>
 <tr><td><link id="Upcase"/></td><td>Convert string to all-uppercase</td></tr>
@@ -275,16 +276,16 @@ The codepage conversion support is influenced by the following variables:
 <table>
 <th><td>Name</td><td>Description</td></th>
 <tr><td><link id="DefaultSystemCodePage"/></td><td>Actual code page to use when <link id="CP_ACP"/> is encountered</td></tr>
-<tr><td><link id="DefaultUnicodeCodePage"/></td><td>Code page for new unicode strings</td></tr>
-<tr><td><link id="DefaultFileSystemCodePage"/></td><td>Codepage to use when sending strings to single-byte OS filesystem routines.</td></tr>
-<tr><td><link id="DefaultRTLFileSystemCodePage"/></td><td>Codepage to use when receiving strings from single-byte OS filesystem routines.</td></tr>
+<tr><td><link id="DefaultUnicodeCodePage"/></td><td>Code page for new Unicode strings</td></tr>
+<tr><td><link id="DefaultFileSystemCodePage"/></td><td>Codepage to use when sending strings to single-byte OS file system routines.</td></tr>
+<tr><td><link id="DefaultRTLFileSystemCodePage"/></td><td>Codepage to use when receiving strings from single-byte OS file system routines.</td></tr>
 </table>
 <p>
 The windows code page identifiers are used. There are 3 special codepage identifiers:
 </p>
 <table>
 <th><td>Name</td><td>Description</td></th>
-<tr><td><link id="CP_ACP"/></td><td>Currently set default syststem cpdepage</td></tr>
+<tr><td><link id="CP_ACP"/></td><td>Currently set default system codepage</td></tr>
 <tr><td><link id="CP_OEMCP"/></td><td>OEM (console)  code page (only on windows)</td></tr>
 <tr><td><link id="CP_NONE"/></td><td>Indicates absence of code page information for a string</td></tr>
 <tr><td><link id="DefaultRTLFileSystemCodePage"/></td><td></td></tr>
@@ -318,7 +319,7 @@ The following routines may perform code page conversions:
 All these routines exist also in Unicode versions.
 </p>
 <p>
-Note that for conversion of codepages and unicode strings, a unicode manager
+Note that for conversion of codepages and Unicode strings, a Unicode manager
 must be present. On windows, the system is used for this. On Unix, one of
 the fpwidestring or cwstring units must be used. 
 </p>
@@ -441,9 +442,14 @@ None.
 <element name="Assign">
 <short>Assign a name to a file</short>
 <descr>
+<p>
 <var>Assign</var> assigns a name to <var>F</var>, which can be any file type.
 This call doesn't open the file, it just assigns a name to a file variable,
 and marks the file as closed.
+</p>
+<p>
+Note that the filename (including path) can be only 255 characters long.
+</p>
 </descr>
 <errors>
 None.
@@ -462,7 +468,7 @@ None.
 <short>Check if a pointer is valid</short>
 <descr>
 <var>Assigned</var> returns <var>True</var> if <var>P</var> is non-nil
-and retuns <var>False</var> of <var>P</var> is nil.
+and returns <var>False</var> of <var>P</var> is nil.
 The main use of Assigned is that Procedural variables, method variables and
 class-type variables also can be passed to <var>Assigned</var>.
 </descr>
@@ -570,8 +576,8 @@ The condition of the repetitive statement is NOT evaluated.
 This can be used with <var>For</var>, var{repeat} and <var>While</var> statements.
 </p>
 <p>
-Note that while this is a procedure, <var>Break</var> is a reserved word
-and hence cannot be redefined.
+Note that although <var>Break</var> is a compiler intrinsic (i.e. is treated specially)
+it is defined as a procedure in the system unit, and hence can be redefined.
 </p>
 </descr>
 <errors>
@@ -582,6 +588,7 @@ None.
 <link id="Exit"/>
 </seealso>
 <example file="refex/ex87"/>
+<example file="refex/ex121"/>
 </element>
 
 
@@ -617,7 +624,7 @@ Historical note:
 <p>
 Originally, Pascal did not have typecasts and chr was a necessary function in
 order to do certain operations on ASCII values of characters. With the arrival of
-typecasting a generic approach became possible, making chr mostly obselete.
+typecasting a generic approach became possible, making chr mostly obsolete.
 However, chr is not considered deprecated and remains in wide use today.
 </p></descr>
 <errors>
@@ -687,7 +694,7 @@ None.
 
 
 <element name="CompareChar">
-<short>ompare 2 memory buffers character per character</short>
+<short>compare 2 memory buffers character per character</short>
 <descr>
 <p>
 <var>CompareChar</var> compares two memory regions <var>buf1</var>,<var>buf2</var> on a
@@ -847,8 +854,8 @@ checked again.
 This can be used with <var>For</var>, <var>repeat</var> and <var>While</var> statements.
 </p>
 <p>
-Note that while this is a procedure, <var>Continue</var> is a reserved word
-and hence cannot be redefined.
+Note that although <var>Continue</var> is a compiler intrinsic (i.e. is treated specially)
+it is defined as an identifier in the system unit, hence it can be redefined.
 </p>
 </descr>
 <errors>
@@ -859,6 +866,7 @@ None.
 <link id="Exit"/>
 </seealso>
 <example file="refex/ex86"/>
+<example file="refex/ex121"/>
 </element>
 
 
@@ -875,9 +883,9 @@ If <var>Index</var> is larger than the length of the string <var>S</var>, then a
 empty string is returned. <var>Index</var> is 1-based.
 </p>
 <p>
-For dynamical arrays, Copy returns a new dynamical array of the same type as
+For dynamic arrays, Copy returns a new dynamic array of the same type as
 the original one, and copies <var>Count</var> elements from the old array,
-starting at position <var>Index</var>. 
+starting at the position in <var>Index</var>. 
 </p>
 <p>
 In Delphi mode, the <var>Count</var> argument can be omitted. In that case, the string (or dynamic
@@ -956,20 +964,27 @@ to decrease <var>X</var> below its minimum value.
 
 
 <element name="Delete">
-<short>Delete part of a string.</short>
+<short>Delete elements (characters) from a string or dynamic array.</short>
 <descr>
+<p>
 <var>Delete</var> removes <var>Count</var> characters from string <var>S</var>, starting
-at position <var>Index</var>. All characters after the deleted characters are
+at position <var>Index</var>. Index is 1-based. All characters after the deleted characters are
 shifted <var>Count</var> positions to the left, and the length of the string is adjusted.
+</p>
+<p>
+For dynamic arrays, <var>Delete</var> removes <var>Count</var> elements from the array <var>A</var>, 
+starting at position <var>Index</var>. Index is 0-based. All elements after the deleted elements are
+shifted <var>Count</var> positions to the left, and the length of the array is adjusted.
+</p>
+<p>
+If the sum of <var>Index</var> and <var>Count</var> exceeds the length of the string or array, 
+<var>Delete</var> removes the end of the string  or array, starting at <var>Index</var>. 
+</p>
+<p>
+If <var>Index</var> is less than 1 or greater than the length of the string or array, 
+or if <var>Count</var> is negative or zero, <var>Delete</var> does nothing.
+</p>
 </descr>
-If sum of <var>Index</var> and <var>Size</var> exceeds length of the string, <var>Delete</var>
-removes the end of string starting from <var>Index</var>. If <var>Index</var> is less than 1
-or greater than length of the string, or if <var>Size</var> is negative or zero,
-<var>Delete</var> does nothing.
-<errors>
-Shortstring variant's third parameter is called <var>Count</var>, in other overloaded
-variants it is called <var>Index</var>
-</errors>
 <seealso>
 <link id="Copy"/>
 <link id="Pos"/>
@@ -1106,11 +1121,11 @@ to check for errors.
 
 
 <element name="Exclude">
-<short>Exlude element from a set if it is present.</short>
+<short>Exclude element from a set if it is present.</short>
 <descr>
 <p>
 <var>Exclude</var> removes <var>E</var> from the set <var>S</var> if it is
-included inthe set. E should be of the same type as the base type
+included in the set. E should be of the same type as the base type
 of the set <var>S</var>.
 </p>
 <p>
@@ -1150,6 +1165,10 @@ surrounded by one or more <var>Try .. Finally</var> constructs, the
 executed, which means that if the finally blocks are used to free resources,
 then these resources will also be freed when <var>Exit</var> is called.
 </p>
+<p>
+Note that although <var>Exit</var> is a compiler intrinsic (i.e. is treated specially)
+it is defined as an identifier in the system unit, hence it can be redefined.
+</p>
 </descr>
 <errors>
 None.
@@ -1158,6 +1177,7 @@ None.
 <link id="Halt"/>
 </seealso>
 <example file="refex/ex21"/>
+<example file="refex/ex121"/>
 </element>
 
 
@@ -1202,11 +1222,16 @@ to check for errors.
 <element name="Filesize">
 <short>Size of file</short>
 <descr>
+<p>
 <var>Filesize</var> returns the total number of records in file <var>F</var>.
 It cannot be invoked with a file of type <var>Text</var>. (under Linux and Unix, this
 also means that it cannot be invoked on pipes).
 If <var>F</var> is empty, 0 is returned. Untyped files have a default record
 size of 128, if the second parameter to <link id="Reset"/> isn't specified.
+</p>
+<p>
+Note that the file must be open for this function to return a result.
+</p>
 </descr>
 <errors>
 Depending on the state of the <var>{$I}</var> switch, a runtime error can be 
@@ -1311,7 +1336,7 @@ No checking on the size of <var>X</var> is done.
 <short>Write file buffers to disk</short>
 <descr>
 <var>Flush</var> empties the internal buffer of an opened file <var>F</var> and writes the
-contents to disk. The file is \textit{not} closed as a result of this call.
+contents to disk. The file is <b>not</b> closed as a result of this call.
 </descr>
 <errors>
 Depending on the state of the <var>{$I}</var> switch, a runtime error can be 
@@ -1410,6 +1435,7 @@ None.
 <link id="Dispose"/>
 <link id="New"/>
 <link id="returnnilifgrowheapfails"/>
+<link id="MemSize"/>
 </seealso>
 </element>
 
@@ -1437,9 +1463,15 @@ None.
 <element name="Halt">
 <short>Stop program execution.</short>
 <descr>
+<p>
 <var>Halt</var> stops program execution and returns control to the calling
 program. The optional argument <var>Errnum</var> specifies an exit value. If
 omitted, zero is returned.
+</p>
+<p>
+Note that this skips any try/finally (implicit or explicit) or try/except blocks, 
+thus may result in memory leaks. Finalization sections of units will be executed.
+</p>
 </descr>
 <errors>
 None.
@@ -1456,7 +1488,7 @@ None.
 <short>Convert integer value to string with hexadecimal representation.</short>
 <descr>
 <var>HexStr</var> returns a string with the hexadecimal representation
-of <var>Value</var>. The string has exactly <var>cnt</var> charaters.
+of <var>Value</var>. The string has exactly <var>cnt</var> characters.
  (i.e. only the <var>cnt</var> rightmost nibbles are taken into account)
 To have a complete representation of a Longint-type value, 8
 nibbles are needed, i.e. <var>cnt=8</var>.
@@ -1478,12 +1510,23 @@ None.
 <element name="Hi">
 <short>Return high byte/word/nibble of value.</short>
 <descr>
-<var>Hi</var> returns the high nibble, byte or word from <var>X</var>, depending on the size
-of X. If the size of X is 4, then the high word is returned. If the size is
-2 then the high byte is returned. If the size is 1, the high nibble is returned.
+<p>
+<var>Hi</var> returns the high nibble, byte or word or longword from <var>X</var>, depending on the size
+of X. 
+</p>
+<table>
+<tr><td>Size</td><td>Return value</td></tr>
+<tr><td>8</td><td>Byte, High nibble</td></tr>
+<tr><td>16</td><td>Byte, High byte</td></tr>
+<tr><td>32</td><td>Word, High word</td></tr>
+<tr><td>64</td><td>Cardinal, High DWord</td></tr>
+</table>
+<p>
+Note that in Delphi or TP, this function always treats its argument as if it was a Word, so the results may differ from FPC.
+</p>
 </descr>
 <errors>
-None
+None.
 </errors>
 <seealso>
 <link id="Lo"/>
@@ -1674,12 +1717,34 @@ If <var>W</var> is not found then -1 is returned.
 
 
 <element name="Insert">
-<short>Insert one string in another.</short>
+<short>Insert one string or dynamic array in another.</short>
 <descr>
+<p>
 <var>Insert</var> inserts string <var>Source</var> in string <var>S</var>, at position
 <var>Index</var>, shifting all characters after <var>Index</var> to the right. The
 resulting string is truncated at 255 characters, if needed. (i.e. for
 shortstrings)
+</p>
+<p>
+<var>Index</var> is a 1-based index. if <var>Index</var> is less than 1, 
+the insert of <var>Source</var> happens at the start of the string, as if the value 1 was specified. 
+</p>
+<p>
+If the value of <var>Index</var> is larger than the length of the string <var>S</var>, 
+<var>Source</var> is appended to the string <var>S</var>.
+</p>
+<p>
+For dynamic arrays, <var>Insert</var> inserts the elements of array <var>Source</var> in array <var>S</var>, at position
+<var>Index</var>, shifting all elements after <var>Index</var> to the right. 
+</p>
+<p>
+<var>Index</var> is a 0-based index. if <var>Index</var> is less than 0, 
+the insert of <var>Source</var> happens at position0.
+</p>
+<p>
+If the value of <var>Index</var> is larger than the length of the array <var>S</var>, 
+<var>Source</var> is appended to the array <var>S</var>.
+</p>
 </descr>
 <errors>
 None.
@@ -1811,7 +1876,7 @@ shortstrings only. The <var>Length</var> function should always be used on
 ansistrings and widestrings.
 </p>
 <p>
-For dynamical or statical arrays, the function returns the number of elements in the
+For dynamic or static arrays, the function returns the number of elements in the
 array.
 </p>
 <p>
@@ -1854,12 +1919,21 @@ An run-time error will occur when <var>X</var> is negative.
 <element name="Lo">
 <short>Return low nibble/byte/word of value.</short>
 <descr>
-<var>Lo</var> returns the low byte of its argument if this is of size 2
-(such as <var>Word</var> or <var>SmallInt</var>), or the low nibble if the
-size is 1 (such as byte). 
-It returns the low word of its argument if this is of type
-<var>Longint</var> or <var>Cardinal</var>.
+<p>
+<var>Lo</var> returns the high nibble, byte or word or longword from <var>X</var>, depending on the size
+of X. 
+</p>
+<table>
+<tr><td>Size</td><td>Return value</td></tr>
+<tr><td>8</td><td>Byte, low nibble</td></tr>
+<tr><td>16</td><td>Byte, low byte</td></tr>
+<tr><td>32</td><td>Word, low word</td></tr>
+<tr><td>64</td><td>Cardinal, low DWord</td></tr>
+</table>
 </descr>
+<p>
+Note that in Delphi or TP, this function always treats its argument as if it was a Word, so the results may differ from FPC.
+</p>
 <errors>
 None.
 </errors>
@@ -1877,7 +1951,7 @@ None.
 <short>Jump to address.</short>
 <descr>
 <p>
-<var>LongJmp</var> jumps to the adress in the <var>env</var> <var>jmp_buf</var>,
+<var>LongJmp</var> jumps to the address in the <var>env</var> <var>jmp_buf</var>,
 and restores the registers that were stored in it at the corresponding
 <link id="SetJmp"/> call.
 In effect, program flow will continue at the <var>SetJmp</var> call, which will
@@ -2073,7 +2147,7 @@ None.
 <short>Convert integer to a string with octal representation.</short>
 <descr>
 <var>OctStr</var> returns a string with the octal representation
-of <var>Value</var>. The string has exactly <var>cnt</var> charaters.
+of <var>Value</var>. The string has exactly <var>cnt</var> characters.
 </descr>
 <errors>
 None.
@@ -2123,7 +2197,7 @@ Historical note:
 </p><p>
 Originally, Pascal did not have typecasts and ord was a necessary function in
 order to do certain operations on non-integer ordinal types. With the arrival of
-typecasting a generic approach became possible, making ord mostly obselete.
+typecasting a generic approach became possible, making ord mostly obsolete.
 However ord is not considered deprecated and remains in wide use today.
 </p>
 </descr>
@@ -2181,9 +2255,9 @@ In the interest of portability, the <var>ParamStr</var> function tries to behave
 the same on all operating systems: like the original <var>ParamStr</var> function 
 in Turbo Pascal. This means even on Unix, paramstr(0) returns the full 
 path to the program executable. A notable exception is Mac OS X, where
-the return value depends on how the application was started. It may be that 
+the returned value depends on how the application was started. It may be that 
 just the name of the application is returned (in case of a command-line
-launch)
+launch), so it is best to avoid using it on that platform.
 </p>
 <p>
 In general, it's a bad idea to rely on the location of the binary. Often,
@@ -2302,16 +2376,25 @@ None.
 <descr>
 <p>
 <var>Random</var> returns a random number larger or equal to <var>0</var> and
-strictly less than <var>L</var>.
+strictly less than <var>L</var>. For negative values of <var>L</var> the behaviour is undefined.
 If the argument <var>L</var> is omitted, a Real number between 0 and 1 is returned
 (0 included, 1 excluded).
 </p>
 <remark>
-The Free Pascal implementation of the <var>Random</var> routine uses the
-Mersenne Twister to simulate randomness. This implementation has a better
+<p>
+The Free Pascal implementation of the <var>Random</var> routine uses a
+Mersenne Twister algorithm to simulate randomness. This implementation has a better
 statistical distribution than for example a Linear Congruential generator
 algorithm, but is considerably slower than the latter. If speed is an issue, 
 then alternate random number generators should be considered. 
+</p>
+<p>
+Note that the fact that a Mersenne Twister is used is an implementation detail, 
+which can be changed at any point. The only guarantee <var>Random()</var> offers 
+is that setting randseed to particular value will result in the same sequence of 
+random numbers in a particular version the RTL. A newer version of the RTL may 
+result in a different sequence for the same randseed.
+</p>
 </remark>
 </descr>
 <errors>
@@ -2417,7 +2500,7 @@ empty strings for string values)
 <p>
 The <var>Real2Double</var> function converts a Turbo Pascal style real (6 bytes long) to
 a native Free Pascal double type. It can be used e.g. to read old binary TP files with
-FPC and convert them to Free Pacal binary files.
+FPC and convert them to Free Pascal binary files.
 </p>
 <p>
 Note that the assignment operator has been overloaded so a <var>Real48</var> type
@@ -2456,15 +2539,22 @@ to check for errors.
 <element name="Reset">
 <short>Open file for reading</short>
 <descr>
+<p>
 <var>Reset</var> opens a file <var>F</var> for reading. <var>F</var> can be any file type.
 If <var>F</var> is a text file, or refers to standard I/O (e.g : '') then it is 
 opened read-only, otherwise it is opened using the mode specified in 
-<var>filemode</var>.
-
+<link id="filemode"/>.
+</p>
+<p>
 If <var>F</var> is an untyped file, the record size can be specified in
 the optional parameter <var>L</var>. A default value of 128 is used.
-
+</p>
+<p>
 File sharing is not taken into account when calling <var>Reset</var>.
+</p>
+<p>
+Note that the path can be only 255 characters long.
+</p>
 </descr>
 <errors>
 Depending on the state of the <var>{$I}</var> switch, a runtime error can be 
@@ -2476,6 +2566,7 @@ to check for errors.
 <link id="Assign"/>
 <link id="Close"/>
 <link id="Append"/>
+<link id="FileMode"/>
 </seealso>
 <example file="refex/ex51"/>
 </element>
@@ -2485,6 +2576,7 @@ to check for errors.
 <element name="Rewrite">
 <short>Open file for writing</short>
 <descr>
+<p>
 <var>Rewrite</var> opens a file <var>F</var> for writing. <var>F</var> can be any file type.
 If <var>F</var> is an untyped or typed file, then it is opened for reading and
 writing. If <var>F</var> is an untyped file, the record size can be specified in
@@ -2492,12 +2584,17 @@ the optional parameter <var>L</var>. Default a value of 128 is used.
 if <var>Rewrite</var> finds a file with the same name as <var>F</var>, this file is
 truncated to length <var>0</var>. If it doesn't find such a file, a new file is
 created.
-
+</p>
+<p>
 Contrary to Turbo Pascal, Free Pascal opens the file with mode <var>fmoutput</var>. If it should
 be opened in <var>fminout</var> mode, an extra call to <link id="Reset"/> is needed.
-
+</p>
+<p>
 File sharing is not taken into account when calling <var>Rewrite</var>.
-
+</p>
+<p>
+Note that the path can be only 255 characters long.
+</p>
 </descr>
 <errors>
 Depending on the state of the <var>{$I}</var> switch, a runtime error can be 
@@ -2728,18 +2825,18 @@ None.
 
 
 <element name="SetLength">
-<short>Set length of a string.</short>
+<short>Set length of a string or dynamic array.</short>
 <descr>
 <p>
-<var>SetLength</var> sets the length of the string <var>S</var> to <var>Len</var>. <var>S</var>
+<var>SetLength</var> for strings sets the length of the string <var>S</var> to <var>Len</var>. <var>S</var>
 can be an ansistring, a short string or a widestring.
 For <var>ShortStrings</var>, <var>Len</var> can maximally be 255. For <var>AnsiStrings</var>
 it can have any value. For <var>AnsiString</var> strings, <var>SetLength</var>
-\emph{must} be used to set the length of the string.
+<b>must</b> be used to set the length of the string.
 </p>
-<p>In the case of a dynamical array <var>A</var>, setlength sets the number
+<p>In the case of a dynamic array <var>A</var>, <var>SetLength</var> sets the number
 of elements. The elements are numbered from index 0, so the count runs from
-0 to <var>Len-1</var>. If Zero is specified, the array is cleared.
+0 to <var>Len-1</var>. If Zero is specified, the array is cleared and removed from memory.
 </p>
 <p>
 In case the length is set to a smaller length than the current one, the existing elements
@@ -2749,6 +2846,37 @@ In case the length is set to a smaller length than the current one, the existing
 In case the length is set to a larger length than the current one, the new
 elements are zeroed out for a dynamic array. For a string, the string is
 zero-terminated at the correct length.
+</p>
+<p>
+Note that <var>SetLength</var> is governed by the Copy-On-Write principle for strings
+and dynamic arrays: the reference count after a call to <var>SetLength</var>
+will be 1 (except when the length is zero, then the array is removed from memory).
+</p>
+<p>
+For multi-dimensional arrays, <var>SetLength</var> can be used to specify all dimensions at once:
+</p>
+<code>
+Var
+  arr : Array of Array of Integer;
+
+begin  
+  SetLength(arr, 10, 20);
+end;  
+</code>
+<p>
+This will create a dynamic array with 10 elements, where each element in itself is a dynamic array of 20 elements.
+<var>SetLength</var> will of course always create "rectangular" arrays: all elements will have the same size.
+</p>
+<code>
+Var
+  arr : Array of Integer;
+
+begin  
+  SetLength(arr,0);
+end;  
+</code>
+<p>
+After this, <var>arr</var> is <var>Nil</var>.
 </p>
 </descr>
 <errors>
@@ -3162,7 +3290,7 @@ None.
 <var>Val</var> converts the value represented in the string <var>S</var> to a numerical
 value or an enumerated value, and stores this value in the variable <var>V</var>, which
 can be of type <var>Longint</var>, <var>Real</var> and <var>Byte</var> or
-any enumerated type. If the conversion isn't succesfull, then the parameter 
+any enumerated type. If the conversion isn't successful, then the parameter 
 <var>Code</var> contains the index of the character in <var>S</var> which 
 prevented the conversion. 
 The string <var>S</var> is allowed to contain spaces in the beginning.
@@ -3198,12 +3326,24 @@ undefined.
 <short>Write variable to a text file</short>
 <descr>
 <p>
-<var>Write</var> writes the contents of the variables <var>V1</var>, <var>V2</var> etc. to
+<var>Write</var> writes the contents of the variables <var>V1</var>, <var>V2</var>, <var>V3</var>  etc. to
 the file <var>F</var>. <var>F</var> can be a typed file, or a <var>Text</var> file.
 If <var>F</var> is a typed file, then the variables <var>V1</var>, <var>V2</var> etc. must
 be of the same type as the type in the declaration of <var>F</var>. Untyped files
 are not allowed.
 </p>
+<p>
+The <var>Write</var> command accepts an arbitrary number of arguments. 
+The <var>V1</var>, <var>V2</var>, <var>V3</var> in the declaration here are in fact just samples, the actual number may be much higher.
+The types of arguments (<var>Type1</var> etc.) are limited to the following types:
+</p>
+<ul>
+<li>Any character type.</li>
+<li>Any string type (including <var>pchar</var>).</li>
+<li>Any ordinal type (integer, enumerated).</li>
+<li>The Int64 and QWord type.</li>
+<li>Any floating-point type (such as double, single, extended).</li>
+</ul>
 <p>
 If the parameter <var>F</var> is omitted, standard output is assumed.
 If <var>F</var> is of type <var>Text</var>, then the necessary conversions are done
@@ -3322,10 +3462,17 @@ controlled with the <var>{$I}</var> switch.
 <element name="Integer">
 <short>A signed 16-bits integer</short>
 <descr>
+<p>
 The system unit defines <var>Integer</var> as a signed 16-bit integer.
 But when <var>DELPHI</var> or <var>OBJFPC</var> mode are active, then
 the <file>objpas</file> unit redefines <var>Integer</var> as a 32-bit
 integer.
+</p>
+<remark>
+Note that due to the way the language modes are implemented, 
+if you refer to <var>integer</var> with the fully qualified 
+name <var>System.Integer</var>, you will still get a 16-bit integer.
+</remark>
 </descr>
 </element>
 
@@ -3365,7 +3512,7 @@ more information about this type.
 
 <!-- "type" alias type Visibility: default -->
 <element name="UCS4Char">
-<short>UCS unicode character (unsigned 32 bit word)</short>
+<short>UCS Unicode character (unsigned 32 bit word)</short>
 </element>
 
 <!-- pointer type Visibility: default -->
@@ -3390,7 +3537,7 @@ more information about this type.
 
 <!-- "type" alias type Visibility: default -->
 <element name="UTF8String">
-<short>UTF-8 unicode (ansi) string.</short>
+<short>UTF-8 Unicode (Ansi) string.</short>
 </element>
 
 <!-- pointer type Visibility: default -->
@@ -3700,6 +3847,16 @@ compatibility, and is not used by the Free Pascal Run-Time Library.
 <!-- constant Visibility: default -->
 <element name="Filemode">
 <short>Default file mode for untyped files.</short>
+<descr>
+<p>
+<var>FileMode</var> determines how untyped files are opened for reading with <link id="Reset"/>. It can have the following values:
+</p>
+<dl>
+<dt>0</dt><dd>open file readonly</dd>
+<dt>1</dt><dd>open file write only</dd>
+<dt>2</dt><dd>open file read/write</dd>
+</dl>
+</descr>
 </element>
 
 <!-- constant Visibility: default -->
@@ -3759,7 +3916,7 @@ id="paramstr"/> instead of cmdline.
 <!-- variable Visibility: default -->
 <element name="IsLibrary">
 <short><var>True</var> if the current module is a library. Otherwise module
-is an excutable</short>
+is an executable</short>
 </element>
 
 <!-- variable Visibility: default -->
@@ -3798,7 +3955,27 @@ is an excutable</short>
 
 <!-- variable Visibility: default -->
 <element name="InOutRes">
-<short>Result of last I/O operation. Read-Only.</short>
+<short>Result of last I/O operation. </short>
+<descr>
+<p>
+<var>InOutRes</var> contains the result of the last I/O operation using one of the file I/O routines.
+When I/O checks are enabled, this variable is checked and if it is nonzero, a runtime error is raised.
+</p>
+<p>
+Although it is a variable for historical reasons, it is not meant to be written to by user code, 
+outside of routines that implement some form of file I/O.
+</p>
+</descr>
+<seealso>
+<link id="reset"/>
+<link id="rewrite"/>
+<link id="close"/>
+<link id="read"/>
+<link id="write"/>
+<link id="blockread"/>
+<link id="blockwrite"/>
+<link id="EOF"/>
+</seealso>
 </element>
 
 <!-- variable Visibility: default -->
@@ -3969,7 +4146,7 @@ of spaces.
 <short>Make sure reference count of string is 1</short>
 <descr>
 <var>UniqueString</var> ensures that the ansistring <var>S</var> has
-reference count 1. It makes a copy of <var>S</var> if this is necesary, and
+reference count 1. It makes a copy of <var>S</var> if this is necessary, and
 returns the copy in <var>S</var>
 </descr>
 <errors>
@@ -4535,9 +4712,15 @@ method (both string and integer messages).
 <element name="TObject.Create">
 <short><var>TObject</var> Constructor</short>
 <descr>
-<var>Create</var> creates a new instance of <var>TObject</var>. Currently it
-does nothing. It is also not virtual, so there is in principle no need to
-call it directly. 
+<p>
+<var>Create</var> creates a new instance of <var>TObject</var>. 
+Currently it does nothing (except allocating memory for the new instance). 
+</p>
+<p>
+Note that allocating the memory for the object instance happens in hidden code generated 
+as part of every constructor, not only in <var>TObject.Create</var>. 
+The hidden code calls <link id="TObject.NewInstance">NewInstance</link>. 
+</p>
 </descr>
 <seealso>
 <link id="TObject.Destroy">Destroy</link>
@@ -4560,7 +4743,7 @@ better to call the <link id="TObject.Free">Free</link> method, because that
 one will check first if <var>Self</var> is different from <var>Nil</var>.
 </p>
 <p>
-To clean up an instance and reset the refence to the instance, it is best to
+To clean up an instance and reset the reference to the instance, it is best to
 use the <link id="#rtl.sysutils.freeandnil">FreeAndNil</link> function.
 </p>
 </descr>
@@ -4574,10 +4757,17 @@ use the <link id="#rtl.sysutils.freeandnil">FreeAndNil</link> function.
 <element name="TObject.newinstance">
 <short>Allocate memory on the heap for a new instance</short>
 <descr>
+<p>
 <var>NewInstance</var> allocates memory on the heap for a new instance of
 the current class. If the memory was allocated, the class will be
 initialized by a call to <link id="TObject.InitInstance">InitInstance</link>.
 The function returns the newly initialized instance.
+</p>
+<p>
+This method can be overridden to implement e.g. object pooling. 
+Note that the method is responsible for correctly initializing 
+the object, i.e. zeroing out the new instance.
+</p>
 </descr>
 <errors>
 If not enough memory is available, a <var>Nil</var> pointer may be returned, 
@@ -4641,7 +4831,7 @@ method.
 <link id="TObject.Destroy">Destroy</link> if it is different from
 <var>Nil</var>. This is a safer method than calling <var>Destroy</var>
 directly. If a reference to the object must be reset as well (a recommended
-technque), then the function <link id="#rtl.sysutils.freeandnil">FreeAndNil</link> should be called.
+technique), then the function <link id="#rtl.sysutils.freeandnil">FreeAndNil</link> should be called.
 </descr>
 <errors>
 None.
@@ -4956,7 +5146,7 @@ None.
 <var>DefaultHandlerStr</var> is called for string messages which have no
 handler associated with them in the string message handler table. The
 implementation of <var>DefaultHandlerStr</var> in <var>TObject</var> does
-nothing and mut be overridden by descendent classes to provide specific
+nothing and must be overridden by descendent classes to provide specific
 message handling behaviour.
 </descr>
 <seealso>
@@ -5561,7 +5751,7 @@ equivalent to <var>GetMem</var>.
 <short>Routine that can be called from assembler routines to release memory.</short>
 <descr>
 <var>AsmFreemem</var> is a routine that can be called from assembler code to
-release previously alocated memory. The assembler reader cannot decide which 
+release previously allocated memory. The assembler reader cannot decide which 
 overloaded <link id="FreeMem"/> call should be used. <var>AsmFreeMem</var> 
 provides a unique name that can be called from assembler. Other than that it 
 is completely equivalent to <var>FreeMem</var>.
@@ -5664,7 +5854,7 @@ OS characteristics.
 <short>Character used to separate directory parts.</short>
 <descr>
 <p>
-On systems that support driveletters, the <var>DriveSeparator</var> constant
+On systems that support drive letters, the <var>DriveSeparator</var> constant
 denotes the character that separates the drive indicator from the directory
 part in a filename path.
 </p>
@@ -5719,7 +5909,7 @@ OS characteristics.
 <var>FileNameCaseSensitive</var> is <var>True</var> if case is important
 when using filenames on the current OS. In this case, the OS will treat 
 files with different cased names as different files. Note that this may 
-depend on the filesystem: Unix operating systems that access a DOS or
+depend on the file system: Unix operating systems that access a DOS or
 Windows partition will have this constant set to true, but when writing to
 the DOS partition, the casing is ignored.
 </p>
@@ -5748,7 +5938,7 @@ OS characteristics.
 <var>FileNameCasePreserving</var> is <var>True</var> if case of letters
 in file and directory entries is preserved and may be later retrieved
 exactly as supplied when creating or renaming these entries. Note that this
-may depend on the filesystem: Unix operating systems that access a DOS or
+may depend on the file system: Unix operating systems that access a DOS or
 Windows partition will have this constant set to true, but when writing to
 the DOS partition, all letters may be automatically converted to uppercase.
 </p>
@@ -5801,7 +5991,7 @@ OS characteristics.
 <descr>
 <p>
 <var>DefaultTextLineBreakStyle</var> contains the default OS setting for the
-<link id="TTextLineBreakStyle"/> type. It is initizliaed by the system unit,
+<link id="TTextLineBreakStyle"/> type. It is initialized by the system unit,
 and is used to determine the default line ending when writing to text files.
 </p>
 <p>
@@ -5931,7 +6121,7 @@ memory on the current architecture, thus it is 64-bit on 64-bit platforms,
 <short>Signed integer type with same size as Pointer.</short>
 <descr>
 <p><var>Ptrint</var> is a signed integer type which has always the same size as a
-pointer. Ptrint is considered harmfull and should almost never be used in actual
+pointer. Ptrint is considered harmful and should almost never be used in actual
 code, because pointers are normally unsigned. For example, consider the following
 code:
 </p>
@@ -5941,7 +6131,7 @@ q:=pointer(ptrint(p)+1024));    {Overflow error.}
 writeln(q>p);                   {Incorrect answer.}
 </code>
 <p>
-Ptrint might have a valid use when two pointers are substracted from each other if
+Ptrint might have a valid use when two pointers are subtracted from each other if
 it is unknown which pointer has the largest address. However, even in this case
 ptrint causes trouble in case the distance is larger than high(ptrint) and must be
 used with great care.
@@ -6013,7 +6203,7 @@ function.
 
 <!-- alias type Visibility: default -->
 <element name="UCS2Char">
-<short>UCS2 unicode character.</short>
+<short>UCS2 Unicode character.</short>
 </element>
 
 <!-- alias type Visibility: default -->
@@ -6038,1496 +6228,1496 @@ function.
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_lo_word">
+<element name="fpc_in_lo_word" skip="1">
 <short>FPC compiler internal procedure index: lo (word)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_hi_word">
+<element name="fpc_in_hi_word" skip="1">
 <short>FPC compiler internal procedure index: hi (word)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_lo_long">
+<element name="fpc_in_lo_long" skip="1">
 <short>FPC compiler internal procedure index: lo (long)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_hi_long">
+<element name="fpc_in_hi_long" skip="1">
 <short>FPC compiler internal procedure index: hi (long)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_ord_x">
+<element name="fpc_in_ord_x" skip="1">
 <short>FPC compiler internal procedure index: ord</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_length_string">
+<element name="fpc_in_length_string" skip="1">
 <short>FPC compiler internal procedure index: length</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_chr_byte">
+<element name="fpc_in_chr_byte" skip="1">
 <short>FPC compiler internal procedure index: chr</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_write_x">
+<element name="fpc_in_write_x" skip="1">
 <short>FPC compiler internal procedure index: write</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_writeln_x">
+<element name="fpc_in_writeln_x" skip="1">
 <short>FPC compiler internal procedure index: writeln</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_read_x">
+<element name="fpc_in_read_x" skip="1">
 <short>FPC compiler internal procedure index: read</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_readln_x">
+<element name="fpc_in_readln_x" skip="1">
 <short>FPC compiler internal procedure index: readln</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_concat_x">
+<element name="fpc_in_concat_x" skip="1">
 <short>FPC compiler internal procedure index: concat</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_assigned_x">
+<element name="fpc_in_assigned_x" skip="1">
 <short>FPC compiler internal procedure index: assigned</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_str_x_string">
+<element name="fpc_in_str_x_string" skip="1">
 <short>FPC compiler internal procedure index: str</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_ofs_x">
+<element name="fpc_in_ofs_x" skip="1">
 <short>FPC compiler internal procedure index: ofs</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_sizeof_x">
+<element name="fpc_in_sizeof_x" skip="1">
 <short>FPC compiler internal procedure index: sizeof</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_typeof_x">
+<element name="fpc_in_typeof_x" skip="1">
 <short>FPC compiler internal procedure index: typeof</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_val_x">
+<element name="fpc_in_val_x" skip="1">
 <short>FPC compiler internal procedure index: val</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_reset_x">
+<element name="fpc_in_reset_x" skip="1">
 <short>FPC compiler internal procedure index: reset</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_rewrite_x">
+<element name="fpc_in_rewrite_x" skip="1">
 <short>FPC compiler internal procedure index: rewrite</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_low_x">
+<element name="fpc_in_low_x" skip="1">
 <short>FPC compiler internal procedure index: low</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_high_x">
+<element name="fpc_in_high_x" skip="1">
 <short>FPC compiler internal procedure index: high</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_seg_x">
+<element name="fpc_in_seg_x" skip="1">
 <short>FPC compiler internal procedure index: seg</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_pred_x">
+<element name="fpc_in_pred_x" skip="1">
 <short>FPC compiler internal procedure index: pred</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_succ_x">
+<element name="fpc_in_succ_x" skip="1">
 <short>FPC compiler internal procedure index: succ</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_reset_typedfile">
+<element name="fpc_in_reset_typedfile" skip="1">
 <short>FPC compiler internal procedure index: reset</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_rewrite_typedfile">
+<element name="fpc_in_rewrite_typedfile" skip="1">
 <short>FPC compiler internal procedure index: rewrite</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_settextbuf_file_x">
+<element name="fpc_in_settextbuf_file_x" skip="1">
 <short>FPC compiler internal procedure index: settextbuf</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_inc_x">
+<element name="fpc_in_inc_x" skip="1">
 <short>FPC compiler internal procedure index: inc</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_dec_x">
+<element name="fpc_in_dec_x" skip="1">
 <short>FPC compiler internal procedure index: dec</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_include_x_y">
+<element name="fpc_in_include_x_y" skip="1">
 <short>FPC compiler internal procedure index:  include</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_exclude_x_y">
+<element name="fpc_in_exclude_x_y" skip="1">
 <short>FPC compiler internal procedure index: exclude</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_break">
+<element name="fpc_in_break" skip="1">
 <short>FPC compiler internal procedure index: break</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_continue">
+<element name="fpc_in_continue" skip="1">
 <short>FPC compiler internal procedure index: continue</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_assert_x_y">
+<element name="fpc_in_assert_x_y" skip="1">
 <short>FPC compiler internal procedure index: assert</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_addr_x">
+<element name="fpc_in_addr_x" skip="1">
 <short>FPC compiler internal procedure index: addr</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_typeinfo_x">
+<element name="fpc_in_typeinfo_x" skip="1">
 <short>FPC compiler internal procedure index: typeinfo</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_setlength_x">
+<element name="fpc_in_setlength_x" skip="1">
 <short>FPC compiler internal procedure index: setlength</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_finalize_x">
+<element name="fpc_in_finalize_x" skip="1">
 <short>FPC compiler internal procedure index: finalize</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_new_x">
+<element name="fpc_in_new_x" skip="1">
 <short>FPC compiler internal procedure index: new</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_dispose_x">
+<element name="fpc_in_dispose_x" skip="1">
 <short>FPC compiler internal procedure index: dispose</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_exit">
+<element name="fpc_in_exit" skip="1">
 <short>FPC compiler internal procedure index: exit</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_copy_x">
+<element name="fpc_in_copy_x" skip="1">
 <short>FPC compiler internal procedure index: copy</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_initialize_x">
+<element name="fpc_in_initialize_x" skip="1">
 <short>FPC compiler internal procedure index: initialize</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_leave">
+<element name="fpc_in_leave" skip="1">
 <short>FPC compiler internal procedure index: leave</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_cycle">
+<element name="fpc_in_cycle" skip="1">
 <short>FPC compiler internal procedure index: cycle</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_trunc">
+<element name="fpc_in_const_trunc" skip="1">
 <short>FPC compiler internal procedure index: trunc</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_round">
+<element name="fpc_in_const_round" skip="1">
 <short>FPC compiler internal procedure index: round</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_frac">
+<element name="fpc_in_const_frac" skip="1">
 <short>FPC compiler internal procedure index: frac</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_abs">
+<element name="fpc_in_const_abs" skip="1">
 <short>FPC compiler internal procedure index: abs</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_int">
+<element name="fpc_in_const_int" skip="1">
 <short>FPC compiler internal procedure index: int</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_sqr">
+<element name="fpc_in_const_sqr" skip="1">
 <short>FPC compiler internal procedure index: sqr</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_odd">
+<element name="fpc_in_const_odd" skip="1">
 <short>FPC compiler internal procedure index: sqr</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_ptr">
+<element name="fpc_in_const_ptr" skip="1">
 <short>FPC compiler internal procedure index: sqr</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_swap_word">
+<element name="fpc_in_const_swap_word" skip="1">
 <short>FPC compiler internal procedure index: swap (word)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_swap_long">
+<element name="fpc_in_const_swap_long" skip="1">
 <short>FPC compiler internal procedure index: swap (long)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_pi">
+<element name="fpc_in_const_pi" skip="1">
 <short>FPC compiler internal procedure index: pi</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_sqrt">
+<element name="fpc_in_const_sqrt" skip="1">
 <short>FPC compiler internal procedure index: sqrt</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_arctan">
+<element name="fpc_in_const_arctan" skip="1">
 <short>FPC compiler internal procedure index: arctan</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_cos">
+<element name="fpc_in_const_cos" skip="1">
 <short>FPC compiler internal procedure index: cos</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_exp">
+<element name="fpc_in_const_exp" skip="1">
 <short>FPC compiler internal procedure index: exp</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_ln">
+<element name="fpc_in_const_ln" skip="1">
 <short>FPC compiler internal procedure index: in</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_sin">
+<element name="fpc_in_const_sin" skip="1">
 <short>FPC compiler internal procedure index: sin</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_lo_qword">
+<element name="fpc_in_lo_qword" skip="1">
 <short>FPC compiler internal procedure index: lo (qword)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_hi_qword">
+<element name="fpc_in_hi_qword" skip="1">
 <short>FPC compiler internal procedure index: hi (qword)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_cos_real">
+<element name="fpc_in_cos_real" skip="1">
 <short>FPC compiler internal procedure index: cos (real)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_pi">
+<element name="fpc_in_pi" skip="1">
 <short>FPC compiler internal procedure index: pi</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_abs_real">
+<element name="fpc_in_abs_real" skip="1">
 <short>FPC compiler internal procedure index: abs (real)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_sqr_real">
+<element name="fpc_in_sqr_real" skip="1">
 <short>FPC compiler internal procedure index: sqr (real)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_sqrt_real">
+<element name="fpc_in_sqrt_real" skip="1">
 <short>FPC compiler internal procedure index: sqrt (real)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_arctan_real">
+<element name="fpc_in_arctan_real" skip="1">
 <short>FPC compiler internal procedure index: arctan (real)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_ln_real">
+<element name="fpc_in_ln_real" skip="1">
 <short>FPC compiler internal procedure index: ln (real)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_sin_real">
+<element name="fpc_in_sin_real" skip="1">
 <short>FPC compiler internal procedure index: sin (real)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_const_swap_qword">
+<element name="fpc_in_const_swap_qword" skip="1">
 <short>FPC compiler internal procedure index: swap (qword)</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_prefetch_var">
+<element name="fpc_in_prefetch_var" skip="1">
 <short>FPC compiler internal procedure index: prefetch</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_mmx_pcmpeqb">
+<element name="fpc_in_mmx_pcmpeqb" skip="1">
 <short>FPC compiler internal procedure index: MMX</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_mmx_pcmpeqw">
+<element name="fpc_in_mmx_pcmpeqw" skip="1">
 <short>FPC compiler internal procedure index: MMX</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_mmx_pcmpeqd">
+<element name="fpc_in_mmx_pcmpeqd" skip="1">
 <short>FPC compiler internal procedure index: MMX</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_mmx_pcmpgtb">
+<element name="fpc_in_mmx_pcmpgtb" skip="1">
 <short>FPC compiler internal procedure index: MMX</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_mmx_pcmpgtw">
+<element name="fpc_in_mmx_pcmpgtw" skip="1">
 <short>FPC compiler internal procedure index: MMX</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_mmx_pcmpgtd">
+<element name="fpc_in_mmx_pcmpgtd" skip="1">
 <short>FPC compiler internal procedure index: MMX</short>
 </element>
 
-<element name="fpc_abs_real">
+<element name="fpc_abs_real" skip="1">
 <short>FPC internal compiler routine: abs_real</short>
 </element>
 
 
-<element name="fpc_AbstractErrorIntern">
+<element name="fpc_AbstractErrorIntern" skip="1">
 <short>FPC internal compiler routine: AbstractErrorIntern</short>
 </element>
 
 
-<element name="fpc_Addref">
+<element name="fpc_Addref" skip="1">
 <short>FPC internal compiler routine: Addref</short>
 </element>
 
 
-<element name="fpc_ansistr_append_ansistring">
+<element name="fpc_ansistr_append_ansistring" skip="1">
 <short>FPC internal compiler routine: ansistr_append_ansistring</short>
 </element>
 
 
-<element name="fpc_ansistr_append_char">
+<element name="fpc_ansistr_append_char" skip="1">
 <short>FPC internal compiler routine: ansistr_append_char</short>
 </element>
 
 
-<element name="fpc_ansistr_append_shortstring">
+<element name="fpc_ansistr_append_shortstring" skip="1">
 <short>FPC internal compiler routine: ansistr_append_shortstring</short>
 </element>
 
 
-<element name="fpc_AnsiStr_Assign">
+<element name="fpc_AnsiStr_Assign" skip="1">
 <short>FPC internal compiler routine: AnsiStr_Assign</short>
 </element>
 
 
-<element name="fpc_AnsiStr_CheckRange">
+<element name="fpc_AnsiStr_CheckRange" skip="1">
 <short>FPC internal compiler routine: AnsiStr_CheckRange</short>
 </element>
 
 
-<element name="fpc_AnsiStr_CheckZero">
+<element name="fpc_AnsiStr_CheckZero" skip="1">
 <short>FPC internal compiler routine: AnsiStr_CheckZero</short>
 </element>
 
 
-<element name="fpc_AnsiStr_Compare">
+<element name="fpc_AnsiStr_Compare" skip="1">
 <short>FPC internal compiler routine: AnsiStr_Compare</short>
 </element>
 
 
-<element name="fpc_AnsiStr_Concat">
+<element name="fpc_AnsiStr_Concat" skip="1">
 <short>FPC internal compiler routine: AnsiStr_Concat</short>
 </element>
 
 
-<element name="fpc_AnsiStr_Concat_multi">
+<element name="fpc_AnsiStr_Concat_multi" skip="1">
 <short>FPC internal compiler routine: AnsiStr_Concat_multi</short>
 </element>
 
 
-<element name="fpc_ansistr_Copy">
+<element name="fpc_ansistr_Copy" skip="1">
 <short>FPC internal compiler routine: ansistr_Copy</short>
 </element>
 
 
-<element name="fpc_ansistr_decr_ref">
+<element name="fpc_ansistr_decr_ref" skip="1">
 <short>FPC internal compiler routine: ansistr_decr_ref</short>
 </element>
 
 
-<element name="fpc_AnsiStr_Float">
+<element name="fpc_AnsiStr_Float" skip="1">
 <short>FPC internal compiler routine: AnsiStr_Float</short>
 </element>
 
 
-<element name="fpc_ansistr_incr_ref">
+<element name="fpc_ansistr_incr_ref" skip="1">
 <short>FPC internal compiler routine: ansistr_incr_ref</short>
 </element>
 
 
-<element name="fpc_ansistr_int64">
+<element name="fpc_ansistr_int64" skip="1">
 <short>FPC internal compiler routine: ansistr_int64</short>
 </element>
 
 
-<element name="fpc_ansistr_qword">
+<element name="fpc_ansistr_qword" skip="1">
 <short>FPC internal compiler routine: ansistr_qword</short>
 </element>
 
 
-<element name="fpc_AnsiStr_SetLength">
+<element name="fpc_AnsiStr_SetLength" skip="1">
 <short>FPC internal compiler routine: AnsiStr_SetLength</short>
 </element>
 
 
-<element name="fpc_AnsiStr_sint">
+<element name="fpc_AnsiStr_sint" skip="1">
 <short>FPC internal compiler routine: AnsiStr_sint</short>
 </element>
 
 
-<element name="fpc_ansistr_to_chararray">
+<element name="fpc_ansistr_to_chararray" skip="1">
 <short>FPC internal compiler routine: ansistr_to_chararray</short>
 </element>
 
 
-<element name="fpc_AnsiStr_To_ShortStr">
+<element name="fpc_AnsiStr_To_ShortStr" skip="1">
 <short>FPC internal compiler routine: AnsiStr_To_ShortStr</short>
 </element>
 
 
-<element name="fpc_ansistr_to_widechararray">
+<element name="fpc_ansistr_to_widechararray" skip="1">
 <short>FPC internal compiler routine: ansistr_to_widechararray</short>
 </element>
 
 
-<element name="fpc_AnsiStr_To_WideStr">
+<element name="fpc_AnsiStr_To_WideStr" skip="1">
 <short>FPC internal compiler routine: AnsiStr_To_WideStr</short>
 </element>
 
 
-<element name="fpc_AnsiStr_uint">
+<element name="fpc_AnsiStr_uint" skip="1">
 <short>FPC internal compiler routine: AnsiStr_uint</short>
 </element>
 
 
-<element name="fpc_ansistr_Unique">
+<element name="fpc_ansistr_Unique" skip="1">
 <short>FPC internal compiler routine: ansistr_Unique</short>
 </element>
 
 
-<element name="fpc_arctan_real">
+<element name="fpc_arctan_real" skip="1">
 <short>FPC internal compiler routine: arctan_real</short>
 </element>
 
 
-<element name="fpc_assert">
+<element name="fpc_assert" skip="1">
 <short>FPC internal compiler routine: assert</short>
 </element>
 
 
-<element name="fpc_Catches">
+<element name="fpc_Catches" skip="1">
 <short>FPC internal compiler routine: Catches</short>
 </element>
 
 
-<element name="fpc_chararray_Float">
+<element name="fpc_chararray_Float" skip="1">
 <short>FPC internal compiler routine: chararray_Float</short>
 </element>
 
 
-<element name="fpc_chararray_int64">
+<element name="fpc_chararray_int64" skip="1">
 <short>FPC internal compiler routine: chararray_int64</short>
 </element>
 
 
-<element name="fpc_chararray_qword">
+<element name="fpc_chararray_qword" skip="1">
 <short>FPC internal compiler routine: chararray_qword</short>
 </element>
 
 
-<element name="fpc_chararray_sint">
+<element name="fpc_chararray_sint" skip="1">
 <short>FPC internal compiler routine: chararray_sint</short>
 </element>
 
 
-<element name="fpc_CharArray_To_AnsiStr">
+<element name="fpc_CharArray_To_AnsiStr" skip="1">
 <short>FPC internal compiler routine: CharArray_To_AnsiStr</short>
 </element>
 
 
-<element name="fpc_chararray_to_shortstr">
+<element name="fpc_chararray_to_shortstr" skip="1">
 <short>FPC internal compiler routine: chararray_to_shortstr</short>
 </element>
 
 
-<element name="fpc_CharArray_To_WideStr">
+<element name="fpc_CharArray_To_WideStr" skip="1">
 <short>FPC internal compiler routine: CharArray_To_WideStr</short>
 </element>
 
 
-<element name="fpc_chararray_uint">
+<element name="fpc_chararray_uint" skip="1">
 <short>FPC internal compiler routine: chararray_uint</short>
 </element>
 
 
-<element name="fpc_char_copy">
+<element name="fpc_char_copy" skip="1">
 <short>FPC internal compiler routine: char_copy</short>
 </element>
 
 
-<element name="fpc_Char_To_AnsiStr">
+<element name="fpc_Char_To_AnsiStr" skip="1">
 <short>FPC internal compiler routine: Char_To_AnsiStr</short>
 </element>
 
 
-<element name="fpc_Char_To_WideStr">
+<element name="fpc_Char_To_WideStr" skip="1">
 <short>FPC internal compiler routine: Char_To_WideStr</short>
 </element>
 
 
-<element name="fpc_class_as_intf">
+<element name="fpc_class_as_intf" skip="1">
 <short>FPC internal compiler routine: class_as_intf</short>
 </element>
 
 
-<element name="fpc_cos_real">
+<element name="fpc_cos_real" skip="1">
 <short>FPC internal compiler routine: cos_real</short>
 </element>
 
 
-<element name="fpc_DecRef">
+<element name="fpc_DecRef" skip="1">
 <short>FPC internal compiler routine: DecRef</short>
 </element>
 
 
-<element name="fpc_divbyzero">
+<element name="fpc_divbyzero" skip="1">
 <short>FPC internal compiler routine: divbyzero</short>
 </element>
 
 
-<element name="fpc_div_int64">
+<element name="fpc_div_int64" skip="1">
 <short>FPC internal compiler routine: div_int64</short>
 </element>
 
 
-<element name="fpc_div_qword">
+<element name="fpc_div_qword" skip="1">
 <short>FPC internal compiler routine: div_qword</short>
 </element>
 
 
-<element name="fpc_do_as">
+<element name="fpc_do_as" skip="1">
 <short>FPC internal compiler routine: do_as</short>
 </element>
 
 
-<element name="fpc_do_is">
+<element name="fpc_do_is" skip="1">
 <short>FPC internal compiler routine: do_is</short>
 </element>
 
 
-<element name="fpc_dynarray_clear">
+<element name="fpc_dynarray_clear" skip="1">
 <short>FPC internal compiler routine: dynarray_clear</short>
 </element>
 
 
-<element name="fpc_dynarray_copy">
+<element name="fpc_dynarray_copy" skip="1">
 <short>FPC internal compiler routine: dynarray_copy</short>
 </element>
 
 
-<element name="fpc_dynarray_decr_ref">
+<element name="fpc_dynarray_decr_ref" skip="1">
 <short>FPC internal compiler routine: dynarray_decr_ref</short>
 </element>
 
 
-<element name="fpc_dynarray_high">
+<element name="fpc_dynarray_high" skip="1">
 <short>FPC internal compiler routine: dynarray_high</short>
 </element>
 
 
-<element name="fpc_dynarray_incr_ref">
+<element name="fpc_dynarray_incr_ref" skip="1">
 <short>FPC internal compiler routine: dynarray_incr_ref</short>
 </element>
 
 
-<element name="fpc_dynarray_length">
+<element name="fpc_dynarray_length" skip="1">
 <short>FPC internal compiler routine: dynarray_length</short>
 </element>
 
 
-<element name="fpc_dynarray_setlength">
+<element name="fpc_dynarray_setlength" skip="1">
 <short>FPC internal compiler routine: dynarray_setlength</short>
 </element>
 
 
-<element name="fpc_dynarray_to_variant">
+<element name="fpc_dynarray_to_variant" skip="1">
 <short>FPC internal compiler routine: dynarray_to_variant</short>
 </element>
 
 
-<element name="fpc_exp_real">
+<element name="fpc_exp_real" skip="1">
 <short>FPC internal compiler routine: exp_real</short>
 </element>
 
 
-<element name="fpc_finalize">
+<element name="fpc_finalize" skip="1">
 <short>FPC internal compiler routine: finalize</short>
 </element>
 
 
-<element name="fpc_finalize_array">
+<element name="fpc_finalize_array" skip="1">
 <short>FPC internal compiler routine: finalize_array</short>
 </element>
 
 
-<element name="fpc_frac_real">
+<element name="fpc_frac_real" skip="1">
 <short>FPC internal compiler routine: frac_real</short>
 </element>
 
 
-<element name="fpc_freemem">
+<element name="fpc_freemem" skip="1">
 <short>FPC internal compiler routine: freemem</short>
 </element>
 
 
-<element name="fpc_get_input">
+<element name="fpc_get_input" skip="1">
 <short>FPC internal compiler routine: get_input</short>
 </element>
 
 
-<element name="fpc_getmem">
+<element name="fpc_getmem" skip="1">
 <short>FPC internal compiler routine: getmem</short>
 </element>
 
 
-<element name="fpc_get_output">
+<element name="fpc_get_output" skip="1">
 <short>FPC internal compiler routine: get_output</short>
 </element>
 
 
-<element name="fpc_help_constructor">
+<element name="fpc_help_constructor" skip="1">
 <short>FPC internal compiler routine: help_constructor</short>
 </element>
 
 
-<element name="fpc_help_destructor">
+<element name="fpc_help_destructor" skip="1">
 <short>FPC internal compiler routine: help_destructor</short>
 </element>
 
 
-<element name="fpc_help_fail">
+<element name="fpc_help_fail" skip="1">
 <short>FPC internal compiler routine: help_fail</short>
 </element>
 
 
-<element name="fpc_in_exp_real">
+<element name="fpc_in_exp_real" skip="1">
 <short>FPC internal compiler routine: in_exp_real</short>
 </element>
 
 
-<element name="fpc_in_fillchar_x">
+<element name="fpc_in_fillchar_x" skip="1">
 <short>FPC internal compiler routine: in_fillchar_x</short>
 </element>
 
 
-<element name="fpc_in_frac_real">
+<element name="fpc_in_frac_real" skip="1">
 <short>FPC internal compiler routine: in_frac_real</short>
 </element>
 
 
-<element name="fpc_in_get_caller_addr">
+<element name="fpc_in_get_caller_addr" skip="1">
 <short>FPC internal compiler routine: in_get_caller_addr</short>
 </element>
 
 
-<element name="fpc_in_get_caller_frame">
+<element name="fpc_in_get_caller_frame" skip="1">
 <short>FPC internal compiler routine: in_get_caller_frame</short>
 </element>
 
 
-<element name="fpc_in_get_frame">
+<element name="fpc_in_get_frame" skip="1">
 <short>FPC internal compiler routine: in_get_frame</short>
 </element>
 
 
-<element name="fpc_in_int_real">
+<element name="fpc_in_int_real" skip="1">
 <short>FPC internal compiler routine: in_int_real</short>
 </element>
 
 
-<element name="fpc_Initialize">
+<element name="fpc_Initialize" skip="1">
 <short>FPC internal compiler routine: Initialize</short>
 </element>
 
 
-<element name="fpc_InitializeUnits">
+<element name="fpc_InitializeUnits" skip="1">
 <short>FPC internal compiler routine: InitializeUnits</short>
 </element>
 
 
-<element name="fpc_in_move_x">
+<element name="fpc_in_move_x" skip="1">
 <short>FPC internal compiler routine: in_move_x</short>
 </element>
 
 
-<element name="fpc_in_pi_real">
+<element name="fpc_in_pi_real" skip="1">
 <short>FPC internal compiler routine: in_pi_real</short>
 </element>
 
 
-<element name="fpc_in_round_real">
+<element name="fpc_in_round_real" skip="1">
 <short>FPC internal compiler routine: in_round_real</short>
 </element>
 
 
-<element name="fpc_in_slice">
+<element name="fpc_in_slice" skip="1">
 <short>FPC internal compiler routine: in_slice</short>
 </element>
 
 
-<element name="fpc_interface_to_variant">
+<element name="fpc_interface_to_variant" skip="1">
 <short>FPC internal compiler routine: interface_to_variant</short>
 </element>
 
 
-<element name="fpc_intf_as">
+<element name="fpc_intf_as" skip="1">
 <short>FPC internal compiler routine: intf_as</short>
 </element>
 
 
-<element name="fpc_intf_assign">
+<element name="fpc_intf_assign" skip="1">
 <short>FPC internal compiler routine: intf_assign</short>
 </element>
 
 
-<element name="fpc_intf_decr_ref">
+<element name="fpc_intf_decr_ref" skip="1">
 <short>FPC internal compiler routine: intf_decr_ref</short>
 </element>
 
 
-<element name="fpc_intf_incr_ref">
+<element name="fpc_intf_incr_ref" skip="1">
 <short>FPC internal compiler routine: intf_incr_ref</short>
 </element>
 
 
-<element name="fpc_int_real">
+<element name="fpc_int_real" skip="1">
 <short>FPC internal compiler routine: int_real</short>
 </element>
 
 
-<element name="fpc_in_trunc_real">
+<element name="fpc_in_trunc_real" skip="1">
 <short>FPC internal compiler routine: in_trunc_real</short>
 </element>
 
 
-<element name="fpc_iocheck">
+<element name="fpc_iocheck" skip="1">
 <short>FPC internal compiler routine: iocheck</short>
 </element>
 
 
-<element name="fpc_ln_real">
+<element name="fpc_ln_real" skip="1">
 <short>FPC internal compiler routine: ln_real</short>
 </element>
 
 
-<element name="fpc_mod_int64">
+<element name="fpc_mod_int64" skip="1">
 <short>FPC internal compiler routine: mod_int64</short>
 </element>
 
 
-<element name="fpc_mod_qword">
+<element name="fpc_mod_qword" skip="1">
 <short>FPC internal compiler routine: mod_qword</short>
 </element>
 
 
-<element name="fpc_mul_int64">
+<element name="fpc_mul_int64" skip="1">
 <short>FPC internal compiler routine: mul_int64</short>
 </element>
 
 
-<element name="fpc_mul_qword">
+<element name="fpc_mul_qword" skip="1">
 <short>FPC internal compiler routine: mul_qword</short>
 </element>
 
 
-<element name="fpc_overflow">
+<element name="fpc_overflow" skip="1">
 <short>FPC internal compiler routine: overflow</short>
 </element>
 
 
-<element name="fpc_pchar_length">
+<element name="fpc_pchar_length" skip="1">
 <short>FPC internal compiler routine: pchar_length</short>
 </element>
 
 
-<element name="fpc_PChar_To_AnsiStr">
+<element name="fpc_PChar_To_AnsiStr" skip="1">
 <short>FPC internal compiler routine: PChar_To_AnsiStr</short>
 </element>
 
 
-<element name="fpc_pchar_to_shortstr">
+<element name="fpc_pchar_to_shortstr" skip="1">
 <short>FPC internal compiler routine: pchar_to_shortstr</short>
 </element>
 
 
-<element name="fpc_PChar_To_WideStr">
+<element name="fpc_PChar_To_WideStr" skip="1">
 <short>FPC internal compiler routine: PChar_To_WideStr</short>
 </element>
 
 
-<element name="fpc_pi_real">
+<element name="fpc_pi_real" skip="1">
 <short>FPC internal compiler routine: pi_real</short>
 </element>
 
 
-<element name="fpc_PopAddrStack">
+<element name="fpc_PopAddrStack" skip="1">
 <short>FPC internal compiler routine: PopAddrStack</short>
 </element>
 
 
-<element name="fpc_PopObjectStack">
+<element name="fpc_PopObjectStack" skip="1">
 <short>FPC internal compiler routine: PopObjectStack</short>
 </element>
 
 
-<element name="fpc_PopSecondObjectStack">
+<element name="fpc_PopSecondObjectStack" skip="1">
 <short>FPC internal compiler routine: PopSecondObjectStack</short>
 </element>
 
 
-<element name="fpc_PushExceptAddr">
+<element name="fpc_PushExceptAddr" skip="1">
 <short>FPC internal compiler routine: PushExceptAddr</short>
 </element>
 
 
-<element name="fpc_PushExceptObj">
+<element name="fpc_PushExceptObj" skip="1">
 <short>FPC internal compiler routine: PushExceptObj</short>
 </element>
 
 
-<element name="fpc_pwidechar_length">
+<element name="fpc_pwidechar_length" skip="1">
 <short>FPC internal compiler routine: pwidechar_length</short>
 </element>
 
 
-<element name="fpc_PWideChar_To_AnsiStr">
+<element name="fpc_PWideChar_To_AnsiStr" skip="1">
 <short>FPC internal compiler routine: PWideChar_To_AnsiStr</short>
 </element>
 
 
-<element name="fpc_PWideChar_To_ShortStr">
+<element name="fpc_PWideChar_To_ShortStr" skip="1">
 <short>FPC internal compiler routine: PWideChar_To_ShortStr</short>
 </element>
 
 
-<element name="fpc_PWideChar_To_WideStr">
+<element name="fpc_PWideChar_To_WideStr" skip="1">
 <short>FPC internal compiler routine: PWideChar_To_WideStr</short>
 </element>
 
 
-<element name="fpc_Raiseexception">
+<element name="fpc_Raiseexception" skip="1">
 <short>FPC internal compiler routine: Raiseexception</short>
 </element>
 
 
-<element name="fpc_rangeerror">
+<element name="fpc_rangeerror" skip="1">
 <short>FPC internal compiler routine: rangeerror</short>
 </element>
 
 
-<element name="fpc_Read_End">
+<element name="fpc_Read_End" skip="1">
 <short>FPC internal compiler routine: Read_End</short>
 </element>
 
 
-<element name="fpc_ReadLn_End">
+<element name="fpc_ReadLn_End" skip="1">
 <short>FPC internal compiler routine: ReadLn_End</short>
 </element>
 
 
-<element name="fpc_Read_Text_AnsiStr">
+<element name="fpc_Read_Text_AnsiStr" skip="1">
 <short>FPC internal compiler routine: Read_Text_AnsiStr</short>
 </element>
 
 
-<element name="fpc_Read_Text_Char">
+<element name="fpc_Read_Text_Char" skip="1">
 <short>FPC internal compiler routine: Read_Text_Char</short>
 </element>
 
 
-<element name="fpc_Read_Text_Float">
+<element name="fpc_Read_Text_Float" skip="1">
 <short>FPC internal compiler routine: Read_Text_Float</short>
 </element>
 
 
-<element name="fpc_Read_Text_Int64">
+<element name="fpc_Read_Text_Int64" skip="1">
 <short>FPC internal compiler routine: Read_Text_Int64</short>
 </element>
 
 
-<element name="fpc_Read_Text_PChar_As_Array">
+<element name="fpc_Read_Text_PChar_As_Array" skip="1">
 <short>FPC internal compiler routine: Read_Text_PChar_As_Array</short>
 </element>
 
 
-<element name="fpc_Read_Text_PChar_As_Pointer">
+<element name="fpc_Read_Text_PChar_As_Pointer" skip="1">
 <short>FPC internal compiler routine: Read_Text_PChar_As_Pointer</short>
 </element>
 
 
-<element name="fpc_Read_Text_QWord">
+<element name="fpc_Read_Text_QWord" skip="1">
 <short>FPC internal compiler routine: Read_Text_QWord</short>
 </element>
 
 
-<element name="fpc_Read_Text_ShortStr">
+<element name="fpc_Read_Text_ShortStr" skip="1">
 <short>FPC internal compiler routine: Read_Text_ShortStr</short>
 </element>
 
 
-<element name="fpc_Read_Text_SInt">
+<element name="fpc_Read_Text_SInt" skip="1">
 <short>FPC internal compiler routine: Read_Text_SInt</short>
 </element>
 
 
-<element name="fpc_Read_Text_UInt">
+<element name="fpc_Read_Text_UInt" skip="1">
 <short>FPC internal compiler routine: Read_Text_UInt</short>
 </element>
 
 
-<element name="fpc_ReRaise">
+<element name="fpc_ReRaise" skip="1">
 <short>FPC internal compiler routine: ReRaise</short>
 </element>
 
 
-<element name="fpc_reset_typed">
+<element name="fpc_reset_typed" skip="1">
 <short>FPC internal compiler routine: reset_typed</short>
 </element>
 
 
-<element name="fpc_rewrite_typed">
+<element name="fpc_rewrite_typed" skip="1">
 <short>FPC internal compiler routine: rewrite_typed</short>
 </element>
 
 
-<element name="fpc_round_real">
+<element name="fpc_round_real" skip="1">
 <short>FPC internal compiler routine: round_real</short>
 </element>
 
 
-<element name="fpc_set_add_sets">
+<element name="fpc_set_add_sets" skip="1">
 <short>FPC internal compiler routine: set_add_sets</short>
 </element>
 
 
-<element name="fpc_set_comp_sets">
+<element name="fpc_set_comp_sets" skip="1">
 <short>FPC internal compiler routine: set_comp_sets</short>
 </element>
 
 
-<element name="fpc_set_contains_sets">
+<element name="fpc_set_contains_sets" skip="1">
 <short>FPC internal compiler routine: set_contains_sets</short>
 </element>
 
 
-<element name="fpc_set_create_element">
+<element name="fpc_set_create_element" skip="1">
 <short>FPC internal compiler routine: set_create_element</short>
 </element>
 
 
-<element name="fpc_set_in_byte">
+<element name="fpc_set_in_byte" skip="1">
 <short>FPC internal compiler routine: set_in_byte</short>
 </element>
 
 
-<element name="fpc_set_load_small">
+<element name="fpc_set_load_small" skip="1">
 <short>FPC internal compiler routine: set_load_small</short>
 </element>
 
 
-<element name="fpc_set_mul_sets">
+<element name="fpc_set_mul_sets" skip="1">
 <short>FPC internal compiler routine: set_mul_sets</short>
 </element>
 
 
-<element name="fpc_set_set_byte">
+<element name="fpc_set_set_byte" skip="1">
 <short>FPC internal compiler routine: set_set_byte</short>
 </element>
 
 
-<element name="fpc_set_set_range">
+<element name="fpc_set_set_range" skip="1">
 <short>FPC internal compiler routine: set_set_range</short>
 </element>
 
 
-<element name="fpc_set_sub_sets">
+<element name="fpc_set_sub_sets" skip="1">
 <short>FPC internal compiler routine: set_sub_sets</short>
 </element>
 
 
-<element name="fpc_set_symdif_sets">
+<element name="fpc_set_symdif_sets" skip="1">
 <short>FPC internal compiler routine: set_symdif_sets</short>
 </element>
 
 
-<element name="fpc_set_unset_byte">
+<element name="fpc_set_unset_byte" skip="1">
 <short>FPC internal compiler routine: set_unset_byte</short>
 </element>
 
 
-<element name="fpc_shortstr_append_shortstr">
+<element name="fpc_shortstr_append_shortstr" skip="1">
 <short>FPC internal compiler routine: shortstr_append_shortstr</short>
 </element>
 
 
-<element name="fpc_shortstr_compare">
+<element name="fpc_shortstr_compare" skip="1">
 <short>FPC internal compiler routine: shortstr_compare</short>
 </element>
 
 
-<element name="fpc_shortstr_concat">
+<element name="fpc_shortstr_concat" skip="1">
 <short>FPC internal compiler routine: shortstr_concat</short>
 </element>
 
 
-<element name="fpc_shortstr_Copy">
+<element name="fpc_shortstr_Copy" skip="1">
 <short>FPC internal compiler routine: shortstr_Copy</short>
 </element>
 
 
-<element name="fpc_ShortStr_Float">
+<element name="fpc_ShortStr_Float" skip="1">
 <short>FPC internal compiler routine: ShortStr_Float</short>
 </element>
 
 
-<element name="fpc_shortstr_int64">
+<element name="fpc_shortstr_int64" skip="1">
 <short>FPC internal compiler routine: shortstr_int64</short>
 </element>
 
 
-<element name="fpc_shortstr_qword">
+<element name="fpc_shortstr_qword" skip="1">
 <short>FPC internal compiler routine: shortstr_qword</short>
 </element>
 
 
-<element name="fpc_Shortstr_SetLength">
+<element name="fpc_Shortstr_SetLength" skip="1">
 <short>FPC internal compiler routine: Shortstr_SetLength</short>
 </element>
 
 
-<element name="fpc_ShortStr_sint">
+<element name="fpc_ShortStr_sint" skip="1">
 <short>FPC internal compiler routine: ShortStr_sint</short>
 </element>
 
 
-<element name="fpc_ShortStr_To_AnsiStr">
+<element name="fpc_ShortStr_To_AnsiStr" skip="1">
 <short>FPC internal compiler routine: ShortStr_To_AnsiStr</short>
 </element>
 
 
-<element name="fpc_shortstr_to_chararray">
+<element name="fpc_shortstr_to_chararray" skip="1">
 <short>FPC internal compiler routine: shortstr_to_chararray</short>
 </element>
 
 
-<element name="fpc_shortstr_to_shortstr">
+<element name="fpc_shortstr_to_shortstr" skip="1">
 <short>FPC internal compiler routine: shortstr_to_shortstr</short>
 </element>
 
 
-<element name="fpc_shortstr_to_widechararray">
+<element name="fpc_shortstr_to_widechararray" skip="1">
 <short>FPC internal compiler routine: shortstr_to_widechararray</short>
 </element>
 
 
-<element name="fpc_ShortStr_To_WideStr">
+<element name="fpc_ShortStr_To_WideStr" skip="1">
 <short>FPC internal compiler routine: ShortStr_To_WideStr</short>
 </element>
 
 
-<element name="fpc_shortstr_uint">
+<element name="fpc_shortstr_uint" skip="1">
 <short>FPC internal compiler routine: shortstr_uint</short>
 </element>
 
 
-<element name="fpc_sin_real">
+<element name="fpc_sin_real" skip="1">
 <short>FPC internal compiler routine: sin_real</short>
 </element>
 
 
-<element name="fpc_sqr_real">
+<element name="fpc_sqr_real" skip="1">
 <short>FPC internal compiler routine: sqr_real</short>
 </element>
 
 
-<element name="fpc_sqrt_real">
+<element name="fpc_sqrt_real" skip="1">
 <short>FPC internal compiler routine: sqrt_real</short>
 </element>
 
 
-<element name="fpc_trunc_real">
+<element name="fpc_trunc_real" skip="1">
 <short>FPC internal compiler routine: trunc_real</short>
 </element>
 
 
-<element name="fpc_typed_read">
+<element name="fpc_typed_read" skip="1">
 <short>FPC internal compiler routine: typed_read</short>
 </element>
 
 
-<element name="fpc_typed_write">
+<element name="fpc_typed_write" skip="1">
 <short>FPC internal compiler routine: typed_write</short>
 </element>
 
 
-<element name="fpc_Val_int64_AnsiStr">
+<element name="fpc_Val_int64_AnsiStr" skip="1">
 <short>FPC internal compiler routine: Val_int64_AnsiStr</short>
 </element>
 
 
-<element name="fpc_val_int64_shortstr">
+<element name="fpc_val_int64_shortstr" skip="1">
 <short>FPC internal compiler routine: val_int64_shortstr</short>
 </element>
 
 
-<element name="fpc_Val_int64_WideStr">
+<element name="fpc_Val_int64_WideStr" skip="1">
 <short>FPC internal compiler routine: Val_int64_WideStr</short>
 </element>
 
 
-<element name="fpc_Val_qword_AnsiStr">
+<element name="fpc_Val_qword_AnsiStr" skip="1">
 <short>FPC internal compiler routine: Val_qword_AnsiStr</short>
 </element>
 
 
-<element name="fpc_val_qword_shortstr">
+<element name="fpc_val_qword_shortstr" skip="1">
 <short>FPC internal compiler routine: val_qword_shortstr</short>
 </element>
 
 
-<element name="fpc_Val_qword_WideStr">
+<element name="fpc_Val_qword_WideStr" skip="1">
 <short>FPC internal compiler routine: Val_qword_WideStr</short>
 </element>
 
 
-<element name="fpc_Val_Real_AnsiStr">
+<element name="fpc_Val_Real_AnsiStr" skip="1">
 <short>FPC internal compiler routine: Val_Real_AnsiStr</short>
 </element>
 
 
-<element name="fpc_Val_Real_ShortStr">
+<element name="fpc_Val_Real_ShortStr" skip="1">
 <short>FPC internal compiler routine: Val_Real_ShortStr</short>
 </element>
 
 
-<element name="fpc_Val_Real_WideStr">
+<element name="fpc_Val_Real_WideStr" skip="1">
 <short>FPC internal compiler routine: Val_Real_WideStr</short>
 </element>
 
 
-<element name="fpc_Val_SInt_AnsiStr">
+<element name="fpc_Val_SInt_AnsiStr" skip="1">
 <short>FPC internal compiler routine: Val_SInt_AnsiStr</short>
 </element>
 
 
-<element name="fpc_Val_SInt_ShortStr">
+<element name="fpc_Val_SInt_ShortStr" skip="1">
 <short>FPC internal compiler routine: Val_SInt_ShortStr</short>
 </element>
 
 
-<element name="fpc_Val_SInt_WideStr">
+<element name="fpc_Val_SInt_WideStr" skip="1">
 <short>FPC internal compiler routine: Val_SInt_WideStr</short>
 </element>
 
 
-<element name="fpc_Val_UInt_AnsiStr">
+<element name="fpc_Val_UInt_AnsiStr" skip="1">
 <short>FPC internal compiler routine: Val_UInt_AnsiStr</short>
 </element>
 
 
-<element name="fpc_Val_UInt_Shortstr">
+<element name="fpc_Val_UInt_Shortstr" skip="1">
 <short>FPC internal compiler routine: Val_UInt_Shortstr</short>
 </element>
 
 
-<element name="fpc_Val_UInt_WideStr">
+<element name="fpc_Val_UInt_WideStr" skip="1">
 <short>FPC internal compiler routine: Val_UInt_WideStr</short>
 </element>
 
 
-<element name="fpc_vararray_get">
+<element name="fpc_vararray_get" skip="1">
 <short>FPC internal compiler routine: vararray_get</short>
 </element>
 
 
-<element name="fpc_vararray_put">
+<element name="fpc_vararray_put" skip="1">
 <short>FPC internal compiler routine: vararray_put</short>
 </element>
 
 
-<element name="fpc_variant_copy">
+<element name="fpc_variant_copy" skip="1">
 <short>FPC internal compiler routine: variant_copy</short>
 </element>
 
 
-<element name="fpc_variant_to_dynarray">
+<element name="fpc_variant_to_dynarray" skip="1">
 <short>FPC internal compiler routine: variant_to_dynarray</short>
 </element>
 
 
-<element name="fpc_variant_to_interface">
+<element name="fpc_variant_to_interface" skip="1">
 <short>FPC internal compiler routine: variant_to_interface</short>
 </element>
 
 
-<element name="fpc_WideCharArray_To_AnsiStr">
+<element name="fpc_WideCharArray_To_AnsiStr" skip="1">
 <short>FPC internal compiler routine: WideCharArray_To_AnsiStr</short>
 </element>
 
 
-<element name="fpc_WideCharArray_To_ShortStr">
+<element name="fpc_WideCharArray_To_ShortStr" skip="1">
 <short>FPC internal compiler routine: WideCharArray_To_ShortStr</short>
 </element>
 
 
-<element name="fpc_WideCharArray_To_WideStr">
+<element name="fpc_WideCharArray_To_WideStr" skip="1">
 <short>FPC internal compiler routine: WideCharArray_To_WideStr</short>
 </element>
 
 
-<element name="fpc_WideStr_Assign">
+<element name="fpc_WideStr_Assign" skip="1">
 <short>FPC internal compiler routine: WideStr_Assign</short>
 </element>
 
 
-<element name="fpc_WideStr_CheckRange">
+<element name="fpc_WideStr_CheckRange" skip="1">
 <short>FPC internal compiler routine: WideStr_CheckRange</short>
 </element>
 
 
-<element name="fpc_WideStr_CheckZero">
+<element name="fpc_WideStr_CheckZero" skip="1">
 <short>FPC internal compiler routine: WideStr_CheckZero</short>
 </element>
 
 
-<element name="fpc_WideStr_Compare">
+<element name="fpc_WideStr_Compare" skip="1">
 <short>FPC internal compiler routine: WideStr_Compare</short>
 </element>
 
 
-<element name="fpc_WideStr_Concat">
+<element name="fpc_WideStr_Concat" skip="1">
 <short>FPC internal compiler routine: WideStr_Concat</short>
 </element>
 
 
-<element name="fpc_WideStr_Concat_multi">
+<element name="fpc_WideStr_Concat_multi" skip="1">
 <short>FPC internal compiler routine: WideStr_Concat_multi</short>
 </element>
 
 
-<element name="fpc_widestr_Copy">
+<element name="fpc_widestr_Copy" skip="1">
 <short>FPC internal compiler routine: widestr_Copy</short>
 </element>
 
 
-<element name="fpc_WideStr_Decr_Ref">
+<element name="fpc_WideStr_Decr_Ref" skip="1">
 <short>FPC internal compiler routine: WideStr_Decr_Ref</short>
 </element>
 
 
-<element name="fpc_WideStr_Float">
+<element name="fpc_WideStr_Float" skip="1">
 <short>FPC internal compiler routine: WideStr_Float</short>
 </element>
 
 
-<element name="fpc_WideStr_Incr_Ref">
+<element name="fpc_WideStr_Incr_Ref" skip="1">
 <short>FPC internal compiler routine: WideStr_Incr_Ref</short>
 </element>
 
 
-<element name="fpc_widestr_int64">
+<element name="fpc_widestr_int64" skip="1">
 <short>FPC internal compiler routine: widestr_int64</short>
 </element>
 
 
-<element name="fpc_widestr_qword">
+<element name="fpc_widestr_qword" skip="1">
 <short>FPC internal compiler routine: widestr_qword</short>
 </element>
 
 
-<element name="fpc_WideStr_SetLength">
+<element name="fpc_WideStr_SetLength" skip="1">
 <short>FPC internal compiler routine: WideStr_SetLength</short>
 </element>
 
 
-<element name="fpc_WideStr_sint">
+<element name="fpc_WideStr_sint" skip="1">
 <short>FPC internal compiler routine: WideStr_sint</short>
 </element>
 
 
-<element name="fpc_WideStr_To_AnsiStr">
+<element name="fpc_WideStr_To_AnsiStr" skip="1">
 <short>FPC internal compiler routine: WideStr_To_AnsiStr</short>
 </element>
 
 
-<element name="fpc_widestr_to_chararray">
+<element name="fpc_widestr_to_chararray" skip="1">
 <short>FPC internal compiler routine: widestr_to_chararray</short>
 </element>
 
 
-<element name="fpc_WideStr_To_ShortStr">
+<element name="fpc_WideStr_To_ShortStr" skip="1">
 <short>FPC internal compiler routine: WideStr_To_ShortStr</short>
 </element>
 
 
-<element name="fpc_widestr_to_widechararray">
+<element name="fpc_widestr_to_widechararray" skip="1">
 <short>FPC internal compiler routine: widestr_to_widechararray</short>
 </element>
 
 
-<element name="fpc_WideStr_uint">
+<element name="fpc_WideStr_uint" skip="1">
 <short>FPC internal compiler routine: WideStr_uint</short>
 </element>
 
 
-<element name="fpc_widestr_Unique">
+<element name="fpc_widestr_Unique" skip="1">
 <short>FPC internal compiler routine: widestr_Unique</short>
 </element>
 
 
-<element name="fpc_Write_End">
+<element name="fpc_Write_End" skip="1">
 <short>FPC internal compiler routine: Write_End</short>
 </element>
 
 
-<element name="fpc_Writeln_End">
+<element name="fpc_Writeln_End" skip="1">
 <short>FPC internal compiler routine: Writeln_End</short>
 </element>
 
 
-<element name="fpc_Write_Text_AnsiStr">
+<element name="fpc_Write_Text_AnsiStr" skip="1">
 <short>FPC internal compiler routine: Write_Text_AnsiStr</short>
 </element>
 
 
-<element name="fpc_Write_Text_Boolean">
+<element name="fpc_Write_Text_Boolean" skip="1">
 <short>FPC internal compiler routine: Write_Text_Boolean</short>
 </element>
 
 
-<element name="fpc_Write_Text_Char">
+<element name="fpc_Write_Text_Char" skip="1">
 <short>FPC internal compiler routine: Write_Text_Char</short>
 </element>
 
 
-<element name="fpc_Write_Text_Float">
+<element name="fpc_Write_Text_Float" skip="1">
 <short>FPC internal compiler routine: Write_Text_Float</short>
 </element>
 
 
-<element name="fpc_write_text_int64">
+<element name="fpc_write_text_int64" skip="1">
 <short>FPC internal compiler routine: write_text_int64</short>
 </element>
 
 
-<element name="fpc_Write_Text_Pchar_as_Array">
+<element name="fpc_Write_Text_Pchar_as_Array" skip="1">
 <short>FPC internal compiler routine: Write_Text_Pchar_as_Array</short>
 </element>
 
 
-<element name="fpc_Write_Text_PChar_As_Pointer">
+<element name="fpc_Write_Text_PChar_As_Pointer" skip="1">
 <short>FPC internal compiler routine: Write_Text_PChar_As_Pointer</short>
 </element>
 
 
-<element name="fpc_write_text_qword">
+<element name="fpc_write_text_qword" skip="1">
 <short>FPC internal compiler routine: write_text_qword</short>
 </element>
 
 
-<element name="fpc_Write_Text_ShortStr">
+<element name="fpc_Write_Text_ShortStr" skip="1">
 <short>FPC internal compiler routine: Write_Text_ShortStr</short>
 </element>
 
 
-<element name="fpc_Write_Text_SInt">
+<element name="fpc_Write_Text_SInt" skip="1">
 <short>FPC internal compiler routine: Write_Text_SInt</short>
 </element>
 
 
-<element name="fpc_Write_Text_UInt">
+<element name="fpc_Write_Text_UInt" skip="1">
 <short>FPC internal compiler routine: Write_Text_UInt</short>
 </element>
 
 
-<element name="fpc_write_text_variant">
+<element name="fpc_write_text_variant" skip="1">
 <short>FPC internal compiler routine: write_text_variant</short>
 </element>
 
 
-<element name="fpc_Write_Text_WideChar">
+<element name="fpc_Write_Text_WideChar" skip="1">
 <short>FPC internal compiler routine: Write_Text_WideChar</short>
 </element>
 
 
-<element name="fpc_Write_Text_WideStr">
+<element name="fpc_Write_Text_WideStr" skip="1">
 <short>FPC internal compiler routine: Write_Text_WideStr</short>
 </element>
 
@@ -7856,7 +8046,7 @@ operations on a variant.
 
 <!-- enumeration value Visibility: default -->
 <element name="tvarop.opsubtract">
-<short>Variant operation: Substraction</short>
+<short>Variant operation: Subtraction</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
@@ -8010,7 +8200,7 @@ arguments to a call.
 <short>COM/OLE dispatch call description.</short>
 <descr>
 <var>tcalldesc</var> is used to encode a dispatch call to an OLE dispatch 
-interface. It is used on windows only. It describes the dispath call call.
+interface. It is used on windows only. It describes the dispatch call call.
 </descr>
 <seealso>
 <link id="tcalldesc"/>
@@ -8803,7 +8993,7 @@ For more information about thread programming, see the programmer's guide.
 
 <!-- variable Visibility: default -->
 <element name="TThreadManager.ResumeThread">
-<short>Resumt a suspended thread.</short>
+<short>Resume a suspended thread.</short>
 </element>
 
 <!-- variable Visibility: default -->
@@ -8970,7 +9160,7 @@ previously used thread manager.
 </p>
 <p>
 The function returns <var>True</var> if the threadmanager was set
-succesfully, <var>False</var> if an error occurred.
+successfully, <var>False</var> if an error occurred.
 </p>
 <p>
 For more information about thread programming, see the programmer's guide.
@@ -9059,7 +9249,7 @@ This function does not return.
 with it's handle or ID <var>threadHandle</var>.
 </p>
 <p>
-The function returns zero if succesful. A nonzero return value indicates
+The function returns zero if successful. A nonzero return value indicates
 failure.
 </p>
 </descr>
@@ -9083,7 +9273,7 @@ id="SuspendThread"/>) to resume it's execution. The thread is
 identified with it's handle or ID <var>threadHandle</var>.
 </p>
 <p>
-The function returns zero if succesful. A nonzero return value indicates
+The function returns zero if successful. A nonzero return value indicates
 failure.
 </p>
 </descr>
@@ -9125,7 +9315,7 @@ This call is a hint only, and may be ignored.
 identified by it's handle or ID <var>threadHandle</var>.
 </p>
 <p>
-The function returns zero if succesful. A nonzero return value indicates
+The function returns zero if successful. A nonzero return value indicates
 failure.
 </p>
 </descr>
@@ -9566,7 +9756,7 @@ None.
 <var>DefaultUnicode2AnsiMove</var> simply copies each character from
 <var>Source</var> having an ordinal value of less than 255 to the
 corresponding character in <var>Dest</var>. Characters having an 
-ordinal valuelarger than 255 will be replaced by question marks.
+ordinal value larger than 255 will be replaced by question marks.
 At most <var>Len</var> characters will be copied.
 </descr>
 <errors>
@@ -9582,9 +9772,9 @@ None.
 <short>Set the length of a dynamic array</short>
 <descr>
 <p>
-<var>DynArraySetLength</var> sets the length of the dynamical array
+<var>DynArraySetLength</var> sets the length of the dynamic array
 <var>a</var> to the first <var>dimCnt</var> lengths specified in the 
-array <var>lengthVec</var>. The dynamical array type is described in
+array <var>lengthVec</var>. The dynamic array type is described in
 <var>typeInfo</var> which points to a record of type <link
 id="TDynArrayTypeInfo"/>
 </p>
@@ -9781,7 +9971,7 @@ None. In case the resource was not found, 0 is returned.
 <var>FreeResource</var> unloads the resource identified by
 <var>ResData</var> from memory. The resource must have been loaded by <link
 id="LoadResource"/>. It returns <var>True</var> if the operation was
-succesful, <var>False</var> otherwise.
+successful, <var>False</var> otherwise.
 </descr>
 <errors>
 On error, <var>False</var> is returned.
@@ -10015,7 +10205,7 @@ nothing.
 
 
 <element name="RT_ACCELERATOR">
-<short>Constant identifying an accelerator resouce</short>
+<short>Constant identifying an accelerator resource</short>
 </element>
 
 
@@ -10261,7 +10451,7 @@ system unit initialization code. Do not use or modify this value.
 <element name="StringToWideChar">
 <short>Convert a string to an array of widechars.</short>
 <descr>
-<var>StringToWideChar</var> converts an ansistring <var>Src</var> 
+<var>StringToWideChar</var> converts a single-byte-character string <var>Src</var> 
 to a null-terminated  array of WideChars. The destination for this
 array is pointed to by <var>Dest</var>, and contains room for at 
 least <var>DestSize</var> widechars.
@@ -10299,7 +10489,7 @@ the current heapmanager is not the standard FPC heapmanager.
 <short>Type information for a dynamic array.</short>
 <descr>
 <var>tdynarraytypeinfo</var> describes the structure of 
-a multi-dimensional dynamical array. 
+a multi-dimensional dynamic array. 
 It is used in the <link id="DynArraySetLength"/> call.
 </descr>
 <seealso>
@@ -10764,7 +10954,7 @@ low-level <link id="Utf8ToUnicode"/> function to do the actual work.
 <short>Convert a widestring or unicodestring to an UTF-8 encoded ansistring</short>
 <descr>
 <p>
-<var>UTF8Encode</var> converts an ansistring or widestring <var>S</var> to the equivalent UTF-8 encoded unicode string and returns this resulting string. It calls the
+<var>UTF8Encode</var> converts an ansistring or widestring <var>S</var> to the equivalent UTF-8 encoded Unicode string and returns this resulting string. It calls the
 low-level <link id="UnicodeToUTF8"/> function to do the actual work.
 </p>
 <p>
@@ -10781,10 +10971,10 @@ The resulting string has code page <var>CP_UTF8</var>.
 
 
 <element name="Utf8ToAnsi">
-<short>Convert a UTF-8 encoded unicode string to an ansistring</short>
+<short>Convert a UTF-8 encoded Unicode string to an ansistring</short>
 <descr>
 <p>
-<var>Utf8ToAnsi</var> converts an utf8-encode unicode string to an
+<var>Utf8ToAnsi</var> converts an utf8-encode Unicode string to an
 ansistring. It converts the string to a widestring and then converts
 the widestring to an ansistring.
 </p>
@@ -10832,7 +11022,7 @@ On error, -1 is returned.
 <descr>
 <var>VarCast</var> converts the variant in <var>Source</var> to the type
 indicated in <var>VarType</var> and returns the result in <var>dest</var>.
-The <var>VarType</var> must be one of the pre-defined <var>VarNNN</var> constants.
+The <var>VarType</var> must be one of the predefined <var>VarNNN</var> constants.
 </descr>
 <errors>
 If the conversion is not possible because the value cannot be correctly
@@ -10849,11 +11039,11 @@ casted, then a run-time error or an exception may occur.
 
 
 <element name="WideCharLenToString">
-<short>Convert a length-limited array of widechar to an ansistring</short>
+<short>Convert a length-limited array of widechar to an unicodestring</short>
 <descr>
 <var>WideCharLenToString</var> converts at most <var>Len</var> widecharacters from 
-the null-terminated widechar array <var>S</var> to an ansistring, and returns 
-the ansistring.
+the null-terminated widechar array <var>S</var> to an unicodestring, and returns 
+the unicodestring.
 </descr>
 <errors>
 No validity checking is performed on <var>S</var>. 
@@ -10871,12 +11061,11 @@ Passing an invalid pointer may lead to access violations.
 <short>Convert a length-limited array of widechar to an ansistring</short>
 <descr>
 <var>WideCharLenToString</var> converts at most <var>Len</var> widecharacters from 
-the null-terminated widechar array <var>Src</var> to an ansistring, and returns 
-the ansistring in <var>Dest</var>.
+the null-terminated widechar array <var>Src</var> to an ansistring or Unicode string, 
+and returns the resulting in <var>Dest</var>.
 </descr>
 <errors>
-No validity checking is performed on <var>Src</var>. 
-Passing an invalid pointer may lead to access violations.
+No validity checking is performed on <var>Src</var>. Passing an invalid pointer may lead to access violations.
 </errors>
 <seealso>
 <link id="StringToWideChar"/>
@@ -10888,10 +11077,10 @@ Passing an invalid pointer may lead to access violations.
 
 
 <element name="WideCharToString">
-<short>Convert a null-terminated array of widechar to an ansistring</short>
+<short>Convert a null-terminated array of widechar to an unicodestring</short>
 <descr>
 <var>WideCharToString</var> converts the null-terminated widechar 
-array <var>S</var> to an ansistring, and returns the ansistring.
+array <var>S</var> to an unicodestring, and returns the unicodestring.
 </descr>
 <errors>
 No validity checking is performed on <var>Src</var>. 
@@ -10910,7 +11099,7 @@ lead to access violations.
 <short>Convert a null-terminated array of widechar to an ansistring</short>
 <descr>
 <var>WideCharToString</var> converts the null-terminated widechar 
-array <var>S</var> to an ansistring, and returns the ansistring in <var>Dest</var>.
+array <var>S</var> to an ansistring or Unicode string, and returns the resulting string in <var>Dest</var>.
 </descr>
 <errors>
 No validity checking is performed on <var>S</var>. 
@@ -10920,7 +11109,7 @@ lead to access violations.
 <seealso>
 <link id="StringToWideChar"/>
 <link id="WideCharToString"/>
-<link id="WideCharToStrVar"/>
+<link id="WideCharLenToStrVar"/>
 <link id="WideCharLenToString"/>
 </seealso>
 </element>
@@ -10948,1125 +11137,512 @@ Contains the current widestring manager. Do not use directly.
 </seealso>
 </element>
 
-<element name="operator and(variant, variant): variant">
+<element name="operator and(variant, variant): variant" skip="1">
 <short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
 
-<element name="operator :=(ansistring): olevariant">
+<element name="operator :=(ansistring): olevariant" skip="1">
 <short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
 
-<element name="operator :=(ansistring): variant">
+<element name="operator :=(ansistring): variant" skip="1">
 <short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
 
-<element name="operator :=(Boolean): olevariant">
+<element name="operator :=(Boolean): olevariant" skip="1">
 <short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
 
-<element name="operator :=(Boolean): variant">
+<element name="operator :=(Boolean): variant" skip="1">
 <short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
 
-<element name="operator :=(Byte): olevariant">
+<element name="operator :=(Byte): olevariant" skip="1">
 <short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
 
-<element name="operator :=(Byte): variant">
+<element name="operator :=(Byte): variant" skip="1">
 <short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
 
-<element name="operator :=(Char): olevariant">
+<element name="operator :=(Char): olevariant" skip="1">
 <short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
-
-<element name="operator :=(Char): variant">
+<element name="operator :=(Char): variant" skip="1">
 <short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
 
-<element name="operator :=(currency): olevariant">
+<element name="operator :=(currency): olevariant" skip="1">
 <short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
 
-<element name="operator :=(currency): variant">
+<element name="operator :=(currency): variant" skip="1">
 <short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
 </element>
 
 
-<element name="operator div(variant, variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator div(variant, variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(double): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(double): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(double): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(double): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(DWord): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(DWord): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(DWord): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(DWord): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(Int64): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(Int64): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(Int64): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(Int64): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(longbool): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(longbool): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(longbool): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(longbool): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(LongInt): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(LongInt): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(LongInt): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(LongInt): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator mod(variant, variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator mod(variant, variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator not(variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator not(variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): ansistring">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): ansistring" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): Boolean">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): Boolean" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): Byte">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): Byte" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): Char">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): Char" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): currency">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): currency" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): double">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): double" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): DWord">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): DWord" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): Int64">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): Int64" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): longbool">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): longbool" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): LongInt">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): LongInt" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): qword">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): qword" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): ShortInt">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): ShortInt" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): shortstring">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): shortstring" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): SmallInt">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): SmallInt" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): TDateTime">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): TDateTime" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): TError">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): TError" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): widechar">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): widechar" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): widestring">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): widestring" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): Word">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): Word" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(olevariant): wordbool">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(olevariant): wordbool" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator or(variant, variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator or(variant, variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(qword): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(qword): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(qword): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(qword): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(real48): double">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(real48): double" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator shl(variant, variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator shl(variant, variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(ShortInt): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(ShortInt): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(ShortInt): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(ShortInt): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(shortstring): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(shortstring): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(shortstring): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(shortstring): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator shr(variant, variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator shr(variant, variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(SmallInt): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(SmallInt): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(SmallInt): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(SmallInt): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(TDateTime): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(TDateTime): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(TDateTime): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(TDateTime): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(TError): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(TError): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(TError): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(TError): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): ansistring">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): ansistring" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): Boolean">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): Boolean" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): Byte">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): Byte" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): Char">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): Char" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): currency">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): currency" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): double">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): double" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): DWord">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): DWord" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): Int64">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): Int64" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): longbool">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): longbool" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): LongInt">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): LongInt" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): qword">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): qword" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): ShortInt">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): ShortInt" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): shortstring">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): shortstring" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): SmallInt">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): SmallInt" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): TDateTime">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): TDateTime" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): TError">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): TError" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator -(variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator -(variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator &lt;=(variant, variant): Boolean">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator &lt;=(variant, variant): Boolean" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator &lt;(variant, variant): Boolean">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator &lt;(variant, variant): Boolean" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator =(variant, variant): Boolean">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator =(variant, variant): Boolean" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator &gt;=(variant, variant): Boolean">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator &gt;=(variant, variant): Boolean" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator &gt;(variant, variant): Boolean">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator &gt;(variant, variant): Boolean" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator -(variant, variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator -(variant, variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator /(variant, variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator /(variant, variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator *(variant, variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator *(variant, variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator **(variant, variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator **(variant, variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator +(variant, variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator +(variant, variant): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): widechar">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): widechar" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): widestring">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): widestring" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): Word">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): Word" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(variant): wordbool">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(variant): wordbool" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(widechar): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(widechar): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(widechar): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(widechar): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(widestring): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(widestring): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(widestring): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(widestring): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(wordbool): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(wordbool): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(wordbool): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(wordbool): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(Word): olevariant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(Word): olevariant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator :=(Word): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator :=(Word): variant" skip="1">
+<short> </short>
 </element>
 
 
-<element name="operator xor(variant, variant): variant">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<element name="operator xor(variant, variant): variant" skip="1">
+<short> </short>
 </element>
 
 <!-- function Visibility: default -->
@@ -12167,8 +11743,8 @@ None.
 <short>Conditional exchange</short>
 <descr>
 <var>InterlockedCompareExchange</var> does an  compare-and-exchange operation on the specified values in a thread-safe way. 
-The function compares <var>Target</var> and <var>Comparand</var> and exchanges <var>Target</var> with <var>NewValue</var>
-if <var>Target</var> and <var>Comparand</var> are equal. It returns the old value of <var>Target</var>. 
+The function compares <var>Target</var> and <var>Comperand</var> and exchanges <var>Target</var> with <var>NewValue</var>
+if <var>Target</var> and <var>Comperand</var> are equal. It returns the old value of <var>Target</var>. 
 This is done in a thread-safe way, i.e., only one processor is accessing the <var>Target</var> variable at a time.
 </descr>
 <errors>
@@ -12424,7 +12000,7 @@ None.
 
 <!-- variable Visibility: default -->
 <element name="tvardata.vany">
-<short>Any valyue</short>
+<short>Any value</short>
 </element>
 
 <!-- variable Visibility: default -->
@@ -12538,17 +12114,17 @@ None.
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_pack_x_y_z">
+<element name="fpc_in_pack_x_y_z" skip="1">
 <short>FPC compiler internal procedure index: pack</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_unpack_x_y_z">
+<element name="fpc_in_unpack_x_y_z" skip="1">
 <short>FPC compiler internal procedure index: unpack</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_bitsizeof_x">
+<element name="fpc_in_bitsizeof_x" skip="1">
 <short>FPC compiler internal procedure index: bitsizeof</short>
 </element>
 
@@ -12606,7 +12182,7 @@ None.
 </element>
 
 <!-- function Visibility: default -->
-<element name="operator :=">
+<element name="operator :=" skip="1">
 <short>Overload for variants</short>
 <descr>
 The assignment operator is overloaded for various types. This should be
@@ -12665,7 +12241,7 @@ dispatch interfaces.
 
 <!-- enumeration value Visibility: default -->
 <element name="tinterfaceentrytype.etStaticMethodResult">
-<short>Statis method</short>
+<short>Static method</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
@@ -12796,7 +12372,7 @@ manager <var>ThreadManager.SemaphorePost</var>.
 <descr>
 <var>TSemaphoreWaitHandler</var> is the function prototype to wait on an 
 event on the semaphore (which should be posted to the semaphore with
-<var>ThreadManager.SemaphorePost</var>). It should handle a pointer as eturned by the
+<var>ThreadManager.SemaphorePost</var>). It should handle a pointer as returned by the
 <var>ThreadManager.SemaphoreInit</var> procedure. it's used by the thread
 manager <var>ThreadManager.SemaphoreWait</var>.
 </descr>
@@ -12931,17 +12507,17 @@ for Delphi compatibility only.
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_writestr_x">
+<element name="fpc_in_writestr_x" skip="1">
 <short>Internal write string procedure</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_readstr_x">
+<element name="fpc_in_readstr_x" skip="1">
 <short>Internal read string procedure</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_abs_long">
+<element name="fpc_in_abs_long" skip="1">
 <short>Internal ABS function</short>
 </element>
 
@@ -13020,7 +12596,7 @@ result:
 <dt>&gt;0</dt><dd>if <var>S1&gt;S2</var>.</dd>
 </dl>
 <p>
-The comparision of the two strings is case-insensitive.
+The comparison of the two strings is case-insensitive.
 The function does not take internationalization settings into account, it
 simply compares ASCII values.
 </p>
@@ -13146,13 +12722,6 @@ raised.
 </errors>
 <seealso>
 <link id="VarArrayPut"/>
-</seealso>
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
 </seealso>
 </element>
 
@@ -13298,9 +12867,9 @@ only member of this set.
 
 <!-- pointer type Visibility: default -->
 <element name="PUnicodeChar">
-<short>Pointer to unicode character</short>
+<short>Pointer to Unicode character</short>
 <descr>
-<var>PUnicodeChar</var> is a pointer to a unicode character, just like
+<var>PUnicodeChar</var> is a pointer to a Unicode character, just like
 <var>PChar</var> is a pointer to a <var>Char</var> ansistring character.
 </descr>
 <seealso>
@@ -13332,7 +12901,7 @@ only member of this set.
 <element name="fpc_in_rol_x_x" skip="1"/>
 <element name="fpc_objc_selector_x" skip="1"/>
 
-<element name="FillQWord">
+<element name="FillQWord" skip="1">
 <short>Fill memory range with QWord (64-bit) values</short>
 <descr>
 <var>FillQWord</var> fills the memory location of <var>x</var> with <var>Count</var>
@@ -13568,11 +13137,11 @@ emulation routines do the rounding. The value can be one of the following:
 
 <!-- function Visibility: default -->
 <element name="UnicodeCharToString">
-<short>Convert unicode character to string</short>
+<short>Convert Unicode character to string</short>
 <descr>
 <p>
-<var>UnicodeCharToString</var> converts a null-word-terminated array of unicode characters 
-in <var>S</var> to an AnsiString value. It simply calls <link id="UnicodeCharLenToString"/>
+<var>UnicodeCharToString</var> converts a null-word-terminated array of Unicode characters 
+in <var>S</var> to a Unicode string value. It simply calls <link id="UnicodeCharLenToString"/>
 with the length of the string <var>S</var>.
 </p>
 <p>
@@ -13591,7 +13160,7 @@ No checking is done to see if the pointer <var>S</var> is valid.
 
 <!-- function Visibility: default -->
 <element name="StringToUnicodeChar">
-<short>Convert an ansistring to a null-terminated array of unicode characters.</short>
+<short>Convert an ansistring to a null-terminated array of Unicode characters.</short>
 <descr>
 <p>
 <var>StringToUnicodeChar</var> converts the ansistring <var>S</var> to a
@@ -13616,11 +13185,11 @@ memory location.
 
 <!-- function Visibility: default -->
 <element name="UnicodeCharLenToString">
-<short>Convert a memory buffer with unicode characters to an ansistring</short>
+<short>Convert a memory buffer with Unicode characters to a unicodestring</short>
 <descr>
 <p>
-<var>UnicodeCharLenToString</var> converts the unicode characters in buffer
-<var>S</var> with at most <var>len</var> bytes length, to an ansistring and
+<var>UnicodeCharLenToString</var> converts the Unicode characters in buffer
+<var>S</var> with at most <var>len</var> bytes length, to a unicodestring and
 returns the result.
 </p>
 <p>
@@ -13638,10 +13207,10 @@ No checking is done to see if the pointer <var>S</var> or length <var>len</var> 
 
 <!-- procedure Visibility: default -->
 <element name="UnicodeCharLenToStrVar">
-<short>Convert a memory buffer with unicode characters to an ansistring</short>
+<short>Convert a memory buffer with Unicode characters to an ansistring</short>
 <descr>
 <p>
-<var>UnicodeCharLenToString</var> converts the unicode characters in buffer
+<var>UnicodeCharLenToString</var> converts the Unicode characters in buffer
 <var>S</var> with at most <var>len</var> bytes length, to an ansistring and
 returns the result in <var>Dest</var>
 </p>
@@ -13663,12 +13232,11 @@ No checking is done to see if the pointer <var>S</var> or length
 
 <!-- procedure Visibility: default -->
 <element name="UnicodeCharToStrVar">
-<short>Convert a null-terminated memory buffer with unicode characters to an ansistring</short>
+<short>Convert a null-terminated memory buffer with Unicode characters to an ansistring</short>
 <descr>
 <p>
-<var>UnicodeCharLenToString</var> converts the unicode characters in buffer
-<var>S</var> up to the first null word, to an ansistring and
-returns the result in <var>Dest</var>
+<var>UnicodeCharLenToString</var> converts the Unicode characters in buffer
+<var>S</var> up to the first null word, to an ansistring and returns the result in <var>Dest</var>
 </p>
 <p>
 This function does the same as <link id="UnicodeCharToString"/>.
@@ -13690,7 +13258,7 @@ No checking is done to see if the pointer <var>S</var> is valid.
 <short>Standard widestring manager callback</short>
 <descr>
 <var>DefaultUnicode2AnsiMove</var> is the standard callback used for the
-widestring manager when a unicode string must be converted to an ansistring.
+widestring manager when a Unicode string must be converted to an ansistring.
 It replaces all words with value &lt; 256 with their value as ASCII code.
 </descr>
 <errors>
@@ -13723,7 +13291,7 @@ unicodestring, no conversion whatsoever is performed.
 <p>
 <var>TUnicodeStringManager</var> is currently the same as the <link
 id="TUnicodeStringManager"/> manager record. It performs the same functions:
-converting unicode strings to ansistrings and vice-versa,
+converting Unicode strings to ansistrings and vice-versa,
 performing uppercase to lowercase transformations and comparing strings.
 </p>
 </descr>
@@ -13734,7 +13302,7 @@ performing uppercase to lowercase transformations and comparing strings.
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.Wide2AnsiMoveProc">
-<short>Callback used when a unicode/wide string must be converted to an ansistring</short>
+<short>Callback used when a Unicode/wide string must be converted to an ansistring</short>
 </element>
 
 <!-- variable Visibility: default -->
@@ -13744,27 +13312,27 @@ performing uppercase to lowercase transformations and comparing strings.
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.UpperWideStringProc">
-<short>Callback used when a unicode/wide string must be uppercased.</short>
+<short>Callback used when a Unicode/wide string must be uppercased.</short>
 </element>
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.LowerWideStringProc">
-<short>Callback used when a unicode/wide string must be lowercased.</short>
+<short>Callback used when a Unicode/wide string must be lowercased.</short>
 </element>
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.CompareWideStringProc">
-<short>Callback used when 2 unicode/wide strings must be compared</short>
+<short>Callback used when 2 Unicode/wide strings must be compared</short>
 </element>
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.CompareTextWideStringProc">
-<short>Callback used when 2 unicode/wide strings must be compared case-insensitively</short>
+<short>Callback used when 2 Unicode/wide strings must be compared case-insensitively</short>
 </element>
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.CharLengthPCharProc">
-<short>Callback used when the character length of a unicode/wide string must be calculated</short>
+<short>Callback used when the character length of a Unicode/wide string must be calculated</short>
 </element>
 
 <!-- variable Visibility: default -->
@@ -13804,7 +13372,7 @@ performing uppercase to lowercase transformations and comparing strings.
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.StrLICompAnsiStringProc">
-<short>Callback used when 2 ansistring arrays must be compared case insensitively up to agiven length</short>
+<short>Callback used when 2 ansistring arrays must be compared case insensitively up to a given length</short>
 </element>
 
 <!-- variable Visibility: default -->
@@ -13829,40 +13397,40 @@ performing uppercase to lowercase transformations and comparing strings.
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.Unicode2AnsiMoveProc">
-<short>Callback used whenever a unicode string must be converted to an ansistring.</short>
+<short>Callback used whenever a Unicode string must be converted to an ansistring.</short>
 </element>
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.Ansi2UnicodeMoveProc">
-<short>Callback used whenever a ansistring must be converted to a unicode string.</short>
+<short>Callback used whenever a ansistring must be converted to a Unicode string.</short>
 </element>
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.UpperUnicodeStringProc">
-<short>Callback used to convert a unicode string to uppercase.</short>
+<short>Callback used to convert a Unicode string to uppercase.</short>
 </element>
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.LowerUnicodeStringProc">
-<short>Callback used to convert a unicode string to lowercase.</short>
+<short>Callback used to convert a Unicode string to lowercase.</short>
 </element>
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.CompareUnicodeStringProc">
-<short>Callback used to compare 2 unicode strings.</short>
+<short>Callback used to compare 2 Unicode strings.</short>
 </element>
 
 <!-- variable Visibility: default -->
 <element name="TUnicodeStringManager.CompareTextUnicodeStringProc">
-<short>Callback used to compare 2 unicode strings case insensitively</short>
+<short>Callback used to compare 2 Unicode strings case insensitively</short>
 </element>
 
 <!-- function Visibility: default -->
 <element name="UnicodeStringToUCS4String">
-<short>Convert a unicode string to a UCS-4 string.</short>
+<short>Convert a Unicode string to a UCS-4 string.</short>
 <descr>
 <p>
-<var>UnicodeStringToUCS4String</var> converts a unicode string <var>S</var> to a UCS-4
+<var>UnicodeStringToUCS4String</var> converts a Unicode string <var>S</var> to a UCS-4
 encoded string, and returns the resulting string.
 </p>
 <p>
@@ -13876,11 +13444,11 @@ This function requires the widestring manager.
 
 <!-- function Visibility: default -->
 <element name="UCS4StringToUnicodeString">
-<short>Convert a UCS-4 encoded string to a unicode string</short>
+<short>Convert a UCS-4 encoded string to a Unicode string</short>
 <descr>
 <p>
 <var>UCS4StringToUnicodeString</var> converts the UCS-4 encoded string
-<var>S</var> to a unicode string and returns the resulting string.
+<var>S</var> to a Unicode string and returns the resulting string.
 </p>
 <p>
 This function requires the widestring manager.
@@ -13895,11 +13463,11 @@ This function requires the widestring manager.
 
 <!-- procedure Visibility: default -->
 <element name="GetUnicodeStringManager">
-<short>Return a copy of the currently active unicodetring manager.</short>
+<short>Return a copy of the currently active UnicodeString manager.</short>
 <descr>
 <p>
 <var>GetUnicodeStringManager</var> returns a copy of the currently active 
-unicode string manager in <var>Old</var>
+Unicode string manager in <var>Old</var>
 </p>
 <p>
 UnicodeStrings are implemented in different ways on different platforms. 
@@ -14085,7 +13653,7 @@ common to all classes.
 <short>Handle to resource</short>
 <descr>
 <var>TFPResourceHandle</var> represents a handle to a binary resource and is
-used in the various resource calls. Its actual type and size may differ accross 
+used in the various resource calls. Its actual type and size may differ across 
 platforms. 
 </descr>
 <seealso>
@@ -14100,7 +13668,7 @@ platforms.
 <descr>
 <var>TFPResourceHMODULE</var> represents a module (library, executable, other) in which
 a resource is located. It is used in the various resource calls. It is an opaque type: 
-its actual type and size may differ accross platforms.
+its actual type and size may differ across platforms.
 </descr>
 <seealso>
 <link id="TFPResourceHandle"/>
@@ -14114,7 +13682,7 @@ its actual type and size may differ accross platforms.
 <descr>
 <var>TFPResourceHGLOBAL</var> represents a handle to the global module
 containing a resource. It is used in the various resource calls. 
-It is an opaque type: its actual type and size may differ accross platforms.
+It is an opaque type: its actual type and size may differ across platforms.
 </descr>
 <seealso>
 <link id="TFPResourceHandle"/>
@@ -14229,7 +13797,7 @@ None.
 
 <!-- function Visibility: default -->
 <element name="MakeLangID">
-<short>Create a langauge ID</short>
+<short>Create a language ID</short>
 <descr>
 <var>MakeLangID</var> creates a language ID from the <var>primary</var> and
 <var>sub</var> language IDS. 
@@ -14285,7 +13853,7 @@ None.
 <var>EnumResourceLanguages</var> enumerates the available languages for a
 resource of given <var>ResourceName</var> and type <var>ResourceType</var> 
 in the module <var>ModuleHandle</var>.  
-For each language availanle, it calls <var>EnumFunc</var> and passes it
+For each language available, it calls <var>EnumFunc</var> and passes it
 <var>ModuleHandle</var>, the type of the resource <var>ResourceType</var>, the name of the resource
 <var>ResourceName</var>, the language ID, and <var>lParam</var>.
 It returns <var>False</var> if no resources are available for the specified
@@ -14308,7 +13876,7 @@ None.
 <p>
 <var>FindResourceEx</var> looks in module <var>ModuleHandle</var> for a
 resource of type <var>ResourceType</var> and name <var>ResourceName</var>
-with languague ID <var>Language</var>. Both <var>Resourcename</var> and
+with language ID <var>Language</var>. Both <var>Resourcename</var> and
 <var>ResourceName</var> can be specified as a null-terminated array of
 characters, or as an AnsiString.
 </p>
@@ -14317,7 +13885,7 @@ conducted</p>
 <ol>
 <li>with only primary language.</li>
 <li>with the neutral language (<var>LANG_NEUTRAL</var>)</li>
-<li>with the english language</li>
+<li>with the English language</li>
 </ol>
 <p>
 If none of these has returned a match, then the first available language is
@@ -14440,7 +14008,7 @@ functions in the <var>Manager</var> record will be used to handle resources.
 </p>
 <p>
 Note that it is not supported to change resource managers on-the-fly: any
-resources or information about resources obtained should be discareded prior
+resources or information about resources obtained should be discarded prior
 to a call to <var>SetResourceManager</var>. Typically,
 <var>SetResourceManager</var> should be called once, at program startup.
 </p>
@@ -15354,7 +14922,7 @@ error 232 may occur if no exceptions are used.
 <var>TryEnterCriticalsection</var> attempts to enter critical section
 <var>cs</var>. It returns at once. The return value is zero if another
 thread owns the critical section, or nonzero if the current thread already
-owns or succesfully obtained the critical section.
+owns or successfully obtained the critical section.
 </descr>
 <seealso>
 If no threadmanager is installed, an exception may be raised or runtime
@@ -15420,20 +14988,23 @@ on the architecture the program runs on. On most processors, it should be one of
 <var>NativeInt</var> is defined for Delphi compatibility. It is a signed integer
 with the size of a pointer, so 32-bit on 32-bit platforms, 64-bit on 64-bit
 platforms.
+
+It is advisable to use unsigned variants of this type. See <var>PtrInt</var>
+for details.
 </descr>
 <seealso>
 <link id="PtrInt"/>
-<link id="NativeUint"/>
+<link id="NativeUInt"/>
 </seealso>
 </element>
 
 <!-- alias type Visibility: default -->
-<element name="NativeUint">
-<short>Alias for <var>PtrUint</var></short>
+<element name="NativeUInt">
+<short>Alias for <var>PtrUInt</var></short>
 <descr>
-<var>NativeInt</var> is defined for Delphi compatibility. It is an unsigned integer  
+<var>NativeUInt</var> is defined for Delphi compatibility. It is an unsigned integer
 with the size of a pointer, so 32-bit on 32-bit platforms, 64-bit on 64-bit
-platforms. 
+platforms.
 </descr>
 <seealso>
 <link id="PtrInt"/>
@@ -15460,32 +15031,32 @@ platforms.
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_objc_protocol_x">
+<element name="fpc_inobjc_protocol_x" skip="1">
 <short>FPC compiler internal procedure index: protocol</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_objc_encode_x">
+<element name="fpc_inobjc_encode_x" skip="1">
 <short>FPC compiler internal procedure index: encode</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_sar_x_y">
+<element name="fpc_in_sar_x_y" skip="1">
 <short>FPC compiler internal procedure index: sar_x_y</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_sar_x">
+<element name="fpc_in_sar_x" skip="1">
 <short>FPC compiler internal procedure index: sar_x</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_bsf_x">
+<element name="fpc_in_bsf_x" skip="1">
 <short>FPC compiler internal procedure index: bsf_x</short>
 </element>
 
 <!-- constant Visibility: default -->
-<element name="fpc_in_bsr_x">
+<element name="fpc_in_bsr_x" skip="1">
 <short>FPC compiler internal procedure index: bsr_x</short>
 </element>
 
@@ -15792,7 +15363,7 @@ will not increase the reference count of the interface.
 <element name="vtUnicodeString">
 <short>Unicode string argument</short>
 <descr>
-<var>vtUnicodeString</var> denotes a unicode string argument in the array of
+<var>vtUnicodeString</var> denotes a Unicode string argument in the array of
 const. The <var>TVarRec.VUnicodeString</var> field will contain the actual
 value.
 </descr>
@@ -15816,7 +15387,7 @@ end-user code. It is used in the <var>as</var> operator.
 <element name="varustrarg">
 <short>Unicode string argument value</short>
 <descr>
-<var>varustrarg</var>  denotes a unicode string argument in
+<var>varustrarg</var>  denotes a Unicode string argument in
 <var>DispInvoke</var> call. It will be converted to varustring in a
 variant.
 </descr>
@@ -15829,7 +15400,7 @@ variant.
 <element name="varustring">
 <short>Unicode string value in Variant</short>
 <descr>
-<var>varustring</var> denotes a unicode string value in a variant. It is one
+<var>varustring</var> denotes a Unicode string value in a variant. It is one
 of the values found in the <var>VType</var> field of the variant record
 <link id="tvardata"/>.
 </descr>
@@ -16086,7 +15657,7 @@ manual for more details</descr>
 <element name="CP_UTF16">
 <short>UTF-16 code page identifier</short>
 <descr>
-<var>CP_UTF16</var> is the default Windows unicode codepage identifier (little endian).
+<var>CP_UTF16</var> is the default Windows Unicode codepage identifier (little endian).
 </descr>
 </element>
 
@@ -16094,7 +15665,7 @@ manual for more details</descr>
 <element name="CP_UTF16BE">
 <short>Big-endian UTF-16 code page identifier</short>
 <descr>
-<var>CP_UTF16BE</var> is the Windows unicode codepage identifier (big endian).
+<var>CP_UTF16BE</var> is the Windows Unicode codepage identifier (big endian).
 </descr>
 </element>
 
@@ -16102,7 +15673,7 @@ manual for more details</descr>
 <element name="CP_UTF7">
 <short>UTF-7 code page identifier</short>
 <descr>
-<var>CP_UTF7</var> is the Windows unicode 7-Bit encoding codepage identifier.
+<var>CP_UTF7</var> is the Windows Unicode 7-Bit encoding codepage identifier.
 </descr>
 </element>
 
@@ -16110,7 +15681,7 @@ manual for more details</descr>
 <element name="CP_UTF8">
 <short>UTF-8 code page identifier</short>
 <descr>
-<var>CP_UTF8</var> is the Windows unicode 8-Bit encoding codepage identifier.
+<var>CP_UTF8</var> is the Windows Unicode 8-Bit encoding codepage identifier.
 </descr>
 </element>
 
@@ -16529,6 +16100,10 @@ The <var>DefaultSystemCodePage</var> value may be set using <link id="SetMultiBy
 That means that it is not a good idea to use its value to determine the real OS "default system code
 page".
 </p>
+<p>
+Note that if you change <var>DefaultSystemCodePage</var>, you should call <var>TEncoding.FreeEncodings</var> 
+to free the encodings that were created. They will be recreated with the correct (new) <var>DefaultSystemCodePage</var>.
+</p>
 </descr>
 <seealso>
 <link id="DefaultUnicodeCodePage"/>
@@ -16568,7 +16143,7 @@ This variable does not exist in Delphi, and has  been introduced in FPC to make 
 the value of <var>DefaultSystemCodePage</var> without breaking RTL interfaces with the OS file system API calls.
 </p>
 <p>
-The initiali value of this variable depends on the platform:
+The initial value of this variable depends on the platform:
 </p>
 <ul>
 <li>Windows: UTF-8, because the RTL uses UTF-16 OS API calls (so no data is lost in intermediate
@@ -16705,7 +16280,7 @@ encoding is unknown.
 </element>
 
 <!-- function Visibility: default -->
-<element name="fpc_SarInt64">
+<element name="fpc_SarInt64" skip="1">
 <short>SAR (int64)</short>
 <descr>
 <var>fpc_SarInt64</var> is a FPC helper function which should not be used directly.
@@ -17312,6 +16887,10 @@ changes, and code page conversions will be done to the new codepage.
 <p>
 Do not set <var>DefaultSystemCodePage</var> directly, as additional actions may need to be done when changing the code page.
 </p>
+<p>
+When the <link id="#rtl.system.DefaultSystemCodePage">DefaultSystemCodePage</link> changes and you use the <var>TEncoding</var> classes, 
+you must call <link id="#rtl.sysutils.TEncoding.FreeEncodings">TEncoding.FreeEncodings</link> to regenerate the default encoding using the new code page.
+</p>
 </descr>
 <seealso>
 <link id="DefaultSystemCodePage"/>
@@ -17322,16 +16901,16 @@ Do not set <var>DefaultSystemCodePage</var> directly, as additional actions may 
 
 <!-- procedure Visibility: default -->
 <element name="SetMultiByteFileSystemCodePage">
-<short>Set codepage used when passing strings to OS single-byte filesystem APIs</short>
+<short>Set codepage used when passing strings to OS single-byte file system APIs</short>
 <descr>
 <p>
-<var>SetMultiByteFileSystemCodePage</var> sets the codepage used in single-byte OS filesystem APIs to <var>CodePage</var>.
+<var>SetMultiByteFileSystemCodePage</var> sets the codepage used in single-byte OS file system APIs to <var>CodePage</var>.
 The effect of this change is that the default codepage used to translate multi-byte (UTF-16)  strings 
-to single-byte codepage-aware strings used in Filesystem APIs changes, and
-strings passed to the codepage-aware filesystem APIs will be passed using the new codepage.
+to single-byte codepage-aware strings used in File system APIs changes, and
+strings passed to the codepage-aware file system APIs will be passed using the new codepage.
 </p>
 <p>
-This constant is not used if the filesystem API of the OS is multi-byte (such as on Windows).
+This constant is not used if the file system API of the OS is multi-byte (such as on Windows).
 </p>
 <p> 
 Do not set <var>DefaultFileSystemCodePage</var> directly, as additional actions
@@ -17347,19 +16926,19 @@ may need to be done when changing the code page.
 
 <!-- procedure Visibility: default -->
 <element name="SetMultiByteRTLFileSystemCodePage">
-<short>Set codepage used when interpreting strings from OS single-byte filesystem APIs</short>
+<short>Set codepage used when interpreting strings from OS single-byte file system APIs</short>
 <descr>
 <p>
-<var>SetMultiByteRTLFileSystemCodePage</var> sets the codepage used to interprete
-strings returned by single-byte OS filesystem APIs to <var>CodePage</var>.
+<var>SetMultiByteRTLFileSystemCodePage</var> sets the codepage used to interpreted
+strings returned by single-byte OS file system APIs to <var>CodePage</var>.
 </p>
 <p>
 The effect of this change is that the default codepage used to translate single byte strings
 obtained from the OS to single-byte codepage-aware strings or multi-byte strings changes, and
-strings obtained from  the codepage-aware filesystem APIs will be interpreted using the new codepage.
+strings obtained from  the codepage-aware file system APIs will be interpreted using the new codepage.
 </p>
 <p>
-his constant is not used if the filesystem API of the OS is multi-byte (such
+his constant is not used if the file system API of the OS is multi-byte (such
 as on Windows).
 </p>
 <p> 
@@ -17413,12 +16992,12 @@ be queried by the unicode string manager <link id="TUnicodeStringManager"/>.
 
 <!-- function Visibility: default -->
 <element name="ToSingleByteFileSystemEncodedFileName">
-<short>Convert string to encoding for use in single-byte filesystem API</short>
+<short>Convert string to encoding for use in single-byte file system API</short>
 <descr>
 <p>
 <var>ToSingleByteFileSystemEncodedFileName</var> converts the argument
 (<var>Str</var> or <var>Arr</var>) to a single-byte string, encoded using
-the codepage used by the single-byte filesystem API.
+the codepage used by the single-byte file system API.
 </p>
 <p>
 This routine is simply an auxiliary routine, which converts the argument to
@@ -17639,7 +17218,7 @@ each other.
 
 <!-- procedure Visibility: default -->
 <element name="DynArrayClear">
-<short>Clear dynamical array</short>
+<short>Clears a dynamic array</short>
 <descr>
 <var>DynArrayClear</var> clears the array (<var>a</var>) using its
 type info (<var>typeInfo</var>). It is equal to setting the length to zero.
@@ -17788,7 +17367,7 @@ id="SemaphoreDestroy"/>.
 The result is an untyped pointer (thread support is platform dependent).
 </p>
 <p>
-The use of semaphores requires thread support (use <link id="#rtl.cthreads"/> unit on unices).
+The use of semaphores requires thread support (use <link id="#rtl.cthreads"/> unit on Unixes).
 </p>
 </descr>
 <errors>
@@ -17811,7 +17390,7 @@ If no thread support is compiled in, then calling this function will result in a
 <var>SemaphoreDestroy</var> destroys a semaphore, created with  <link id="SemaphoreInit"/>.
 </p>
 <p>
-The use of semaphores requires thread support (use <link id="#rtl.cthreads"/> unit on unices).
+The use of semaphores requires thread support (use <link id="#rtl.cthreads"/> unit on Unixes).
 </p>
 </descr>
 <errors>
@@ -17833,7 +17412,7 @@ If no thread support is compiled in, then calling this function will result in a
 <var>SemaphoreWait</var> waits (indefinitely) for the semaphore <var>FSem</var> to become available.
 </p>
 <p> 
-The use of semaphores requires thread support (use <link id="#rtl.cthreads"/> unit on unices).
+The use of semaphores requires thread support (use <link id="#rtl.cthreads"/> unit on Unixes).
 </p>
 </descr>
 <errors>
@@ -17858,7 +17437,7 @@ available (using <link id="SemaphoreWait"/>, will continue to execute.
 </p>
 <p> 
 The use of semaphores requires thread support (use <link
-id="#rtl.cthreads"/> unit on unices).
+id="#rtl.cthreads"/> unit on Unixes).
 </p>
 </descr>
 <errors>
@@ -17941,6 +17520,24 @@ type information is available, i.e. the result is always non-nil.
 <seealso>
 <link id="Default"/>
 <link id="TypeOf"/>
+<link id="GetTypeKind"/>
+<link id="Initialize"/>
+<link id="Finalize"/>
+</seealso>
+</element>
+
+<element name="GetTypeKind">
+<short>Return type kind for a type</short>
+<descr>
+<var>GetTypeKind</var> is a compiler intrinsic: it returns the type kind for the type <var>T</var>. 
+In difference with the <link id="TypeInfo"/>, if no type information was yet generated for the type, 
+this statement will not ensure that the type information is available: the compiler knows the correct
+value, and will directly insert it into the code as a constant.
+</descr>
+<seealso>
+<link id="Default"/>
+<link id="TypeInfo"/>
+<link id="TypeOf"/>
 <link id="Initialize"/>
 <link id="Finalize"/>
 </seealso>
@@ -17954,6 +17551,7 @@ type information is available, i.e. the result is always non-nil.
 <seealso>
 <link id="Default"/>
 <link id="TypeInfo"/>
+<link id="GetTypeKind"/>
 </seealso>
 </element>
 
@@ -17979,7 +17577,7 @@ and for classes, the object instance will be <var>Nil</var>.
 <descr>   
 <p>
 <var>Initialize</var> is a compiler intrinsic: it initializes a memory area
-<var>T</var> for any kind of managed variable. Initializing means zeroeing out
+<var>T</var> for any kind of managed variable. Initializing means zeroing out
 the memory area. In this sense it is close in functionality to <link id="Default"/>, 
 but <var>Default</var> requires an already initialized variable.
 It performs the opposite operation of <link id="finalize"/>, which should be
@@ -18005,11 +17603,11 @@ It then specifies the number of elements in the array.
 <p>
 <var>Finalize</var> is a compiler intrinsic: it cleans up (finalizes) a memory area
 <var>T</var> for any kind of managed variable. Finalizing means decreasing
-reference counts where necessaru and generally zeroeing out the memory area. 
+reference counts where necessary and generally zeroing out the memory area. 
 It performs the opposite operation of <link id="initialize"/>.
 </p>
 <p>
-The optional <var>ACount</var> parameter can be used to initialize an array.
+The optional <var>ACount</var> parameter can be used to finalize an array of values.
 </p>
 <p>
 For examples, see <link id="initialize"/>.
@@ -18053,7 +17651,7 @@ integer of architecture-dependent size.
 <var>WriteErrorsToStdErr</var> can be set to <var>True</var> to write error
 messages (run-time errors, exceptions) to <var>StdErr</var> instead of to
 standard output. This is the default behaviour. When set to
-<var>False</var>, error message will be written to standar output.
+<var>False</var>, error message will be written to standard output.
 </descr>
 <seealso>
 <link id="Halt"/>
@@ -18063,13 +17661,7 @@ standard output. This is the default behaviour. When set to
 
 <!-- operator Visibility: default -->
 <element name="assign(real48):extended">
-<short></short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<short> </short>
 </element>
 
 <!-- property Visibility: public -->
@@ -18136,7 +17728,7 @@ Not all platforms will support all possibilities.
 
 <!-- enumeration value Visibility: default -->
 <element name="TCompareOption.coLingIgnoreDiacritic">
-<short>Ignore diacritic caharacters</short>
+<short>Ignore diacritic characters</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
@@ -18324,13 +17916,7 @@ The resulting variant is a double-precision value.
 
 <!-- operator Visibility: default -->
 <element name="assign(Real):olevariant">
-<short>Assign a real-precision float to an ole-variant</short>
-<descr>
-</descr>
-<errors>
-</errors>
-<seealso>
-</seealso>
+<short>Assign a real-precision float to an ole-variant </short>
 </element>
 
 <!-- variable Visibility: default -->
@@ -18342,9 +17928,1191 @@ The resulting variant is a double-precision value.
 <element name="WideString">
 <short>UTF-16 widechar encoded unicode string</short>
 <descr>
-<var>WideString</var> is an alias for <var>UnicodeString</var> on unix. On
-windows, it is a different type wich has no reference counting.
+<var>WideString</var> is an alias for <var>UnicodeString</var> on UNIX. On
+windows, it is a different type which has no reference counting.
 </descr>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_insert_x_y_z" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_delete_x_y_z" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_reset_typedfile_name" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_rewrite_typedfile_name" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_and_assign_x_y" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_or_assign_x_y" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_xor_assign_x_y" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_sar_assign_x_y" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_shl_assign_x_y" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_shr_assign_x_y" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_rol_assign_x_y" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_ror_assign_x_y" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_neg_assign_x" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_not_assign_x" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_faraddr_x" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_cpu_first" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_inportb" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_inportw" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_inportl" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_outportb" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_outportw" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_outportl" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_cli" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_sti" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_get_cs" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_get_ss" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_get_ds" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_get_es" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_get_fs" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_in_x86_get_gs" skip="1">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="Test8086">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="Test8087">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="has_sse_support">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="has_sse2_support">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="has_sse3_support">
+<short></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="has_mmx_support">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpc_inx86_inportb" skip="1">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpc_inx86_inportw" skip="1">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpc_inx86_inportl" skip="1">
+<short></short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="fpc_inx86_outportb" skip="1">
+<short></short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="fpc_inx86_outportw" skip="1">
+<short></short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="fpc_inx86_outportl" skip="1">
+<short></short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="fpc_inx86_cli" skip="1">
+<short></short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="fpc_x86_sti" skip="1">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpc_inx86_get_cs" skip="1">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpc_inx86_get_ss" skip="1">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpc_inx86_get_ds" skip="1">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpc_inx86_get_es" skip="1">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpc_inx86_get_fs" skip="1">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="fpc_inx86_get_gs" skip="1">
+<short></short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TDoubleRec.BuildUp">
+<short> </short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UTF8ToString">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="InterlockedCompareExchangePointer">
+<short> </short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TRuntimeError.reNoDynLibsSupport">
+<short></short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TRuntimeError.reThreadError">
+<short></short>
+</element>
+
+
+
+<!-- enumeration type Visibility: default -->
+<element name="TTypeKind">
+<short></short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<element name="TTypeKind">
+<short>Type of a property or value.</short>
+</element>
+
+<element name="tkString">
+<short>Alias for the <var>tsSString</var> enumeration value</short>
+</element>
+
+
+<element name="TTypeKind.tkUnknown">
+<short>Unknown property type.</short>
+</element>
+
+<element name="TTypeKind.tkInteger">
+<short>Integer property.</short>
+</element>
+
+<element name="TTypeKind.tkChar">
+<short>Char property.</short>
+</element>
+
+<element name="TTypeKind.tkEnumeration">
+<short>Enumeration type property.</short>
+</element>
+
+<element name="TTypeKind.tkFloat">
+<short>Float property.</short>
+</element>
+
+<element name="TTypeKind.tkSet">
+<short>Set property.</short>
+</element>
+
+<element name="TTypeKind.tkMethod">
+<short>Method property.</short>
+</element>
+
+<element name="TTypeKind.tkSString">
+<short>Shortstring property.</short>
+</element>
+
+<element name="TTypeKind.tkLString">
+<short>Longstring property.</short>
+</element>
+
+<element name="TTypeKind.tkAString">
+<short>Ansistring property.</short>
+</element>
+
+<element name="TTypeKind.tkWString">
+<short>Widestring property.</short>
+</element>
+
+<element name="TTypeKind.tkVariant">
+<short>Variant property.</short>
+</element>
+
+<element name="TTypeKind.tkArray">
+<short>Array property.</short>
+</element>
+
+<element name="TTypeKind.tkRecord">
+<short>Record property.</short>
+</element>
+
+<element name="TTypeKind.tkInterface">
+<short>Interface property.</short>
+</element>
+
+<element name="TTypeKind.tkClass">
+<short>Class property.</short>
+</element>
+
+<element name="TTypeKind.tkObject">
+<short>Object property.</short>
+</element>
+
+<element name="TTypeKind.tkWChar">
+<short>Widechar property.</short>
+</element>
+
+<element name="TTypeKind.tkBool">
+<short>Boolean property.</short>
+</element>
+
+<element name="TTypeKind.tkInt64">
+<short>Int64 property.</short>
+</element>
+
+<element name="TTypeKind.tkQWord">
+<short>QWord property.</short>
+</element>
+
+<element name="TTypeKind.tkDynArray">
+<short>Dynamic array property.</short>
+</element>
+
+<element name="TTypeKind.tkInterfaceRaw">
+<short>Raw interface property.</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TTypeKind.tkProcVar">
+<short>Procedural variable</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TTypeKind.tkUString">
+<short>Unicode string</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TTypeKind.tkUChar">
+<short>Unicode character</short>
+</element>
+
+
+<element name="TTypeKind.tkHelper">
+<short>Helper type</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TTypeKind.tkFile">
+<short>File type</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TTypeKind.tkClassRef">
+<short>Class reference type</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TTypeKind.tkPointer">
+<short>Generic pointer type</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="tkAnsiChar">
+<short>tkChar alias</short>
+<descr>
+<var>tkAnsiChar</var> is an alias for <link id="TTypeKind.tkChar"/>
+</descr>
+<seealso>
+<link id="TTypeKind.tkChar"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="tkWideChar">
+<short>Alias for tkUchar</short>
+<descr>
+<var>tkWideChar</var> is an alias for <link id="TTypeKind.tkUChar"/>
+</descr>
+<seealso>
+<link id="TTypeKind.tkUChar"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="tkShortString">
+<short>Alias for tkSString</short>
+<descr>
+<var>tkShortString</var> is an alias for <link id="TTypeKind.tkSString"/>
+</descr>
+<seealso>
+<link id="TTypeKind.tkSString"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="tkAnsiString">
+<short>alias for tkAString</short>
+<descr>
+<var>tkAnsiString</var> is an alias for <link id="TTypeKind.tkAString"/>
+</descr>
+<seealso>
+<link id="TTypeKind.tkAString"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="tkWideString">
+<short>Alias for tkWString</short>
+<descr>
+<var>tkWideString</var> is an alias for <link id="TTypeKind.tkWString"/>
+</descr>
+<seealso>
+<link id="TTypeKind.tkWString"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="tkUnicodeString">
+<short>Alias for tkUString</short>
+<descr>
+<var>tkUnicodeString</var> is an alias for <link id="TTypeKind.tkUString"/>
+</descr>
+<seealso>
+<link id="TTypeKind.tkUString"/>
+</seealso>
+</element>
+<element name="fpc_x86_cli" skip="1"/>
+<element name="fpc_x86_get_cs" skip="1"/>
+<element name="fpc_x86_get_ds" skip="1"/>
+<element name="fpc_x86_get_es" skip="1"/>
+<element name="fpc_x86_get_fs" skip="1"/>
+<element name="fpc_x86_get_gs" skip="1"/>
+<element name="fpc_x86_get_ss" skip="1"/>
+<element name="fpc_x86_inportb" skip="1"/>
+<element name="fpc_x86_inportl" skip="1"/>
+<element name="fpc_x86_inportw" skip="1"/>
+<element name="fpc_x86_outportb" skip="1"/>
+<element name="fpc_x86_outportl" skip="1"/>
+<element name="fpc_x86_outportw" skip="1"/>
+
+<!-- alias type Visibility: default -->
+<element name="Boolean8">
+<short>Byte-sized boolean</short>
+<descr>
+<var>Boolean8</var> is a byte-sized boolean. 
+</descr>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="UTF8Char">
+<short>Single byte character</short>
+<descr>
+<var>UTF8Char</var> is provided for completeness, a type alias for AnsiChar.
+</descr>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="PUTF8Char">
+<short>Pointer to <var>UTF8Char</var></short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PRawByteString">
+<short>Pointer to <var>RawByteString</var></short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PMarshaledString">
+<short>Pointer to <var>PWideChar</var></short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PMarshaledAString">
+<short>Pointer to <var>PWideChar</var></short>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="MarshaledString">
+<short>Alias for <var>PWideChar</var></short>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="MarshaledAString">
+<short>Alias for <var>PAnsiChar</var></short>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TOpaqueData">
+<short>Empty record</short>
+<descr>
+<var>TOpaqueData</var> represents data for which the internal structure must not be known. It is mustly useful for the pointer definition <link id="POpaqueData"/>.
+</descr>
+<seealso>
+<link id="POpaqueData"/>
+</seealso>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="POpaqueData">
+<short>Pointer to unknown data</short>
+<descr>
+<var>POpaqueData</var> represents a pointer to data for which the internal structure must not be known. 
+You can make type aliases from this pointer.
+</descr>
+<seealso>
+<link id="OpaquePointer"/>
+</seealso>
+</element>
+
+<!-- "type" alias type Visibility: default -->
+<element name="OpaquePointer">
+<short>Type alias for <var>POpaqueData</var></short>
+<descr>
+</descr>
+<seealso>
+<link id="POpaqueData"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TRTLCRITICALSECTION.__m_lock.__status">
+<short>Lock status. Internal, do not use</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TRTLCRITICALSECTION.__m_lock.__spinlock">
+<short>Spinlock. Internal, do not use</short>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TEntryInformationOS">
+<short>Entry information for the OS</short>
+<descr>
+<var>TEntryInformationOS</var> represents executable entry information for the current OS. This structure is OS dependent.
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TEntryInformationOS.argc">
+<short>Number of command-line arguments.</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TEntryInformationOS.argv">
+<short>Pointer to Array of command-line arguments</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TEntryInformationOS.envp">
+<short>Pointer to array of environment variables</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TEntryInformationOS.stkptr">
+<short>Initial stack pointer</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TEntryInformationOS.stklen">
+<short>Stack length</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TEntryInformationOS.haltproc">
+<short>Procedure to call to exit program</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TEntryInformation.ResourceStringTables">
+<short>Resource string tables for the executable</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TEntryInformation.ResStrInitTables">
+<short>Pointer to compiler-generated resource string initialization table</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TEntryInformation.ResLocation">
+<short>Resources location</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TEntryInformation.OS">
+<short>Operating system entry information</short>
+<descr>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="Test8086">
+<short>8086 or older ?</short>
+<descr>
+This constant will only exist on Intel CPU platforms.
+</descr>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="Test8087">
+<short>8087 floating point CPU or not ?</short>
+<descr>
+This constant will only exist on Intel CPU platforms.
+</descr>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="has_sse_support">
+<short>CPU has SSE support ?</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="has_sse2_support">
+<short>CPU has sse2 support?</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="has_sse3_support">
+<short>CPU has sse3 support?</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="has_mmx_support">
+<short>CPU has mmx support</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TDoubleRec.BuildUp">
+<short>Build a double value</short>
+<descr>
+<var>Buildup</var> will build a double value from the given <var>_Sign</var>, <var>_Mantissa</var> and <var>_Exponent</var>.
+</descr>
+<seealso>
+<link id="TDoubleRec.Mantissa"/>
+<link id="TDoubleRec.Sign"/>
+<link id="TDoubleRec.Exp"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UTF8ToString">
+<short>Convert UTF8 to Unicode String</short>
+<descr>
+<var>UTF8ToString</var> converts a UTF8 single byte string to a UTF16 encoded unicodestring. 
+The source string <var>S</var> is interpreted as an array of UTF8 characters.
+</descr>
+</element>
+
+<!-- function Visibility: default -->
+<element name="InterlockedCompareExchangePointer">
+<short>Compare pointers in an atomic operation</short>
+<descr>
+<var>InterlockedCompareExchangePointer</var> compares <var>Comparand</var> with <var>Target</var>.
+if they are equal, replaces <var>Target</var> with <var>NewValue</var>. 
+This is done in a single atomic operation.
+</descr>
+<seealso>
+<link id="InterlockedCompareExchange"/>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TRuntimeError.reNoDynLibsSupport">
+<short>Runtime error if no dynamic library support is available</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TRuntimeError.reThreadError">
+<short>Runtime error if no thread support is available</short>
+</element>
+
+
+<!-- pointer type Visibility: default -->
+<element name="PPVmt">
+<short>Pointer to <var>PVMT</var> pointer.</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TVmt.vParentRef">
+<short>Parent reference</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="tinterfaceentry.IIDRef">
+<short>Pointer to IID of interface</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="tinterfaceentry.IOffsetAsCodePtr">
+<short>Interface offset in interface table</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="tinterfaceentry.IIDStrRef">
+<short>Reference to IID as string</short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PMethod">
+<short>Pointer to method</short>
+</element>
+
+<!-- class function Visibility: public -->
+<element name="TObject.QualifiedClassName">
+<short>Fully qualified classname</short>
+<descr>
+<var>QualifiedClassName</var> is the classname <link id="TObject.ClassName"/> prepended with the unit name <link id="TObject.UnitName"/> of the unit 
+in which the class is defined. As such, this is a unique name for each class in the program.
+</descr>
+<seealso>
+<link id="TObject.ClassName"/>
+<link id="TObject.UnitName"/>
+</seealso>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TInterfacedObject.destroy">
+<short>Destroy interfaced object</short>
+<descr>
+<var>Destroy</var> overrides the default destructor to clean up: it explicitly sets all counters to zero.
+</descr>
+<seealso>
+<link id="IUnknown._Release"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="tvardata.vrecord">
+<short>Pointer to record</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="tvardata.precinfo">
+<short>Pointer to record type info data</short>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="ppdynarraytypeinfo">
+<short>Pointer to <var>pdynarraytypeinfo</var></short>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="TLibHandle">
+<short>Library handle type</short>
+<descr>
+<var>TLibHandle</var> should be considered an opaque type. It is defined
+differently on various platforms. The definition shown here depends on the
+platform for which the documentation was generated.
+</descr>
+<seealso>
+<link id="LoadLibrary"/>
+<link id="UnloadLibrary"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="NilHandle">
+<short>Correctly typed Nil handle - returned on error by <link id="LoadLibrary"/></short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="SharedSuffix">
+<short>Shared library suffix for the current platform</short>
+</element>
+
+<!-- alias type Visibility: default -->
+<element name="TOrdinalEntry">
+<short>Ordinal of entry point (windows only)</short>
+</element>
+
+<!-- function type Visibility: default -->
+<element name="TLoadLibraryUHandler">
+<short>Load library (unicode) handler type</short>
+<descr>
+<var>TLoadLibraryUHandler</var> is the type for the loadlibrary call using
+unicode names in the <link id="TDynLibsManager"/> dynamic library loading
+manager.
+</descr>
+<seealso>
+<link id="TDynLibsManager"/>
+</seealso>
+</element>
+
+<!-- function type Visibility: default -->
+<element name="TLoadLibraryAHandler">
+<short>>Load library (ansistring) handler type</short>
+<descr>
+<var>TLoadLibraryAHandler</var> is the type for the loadlibrary call using
+ansistring names in the <link id="TDynLibsManager"/> dynamic library loading
+manager.
+</descr>
+<seealso>
+<link id="TDynLibsManager"/>
+</seealso>
+</element>
+
+<!-- function type Visibility: default -->
+<element name="TGetProcAddressHandler">
+<short>Get procedure address handler type</short>
+<descr>
+<var>TGetProcAddressHandler</var> is the type for the <var>GetProcAddress</var> call using
+ansistring names in the <link id="TDynLibsManager"/> dynamic library loading
+manager.
+</descr>
+<seealso>
+<link id="TDynLibsManager"/>
+</seealso>
+</element>
+
+<!-- function type Visibility: default -->
+<element name="TGetProcAddressOrdinalHandler">
+<short>Get procdure address by ordinal handler type</short>
+<descr>
+<var>TGetProcAddressOrdinalHandler</var> is the type for the <var>GetProcAddressOrdinal</var> call using
+ansistring names in the <link id="TDynLibsManager"/> dynamic library loading
+manager.
+</descr>
+<seealso>
+<link id="TDynLibsManager"/>
+</seealso>
+</element>
+
+<!-- function type Visibility: default -->
+<element name="TUnloadLibraryHandler">
+<short>Unload library handler type</short>
+<descr>
+<var>TUnloadLibraryHandler</var> is the type for the <var>UnloadLibrary</var> call using
+ansistring names in the <link id="TDynLibsManager"/> dynamic library loading
+manager.
+</descr>
+<seealso>
+<link id="TDynLibsManager"/>
+</seealso>
+</element>
+
+<!-- function type Visibility: default -->
+<element name="TGetLoadErrorStrHandler">
+<short>Get last load error description string handler type</short>
+<descr>
+<var>TGetLoadErrorStrHandler</var> is the type for the <var>GetLoadErrorStr</var> call using
+ansistring names in the <link id="TDynLibsManager"/> dynamic library loading
+manager.
+</descr>
+<seealso>
+<link id="TDynLibsManager"/>
+</seealso>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TDynLibsManager">
+<short>Dynamic library loading support</short>
+<descr>
+<p>
+<var>TDynLibsManager</var> contains all the callbacks needed to load and manage dynamic libraries.
+The system unit does not contain dynamic loading library support on all supported platforms. 
+Like the unicode string support, heap support and thread support, support for loading dnamic libraries is pluggable.
+This record contains the necessary callbacks that the system unit needs to implement loading of dynamic libraries
+(needed for example for run-time package support).
+</p>
+<p>
+Including the <link id="#rtl.dynlibs">dynlibs</link> unit will enable support for dynamically loadable libraries on all platforms that support this.
+</p>
+</descr>
+<seealso>
+<link id="#rtl.dynlibs"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TDynLibsManager.LoadLibraryU">
+<short>Load library using unicode file name</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TDynLibsManager.LoadLibraryA">
+<short>Load library using ansistring filename</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TDynLibsManager.GetProcAddress">
+<short>Get address of procedure by name</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TDynLibsManager.GetProcAddressOrdinal">
+<short>Get address of procedure by ordinal (Windows only)</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TDynLibsManager.UnloadLibrary">
+<short>Unload a loaded library</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TDynLibsManager.GetLoadErrorStr">
+<short>Get string description of loadable library</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="LoadLibrary">
+<short>Load a dynamic library and return a handle to it.</short>
+<descr>
+<p>
+<var>LoadLibrary</var> loads a dynamic library in file <var>Name</var> 
+and returns a handle to it. If the library cannot be loaded, 
+<link id="NilHandle"/> is returned.
+</p>
+<p>
+No assumptions should be made about the location of the loaded library if a
+relative pathname is specified. The behaviour is dependent on the platform.
+Therefore it is best to specify an absolute pathname if possible.
+</p>
+</descr>
+<errors>
+On error, <link id="NilHandle"/> is returned.
+</errors>
+<seealso>
+<link id="UnloadLibrary"/>
+<link id="GetProcedureAddress"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="GetProcedureAddress">
+<short>Get the address of a procedure or symbol in a dynamic library.</short>
+<descr>
+<p>
+<var>GetProcedureAddress</var> returns a pointer to the location in memory
+of the symbol <var>ProcName</var> or ordinal value <var>Ordinal</var>
+in the dynamically loaded library
+specified by it's handle <var>lib</var>.  If the symbol cannot be found or
+the handle is invalid, <var>Nil</var> is returned.
+</p>
+<p>
+On Windows, only an exported  procedure or
+function can be searched this way. On Unix platforms the location of any
+exported symbol can be retrieved this way.
+</p>
+<p>
+Only windows and OS/2 support getting the address of a function using an
+ordinal value.
+</p>
+</descr>
+<errors>
+If the symbol cannot be found, <var>Nil</var> is returned.
+</errors>
+<seealso>
+<link id="LoadLibrary"/> 
+<link id="UnLoadLibrary"/> 
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="UnloadLibrary">
+<short>Unload a previously loaded library</short>
+<descr>
+<var>UnloadLibrary</var> unloads a previously loaded library (specified by
+the handle <var>lib</var>). The call returns <var>True</var> if successful,
+<var>False</var> otherwise.
+</descr>
+<errors>
+On error, <var>False</var> is returned.
+</errors>
+<seealso>
+<link id="LoadLibrary"/> 
+<link id="GetProcedureAddress"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="FreeLibrary">
+<short>For compatibility with Delphi/Windows: Unload a library</short>
+<descr>
+<var>FreeLibrary</var> provides the same functionality as <link
+id="UnloadLibrary"/>, and is provided for compatibility with Delphi.
+</descr>
+<seealso>
+<link id="UnloadLibrary"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="GetProcAddress">
+<short>For compatibility with Delphi/Windows: Get the address of a procedure</short>
+<descr>
+<var>GetProcAddress</var> provides the same functionality as <link
+id="GetProcedureAddress"/>, and is provided for compatibility with Delphi.
+</descr>
+</element>
+
+
+<!-- procedure Visibility: default -->
+<element name="GetDynLibsManager">
+<short>Return currently active dynamic library support handler</short>
+<descr>
+<var>GetDynLibsManager</var> returns the currently active dynamic library support handler.
+This handler has normally been set by inclusion of the <link id="#rtl.dynlibs"/> unit.
+</descr>
+<seealso>
+<link id="#rtl.dynlibs"/>
+<link id="SetDynLibsManager"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="SetDynLibsManager">
+<short>Set a new handler for dynamic library support </short>
+<descr>
+<p>
+<var>SetDynLibsManager</var> sets the handler for dynamic library support to <var>New</var>. 
+Optionally, it returns the currently active handler in <var>Old</var>.
+</p>
+<p>
+This is the routine used by the <link id="#rtl.dynlibs"/> unit to set the default handler.
+</p>
+</descr>
+<seealso>
+<link id="#rtl.dynlibs"/>
+<link id="GetDynLibsManager"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FPC_EXCEPTION">
+<short>Type of exception: Free pascal exception</short>
+<descr>
+<var>FPC_EXCEPTION</var> is a contstant describing a type of excption.
+</descr>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="cExceptionFrame">
+<short>Indicator of except frame on the exception frame stack</short>
+<descr>
+<var>cExceptionFrame</var> indicates an except frame.
+</descr>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="cFinalizeFrame">
+<short>Indicator of finally frame on the exception frame stack</short>
+<descr>
+<var>cFinalizeFrame</var> indicates a finally frame.
+</descr>
+</element>
+
+<!-- pointer type Visibility: default -->
+<element name="PExceptAddr">
+<short>Pointer to exception address record</short>
+<descr>
+<var>PExceptAddr</var> is a pointer to <link id="PExceptAddr"/>
+</descr>
+</element>
+
+<!-- record type Visibility: default -->
+<element name="TExceptAddr">
+<short>Exception stack address descriptor</short>
+<descr>
+<var>TExceptAddr</var> describes an exception frame on the exception address frame stack. It is used in structured stack exception handling.
+</descr>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TExceptAddr.buf">
+<short>Jump buffer</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TExceptAddr.next">
+<short>Next address on stack</short>
+</element>
+
+<!-- variable Visibility: public -->
+<element name="TExceptAddr.frametype">
+<short>Type of exception frame</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CatchAllExceptions">
+<short>Mask indicating all exception kinds</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_objc_protocol_x" skip="1">
+</element>
+
+<!-- constant Visibility: default -->
+<element name="fpc_objc_encode_x" skip="1">
+</element>
+
+<!-- function Visibility: default -->
+<element name="SafeLoadLibrary">
+<short>Load a library safely</short>
+<descr>
+<var>SafeLoadLibrary</var> calls <link id="LoadLibrary"/> but restores the current FPU control word and exception mask to their current value after the library was loaded, 
+thus preventing the loaded library initialization code from modifying their current values.
+</descr>
+<seealso>
+<link id="LoadLibrary"/> 
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="GetLoadErrorStr">
+<short>Return an error describing the last library loading error</short>
+<descr>
+<var>GetLoadErrorStr</var> returns an error string describing the last library loading error. 
+This function must be called before any other OS calls are performed.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="LoadLibrary"/>
+<link id="SafeLoadLibrary"/>
+</seealso>
 </element>
 
 </module>

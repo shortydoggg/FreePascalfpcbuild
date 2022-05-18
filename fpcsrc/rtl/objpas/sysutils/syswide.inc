@@ -11,6 +11,11 @@
     *********************************************************************
 }
 
+function IsLeadChar(Ch: WideChar): Boolean;
+begin
+    Result := (Ch >= #$D800) and (Ch <= #$DFFF);
+end;
+
 function Trim(const S: widestring): widestring;
 	var 
 	  Ofs, Len: sizeint;
@@ -180,13 +185,29 @@ begin
   result:=(Ch<=#$FF) and (ansichar(byte(ch)) in CSet);
 end;
 
+
 {$macro on}
 {$define INWIDESTRINGREPLACE}
 {$define SRString:=WideString}
 {$define SRUpperCase:=WideUppercase}
-function WideStringReplace(const S, OldPattern, NewPattern: WideString;  Flags: TReplaceFlags): WideString;
+{$define SRPChar:=PWideChar}
+{$define SRChar:=WideChar}
+
+
+Function WideStringReplace(const S, OldPattern, NewPattern: Widestring;  Flags: TReplaceFlags): Widestring;
+
+Var
+  C : Integer;
+
+begin
+  Result:=WideStringReplace(S,OldPattern,NewPattern,Flags,C);
+end;
+
+function WideStringReplace(const S, OldPattern, NewPattern: WideString;  Flags: TReplaceFlags; Out aCount : Integer): WideString;
 {$i syssr.inc}
 
 {$undef INWIDESTRINGREPLACE}
 {$undef SRString}
 {$undef SRUpperCase}
+{$undef SRPChar}
+{$undef SRChar}

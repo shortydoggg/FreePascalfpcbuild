@@ -26,6 +26,9 @@ for this.
 <p>
 Obviously, including this unit links your program to the C library.
 </p>
+<remark>
+Note that specifying the <var>-gv</var> command-line option, to enable valgrind debugging info will implicitly add this unit to your program.
+</remark>
 </descr>
 
 <!-- constant Visibility: default -->
@@ -41,7 +44,7 @@ systems, this is simply "libc.so".
 <element name="Malloc">
 <short>Malloc external declaration.</short>
 <descr>
-<var>Malloc</var> is the external declaration of the C librarys
+<var>Malloc</var> is the external declaration of the C libraries
 <var>malloc</var> call. It accepts a size parameter, and returns a
 pointer to a memory block of the requested size or <var>Nil</var>
 if no more memory could be allocated.

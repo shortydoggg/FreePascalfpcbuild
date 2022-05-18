@@ -44,23 +44,20 @@ implementation
        globtype,globals,verbose,constexp,
        systems,
        { aasm }
-       cpubase,aasmbase,aasmtai,aasmdata,
+       cpubase,aasmtai,aasmdata,
        { symtable }
        symconst,symbase,symtype,symdef,symsym,symtable,defutil,defcmp,
-       paramgr,symutil,
+       paramgr,
        { pass 1 }
        pass_1,htypechk,
-       nutils,ngenutil,nbas,nmat,nadd,ncal,nmem,nset,ncnv,ninl,ncon,nld,nflw,
+       nutils,ngenutil,nbas,ncal,nmem,nset,ncnv,ncon,nld,nflw,
        { parser }
        scanner,
        pbase,ptype,pexpr,
        { codegen }
        procinfo,cgbase,
        { assembler reader }
-       rabase,
-       { wide- and unicodestrings}
-       widestr
-       ;
+       rabase;
 
 
     function statement : tnode;forward;
@@ -71,7 +68,7 @@ implementation
          ex,if_a,else_a : tnode;
       begin
          consume(_IF);
-         ex:=comp_expr(true,false);
+         ex:=comp_expr([ef_accept_equal]);
          consume(_THEN);
          if not(token in endtokens) then
            if_a:=statement
@@ -126,7 +123,7 @@ implementation
          casenode : tcasenode;
       begin
          consume(_CASE);
-         caseexpr:=comp_expr(true,false);
+         caseexpr:=comp_expr([ef_accept_equal]);
          { determines result type }
          do_typecheckpass(caseexpr);
          { variants must be accepted, but first they must be converted to integer }
@@ -224,8 +221,8 @@ implementation
                        CGMessage(parser_e_case_lower_less_than_upper_bound);
                      if not casedeferror then
                        begin
-                         testrange(casedef,hl1,false,false);
-                         testrange(casedef,hl2,false,false);
+                         adaptrange(casedef,hl1,false,false,cs_check_range in current_settings.localswitches);
+                         adaptrange(casedef,hl2,false,false,cs_check_range in current_settings.localswitches);
                        end;
                    end
                  else
@@ -253,7 +250,7 @@ implementation
                    begin
                      hl1:=get_ordinal_value(p);
                      if not casedeferror then
-                       testrange(casedef,hl1,false,false);
+                       adaptrange(casedef,hl1,false,false,cs_check_range in current_settings.localswitches);
                      casenode.addlabel(blockid,hl1,hl1);
                    end;
                end;
@@ -320,7 +317,7 @@ implementation
          consume(_UNTIL);
 
          first:=cblocknode.create(first);
-         p_e:=comp_expr(true,false);
+         p_e:=comp_expr([ef_accept_equal]);
          result:=cwhilerepeatnode.create(p_e,first,false,true);
       end;
 
@@ -332,7 +329,7 @@ implementation
 
       begin
          consume(_WHILE);
-         p_e:=comp_expr(true,false);
+         p_e:=comp_expr([ef_accept_equal]);
          consume(_DO);
          p_a:=statement;
          result:=cwhilerepeatnode.create(p_e,p_a,true,false);
@@ -363,7 +360,7 @@ implementation
           begin
             if (hp.nodetype=ordconstn) and
                (fordef.typ<>errordef) then
-              testrange(fordef,tordconstnode(hp).value,false,true);
+              adaptrange(fordef,tordconstnode(hp).value,false,false,true);
           end;
 
         function for_loop_create(hloopvar: tnode): tnode;
@@ -378,11 +375,14 @@ implementation
              loopvarsym:=nil;
 
              { variable must be an ordinal, int64 is not allowed for 32bit targets }
-             if not(is_ordinal(hloopvar.resultdef))
+             if (
+                 not(is_ordinal(hloopvar.resultdef))
     {$ifndef cpu64bitaddr}
-                or is_64bitint(hloopvar.resultdef)
+                 or is_64bitint(hloopvar.resultdef)
     {$endif not cpu64bitaddr}
-                then
+               ) and
+               (hloopvar.resultdef.typ<>undefineddef)
+               then
                MessagePos(hloopvar.fileinfo,type_e_ordinal_expr_expected);
 
              hp:=hloopvar;
@@ -462,7 +462,7 @@ implementation
              else
                MessagePos(hloopvar.fileinfo,type_e_illegal_count_var);
 
-             hfrom:=comp_expr(true,false);
+             hfrom:=comp_expr([ef_accept_equal]);
 
              if try_to_consume(_DOWNTO) then
                backward:=true
@@ -472,7 +472,7 @@ implementation
                  backward:=false;
                end;
 
-             hto:=comp_expr(true,false);
+             hto:=comp_expr([ef_accept_equal]);
              consume(_DO);
 
              { Check if the constants fit in the range }
@@ -519,7 +519,7 @@ implementation
               else
                 loopvarsym:=nil;
 
-              expr:=comp_expr(true,false);
+              expr:=comp_expr([ef_accept_equal]);
 
               consume(_DO);
 
@@ -541,7 +541,7 @@ implementation
          { parse loop header }
          consume(_FOR);
 
-         hloopvar:=factor(false,false);
+         hloopvar:=factor(false,[]);
          valid_for_loopvar(hloopvar,true);
 
          if try_to_consume(_ASSIGNMENT) then
@@ -604,7 +604,7 @@ implementation
 
       begin
          calltempnode:=nil;
-         p:=comp_expr(true,false);
+         p:=comp_expr([ef_accept_equal]);
          do_typecheckpass(p);
 
          if (p.nodetype=vecn) and
@@ -683,7 +683,7 @@ implementation
                 if not hasimplicitderef then
                   begin
                     valuenode:=caddrnode.create_internal_nomark(valuenode);
-                    include(valuenode.flags,nf_typedaddr);
+                    include(taddrnode(valuenode).addrnodeflags,anf_typedaddr);
                     refnode:=cderefnode.create(refnode);
                     fillchar(refnode.fileinfo,sizeof(tfileposinfo),0);
                   end;
@@ -776,8 +776,6 @@ implementation
               symtablestack.pop(TSymtable(withsymtablelist[i]));
             withsymtablelist.free;
 
-//            p:=cwithnode.create(right,twithsymtable(withsymtable),levelcount,refnode);
-
             { Finalize complex withnode with destroy of temp }
             if assigned(newblock) then
              begin
@@ -830,12 +828,12 @@ implementation
          if not(token in endtokens) then
            begin
               { object }
-              pobj:=comp_expr(true,false);
+              pobj:=comp_expr([ef_accept_equal]);
               if try_to_consume(_AT) then
                 begin
-                   paddr:=comp_expr(true,false);
+                   paddr:=comp_expr([ef_accept_equal]);
                    if try_to_consume(_COMMA) then
-                     pframe:=comp_expr(true,false);
+                     pframe:=comp_expr([ef_accept_equal]);
                 end;
            end
          else
@@ -948,7 +946,7 @@ implementation
                                  with "e: Exception" the e is not necessary }
 
                                { support unit.identifier }
-                               unit_found:=try_consume_unitsym(srsym,srsymtable,t,false);
+                               unit_found:=try_consume_unitsym_no_specialize(srsym,srsymtable,t,false,objname);
                                if srsym=nil then
                                  begin
                                    identifier_not_found(orgpattern);
@@ -961,7 +959,7 @@ implementation
                                if (srsym.typ=typesym) then
                                  begin
                                    ot:=ttypesym(srsym).typedef;
-                                   parse_nested_types(ot,false,nil);
+                                   parse_nested_types(ot,false,false,nil);
                                    check_type_valid(ot);
                                  end
                                else
@@ -1041,18 +1039,26 @@ implementation
     function _asm_statement : tnode;
       var
         asmstat : tasmnode;
-        Marker  : tai;
         reg     : tregister;
         asmreader : tbaseasmreader;
         entrypos : tfileposinfo;
+        hl : TAsmList;
       begin
          Inside_asm_statement:=true;
          asmstat:=nil;
+         hl:=nil;
          if assigned(asmmodeinfos[current_settings.asmmode]) then
            begin
              asmreader:=asmmodeinfos[current_settings.asmmode]^.casmreader.create;
              entrypos:=current_filepos;
-             asmstat:=casmnode.create(asmreader.assemble as TAsmList);
+             hl:=asmreader.assemble as TAsmList;
+             if (not hl.empty) then
+               begin
+                 { mark boundaries of assembler block, this is necessary for optimizer }
+                 hl.insert(tai_marker.create(mark_asmblockstart));
+                 hl.concat(tai_marker.create(mark_asmblockend));
+               end;
+             asmstat:=casmnode.create(hl);
              asmstat.fileinfo:=entrypos;
              asmreader.free;
            end
@@ -1065,14 +1071,13 @@ implementation
          { Read first the _ASM statement }
          consume(_ASM);
 
+         { Force an empty register list for pure assembler routines,
+           so that pass2 won't allocate volatile registers for them. }
+         asmstat.has_registerlist:=(po_assembler in current_procinfo.procdef.procoptions);
+
          { END is read, got a list of changed registers? }
          if try_to_consume(_LECKKLAMMER) then
            begin
-{$ifdef cpunofpu}
-             asmstat.used_regs_fpu:=[0..first_int_imreg-1];
-{$else cpunofpu}
-             asmstat.used_regs_fpu:=[0..first_fpu_imreg-1];
-{$endif cpunofpu}
              if token<>_RECKKLAMMER then
               begin
                 if po_assembler in current_procinfo.procdef.procoptions then
@@ -1082,8 +1087,12 @@ implementation
                   reg:=std_regnum_search(lower(cstringpattern));
                   if reg<>NR_NO then
                     begin
-                      if (getregtype(reg)=R_INTREGISTER) and not(po_assembler in current_procinfo.procdef.procoptions) then
-                        include(asmstat.used_regs_int,getsupreg(reg));
+                      if not(po_assembler in current_procinfo.procdef.procoptions) and assigned(hl) then
+                        begin
+                          hl.Insert(tai_regalloc.alloc(reg,nil));
+                          hl.Insert(tai_regalloc.markused(reg));
+                          hl.Concat(tai_regalloc.dealloc(reg,nil));
+                        end;
                     end
                   else
                     Message(asmr_e_invalid_register);
@@ -1091,24 +1100,11 @@ implementation
                   if not try_to_consume(_COMMA) then
                     break;
                 until false;
+                asmstat.has_registerlist:=true;
               end;
              consume(_RECKKLAMMER);
-           end
-         else
-           begin
-              asmstat.used_regs_int:=paramanager.get_volatile_registers_int(current_procinfo.procdef.proccalloption);
-              asmstat.used_regs_fpu:=paramanager.get_volatile_registers_fpu(current_procinfo.procdef.proccalloption);
            end;
 
-         { mark the start and the end of the assembler block
-           this is needed for the optimizer }
-         If Assigned(AsmStat.p_asm) Then
-           Begin
-             Marker := Tai_Marker.Create(mark_AsmBlockStart);
-             AsmStat.p_asm.Insert(Marker);
-             Marker := Tai_Marker.Create(mark_AsmBlockEnd);
-             AsmStat.p_asm.Concat(Marker);
-           End;
          Inside_asm_statement:=false;
          _asm_statement:=asmstat;
       end;
@@ -1146,7 +1142,7 @@ implementation
                           internalerror(201008021);
 
                         { strip leading 0's in iso mode }
-                        if m_iso in current_settings.modeswitches then
+                        if (([m_iso,m_extpas]*current_settings.modeswitches)<>[]) then
                           while pattern[1]='0' do
                             delete(pattern,1,1);
 
@@ -1240,7 +1236,7 @@ implementation
                 try_to_consume(_COLON) then
               begin
                 { in iso mode, 0003: is equal to 3: }
-                if m_iso in current_settings.modeswitches then
+                if (([m_iso,m_extpas]*current_settings.modeswitches)<>[]) then
                   searchsym(tostr(tordconstnode(p).value),srsym,srsymtable)
                 else
                   searchsym(s,srsym,srsymtable);
@@ -1332,6 +1328,7 @@ implementation
                     ) then
                    Message(parser_e_illegal_expression);
                end;
+
              code:=p;
            end;
          end;
@@ -1356,7 +1353,7 @@ implementation
          filepos:=current_tokenpos;
          consume(starttoken);
 
-         while not(token in [_END,_FINALIZATION]) do
+         while not((token=_END) or (token=_FINALIZATION)) do
            begin
               if first=nil then
                 begin
@@ -1368,7 +1365,7 @@ implementation
                    tstatementnode(last).right:=cstatementnode.create(statement,nil);
                    last:=tstatementnode(last).right;
                 end;
-              if (token in [_END,_FINALIZATION]) then
+              if ((token=_END) or (token=_FINALIZATION)) then
                 break
               else
                 begin
@@ -1398,9 +1395,9 @@ implementation
     function assembler_block : tnode;
       var
         p : tnode;
-{$ifndef arm}
+        {$if not(defined(sparcgen)) and not(defined(arm)) and not(defined(avr)) and not(defined(mips))}
         locals : longint;
-{$endif arm}
+        {$endif not(defined(sparcgen)) and not(defined(arm)) and not(defined(avr)) and not(defined(mips))}
         srsym : tsym;
       begin
          if parse_generic then
@@ -1426,7 +1423,7 @@ implementation
          include(current_procinfo.flags,pi_is_assembler);
          p:=_asm_statement;
 
-{$if not(defined(sparc)) and not(defined(arm)) and not(defined(avr)) and not(defined(mips))}
+{$if not(defined(sparcgen)) and not(defined(arm)) and not(defined(avr)) and not(defined(mips))}
          if (po_assembler in current_procinfo.procdef.procoptions) then
            begin
              { set the framepointer to esp for assembler functions when the
@@ -1452,7 +1449,7 @@ implementation
                  current_procinfo.framepointer:=NR_STACK_POINTER_REG;
                end;
            end;
-{$endif not(defined(sparc)) and not(defined(arm)) and not(defined(avr)) not(defined(mipsel))}
+{$endif not(defined(sparcgen)) and not(defined(arm)) and not(defined(avr)) not(defined(mipsel))}
 
         { Flag the result as assigned when it is returned in a
           register.

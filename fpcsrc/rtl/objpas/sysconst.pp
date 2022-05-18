@@ -12,15 +12,21 @@
 
  **********************************************************************}
 {$mode objfpc}
-{$H+}
-unit sysconst;
+unit SysConst;
 
 interface
 
+{$ifdef FPC_HAS_FEATURE_ANSISTRINGS}
+{$H+}
 resourcestring
+{$else FPC_HAS_FEATURE_ANSISTRINGS}
+const
+{$endif FPC_HAS_FEATURE_ANSISTRINGS}
 
 { from old str*.inc files }
-
+  SListIndexError        = 'List index (%d) out of bounds';
+  SParamIsNegative       = 'Parameter "%s" cannot be negative.';
+  SListCapacityError     = 'List capacity (%d) exceeded.';
   SAbortError            = 'Operation aborted';
   SAbstractError         = 'Abstract method called';
   SAccessDenied          = 'Access denied';
@@ -80,6 +86,7 @@ resourcestring
   SInvalidVarOpWithHResultWithPrefix = 'Invalid variant operation (%s%.8x)'+LineEnding+'%s';
   SNoError               = 'No error.';
   SNoThreadSupport       = 'Threads not supported. Recompile program with thread driver.';
+  SNoDynLibsSupport      = 'Dynamic libraries not supported. Recompile program with dynamic library driver.';
   SMissingWStringManager = 'Widestring manager not available. Recompile program with appropriate manager.';
   SSigQuit               = 'SIGQUIT signal received.';
   SObjectCheckError      = 'Object reference is Nil';
@@ -91,6 +98,7 @@ resourcestring
   SStackOverflow         = 'Stack overflow';
   SSafecallException     = 'Exception in safecall method';
   SiconvError            = 'iconv error';
+  SThreadError           = 'Thread error';
 
   STooManyOpenFiles      = 'Too many open files';
   SUnKnownRunTimeError   = 'Unknown Run-Time error : %3.3d';
@@ -228,6 +236,7 @@ begin
      231 : Result:=SExceptionStack;
      232 : Result:=SNoThreadSupport;
      233 : Result:=SMissingWStringManager;
+     235 : Result:=SNoDynLibsSupport;
 
      255 : Result:=SFallbackError;
 

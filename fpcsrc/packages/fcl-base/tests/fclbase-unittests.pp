@@ -4,12 +4,14 @@ program fclbase_unittests;
 
 uses
   Classes, consoletestrunner, tests_fptemplate, tchashlist,
-  testexprpars;
+  testexprpars, tcmaskutils, tcinifile, tccsvreadwrite,tcbufferedfilestream, tccsvdocument;
 
 var
   Application: TTestRunner;
 
 begin
+  DefaultFormat:=fPlain;
+  DefaultRunAllTests:=True;
   Application := TTestRunner.Create(nil);
   Application.Initialize;
   Application.Title := 'FCL-Base unittests';

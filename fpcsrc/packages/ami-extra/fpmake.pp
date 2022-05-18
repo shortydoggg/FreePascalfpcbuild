@@ -21,17 +21,26 @@ begin
 
     P.Dependencies.Add('morphunits',[morphos]);
     P.Dependencies.Add('arosunits',[aros]);
-    P.Dependencies.Add('amunits',[amiga]);
+    if Defaults.CPU=m68k then
+      P.Dependencies.Add('amunits',[amiga]);
+    if Defaults.CPU=powerpc then
+      P.Dependencies.Add('os4units',[amiga]);
 
 {$ifdef ALLPACKAGES}
     P.Directory:=ADirectory;
 {$endif ALLPACKAGES}
-    P.Version:='3.0.2';
+    P.Version:='3.2.0';
     P.SourcePath.Add('src');
 
     P.OSes:=AllAmigaLikeOSes;
 
+    T:=P.Targets.AddUnit('amsgbox.pas');
     T:=P.Targets.AddUnit('cliputils.pas');
+    T:=P.Targets.AddUnit('pcq.pas');
+    T:=P.Targets.AddUnit('muihelper.pas');
+
+    P.ExamplePath.Add('examples');
+    T:=P.Targets.AddExampleProgram('muihelloworld.pas');
 
 {$ifndef ALLPACKAGES}
     Run;

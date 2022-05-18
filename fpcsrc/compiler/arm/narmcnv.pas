@@ -75,6 +75,9 @@ implementation
         fname: string[19];
       begin
         if (cs_fp_emulation in current_settings.moduleswitches) or
+{$ifdef cpufpemu}
+          (current_settings.fputype=fpu_soft) or
+{$endif cpufpemu}
           (current_settings.fputype=fpu_fpv4_s16) then
           result:=inherited first_int_to_real
         else
@@ -116,6 +119,7 @@ implementation
                 expectloc:=LOC_FPUREGISTER;
               fpu_vfpv2,
               fpu_vfpv3,
+              fpu_vfpv4,
               fpu_vfpv3_d16,
               fpu_fpv4_s16:
                 expectloc:=LOC_MMREGISTER;
@@ -170,9 +174,9 @@ implementation
 
     procedure tarmtypeconvnode.second_int_to_real;
       const
-        signedprec2vfpop: array[boolean,OS_F32..OS_F64] of tasmop =
-          ((A_FUITOS,A_FUITOD),
-           (A_FSITOS,A_FSITOD));
+        signedprec2vfppf: array[boolean,OS_F32..OS_F64] of toppostfix =
+          ((PF_F32U32,PF_F64U32),
+           (PF_F32S32,PF_F64S32));
       var
         instr : taicpu;
         href : treference;
@@ -206,9 +210,9 @@ implementation
                         instr.oppostfix:=PF_D;
                         current_asmdata.CurrAsmList.concat(instr);
 
-                        current_asmdata.getdatalabel(l1);
+                        current_asmdata.getglobaldatalabel(l1);
                         current_asmdata.getjumplabel(l2);
-                        reference_reset_symbol(href,l1,0,const_align(8));
+                        reference_reset_symbol(href,l1,0,const_align(8),[]);
 
                         cg.a_reg_alloc(current_asmdata.CurrAsmList,NR_DEFAULTFLAGS);
                         current_asmdata.CurrAsmList.concat(Taicpu.op_reg_const(A_CMP,left.location.register,0));
@@ -242,6 +246,7 @@ implementation
             end;
           fpu_vfpv2,
           fpu_vfpv3,
+          fpu_vfpv4,
           fpu_vfpv3_d16:
             begin
               location_reset(location,LOC_MMREGISTER,def_cgsize(resultdef));
@@ -253,8 +258,9 @@ implementation
                 location.register:=cg.getmmregister(current_asmdata.CurrAsmList,location.size)
               else
                 location.register:=left.location.register;
-              current_asmdata.CurrAsmList.concat(taicpu.op_reg_reg(
-                signedprec2vfpop[signed,location.size],location.register,left.location.register));
+              current_asmdata.CurrAsmList.concat(setoppostfix(taicpu.op_reg_reg(A_VCVT,
+                location.register,left.location.register),
+                signedprec2vfppf[signed,location.size]));
             end;
           fpu_fpv4_s16:
             begin
@@ -282,13 +288,9 @@ implementation
         hregister : tregister;
         href      : treference;
         resflags  : tresflags;
-        hlabel,oldTrueLabel,oldFalseLabel : tasmlabel;
+        hlabel    : tasmlabel;
         newsize   : tcgsize;
       begin
-         oldTrueLabel:=current_procinfo.CurrTrueLabel;
-         oldFalseLabel:=current_procinfo.CurrFalseLabel;
-         current_asmdata.getjumplabel(current_procinfo.CurrTrueLabel);
-         current_asmdata.getjumplabel(current_procinfo.CurrFalseLabel);
          secondpass(left);
          if codegenerror then
           exit;
@@ -306,8 +308,6 @@ implementation
                 hlcg.location_force_reg(current_asmdata.CurrAsmList,location,left.resultdef,resultdef,true)
               else
                 location.size:=newsize;
-              current_procinfo.CurrTrueLabel:=oldTrueLabel;
-              current_procinfo.CurrFalseLabel:=oldFalseLabel;
               exit;
            end;
 
@@ -364,10 +364,10 @@ implementation
               begin
                 hregister:=cg.getintregister(current_asmdata.CurrAsmList,OS_INT);
                 current_asmdata.getjumplabel(hlabel);
-                cg.a_label(current_asmdata.CurrAsmList,current_procinfo.CurrTrueLabel);
+                cg.a_label(current_asmdata.CurrAsmList,left.location.truelabel);
                 cg.a_load_const_reg(current_asmdata.CurrAsmList,OS_INT,1,hregister);
                 cg.a_jmp_always(current_asmdata.CurrAsmList,hlabel);
-                cg.a_label(current_asmdata.CurrAsmList,current_procinfo.CurrFalseLabel);
+                cg.a_label(current_asmdata.CurrAsmList,left.location.falselabel);
                 cg.a_load_const_reg(current_asmdata.CurrAsmList,OS_INT,0,hregister);
                 cg.a_label(current_asmdata.CurrAsmList,hlabel);
                 tbasecgarm(cg).cgsetflags:=true;
@@ -400,9 +400,6 @@ implementation
          else
 {$endif cpu64bitalu}
            location.register:=hreg1;
-
-         current_procinfo.CurrTrueLabel:=oldTrueLabel;
-         current_procinfo.CurrFalseLabel:=oldFalseLabel;
       end;
 
 

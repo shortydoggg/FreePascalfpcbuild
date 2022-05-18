@@ -17,7 +17,7 @@ begin
 {$ifdef ALLPACKAGES}
     P.Directory:=ADirectory;
 {$endif ALLPACKAGES}
-    P.Version:='3.0.2';
+    P.Version:='3.2.0';
 
     P.Author := 'Nikolay Nikolov (translation to Pascal), Christian Nentwich (original C version)';
     P.License := 'LGPL with modification, ';
@@ -25,7 +25,9 @@ begin
     P.Email := '';
     P.Description := 'Library for pixel graphics conversion';
     P.NeedLibC := false;
-    P.OSes:=AllOSes-[embedded,msdos];
+    P.OSes:=AllOSes-[embedded,msdos,win16,macos,palmos];
+    if Defaults.CPU=jvm then
+      P.OSes := P.OSes - [java,android];
 
     P.SourcePath.Add('src');
     P.IncludePath.Add('src');

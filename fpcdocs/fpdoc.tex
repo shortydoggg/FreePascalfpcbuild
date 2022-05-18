@@ -47,7 +47,7 @@
 \begin{document}
 \title{FPDoc\\Free Pascal code documenter: Reference manual}
 \docdescription{Reference manual for FPDoc}
-\docversion{3.0}
+\docversion{3.2.0}
 \date{\today}
 \author{Micha\"el Van Canneyt}
 \maketitle
@@ -812,7 +812,7 @@ of the inherited method (provided it can find a parent implementation).
 \label{suse:disableprivate}
 If this option is specified, then no \tag{element} tags will be generated
 for private methods or fields of classes or objects. 
-The default behaviour is to generate nodes for private methods or fields.
+The default behavior is to generate nodes for private methods or fields.
 It can be used to generate a skeleton for end-user and developer
 documentation.
 
@@ -1471,6 +1471,22 @@ Normal text \textbf{Bold text} normal text.
 
 See also: \seetag{i}, \seetag{u}.
 
+% Tag BR
+\subsection{\tag{br} : Linebreak}
+\label{tag:br}
+This tag will cause the text to be continued on the next line, without
+starting a new paragraph.
+
+Example:
+\begin{verbatim}
+Normal text on first line <br/>Continued on next line.
+\end{verbatim}
+will be formatted as:\\
+Normal text on first line\\
+Continued on next line.
+
+See also: \seetag{i}, \seetag{u}.
+
 % Tag caption
 \subsection{\tag{caption} : Specify table caption}
 \label{tag:caption}
@@ -1559,7 +1575,7 @@ Example:
 <dl>
 <dt>meOne</dt><dd>First element of the enumeration type.</dd>
 <dt>meTwo</dt><dd>Second element of the enumeration type.</dd>
-<dt>meThree</dt><dd>Thir element of the enumeration type.</dd>
+<dt>meThree</dt><dd>Third element of the enumeration type.</dd>
 </dl>
 \end{verbatim}
 Will be typeset as
@@ -1674,6 +1690,21 @@ Example:
 \end{verbatim}
 
 See also: \seetag{descr}, \seetag{element}, \seetag{seealso}
+
+% Tag i
+\subsection{\tag{file} : Format filename}
+\label{tag:file}
+The \tag{file} tag will cause its contents as a filename. It can
+occur mixed with any text. It is similar to the \seetag{var} tag.
+
+Example:
+\begin{verbatim}
+The file <file>me.exe</file> is searched in the PATH.
+\end{verbatim}
+will be formatted as:\\
+The file \file{me.exe<} is searched in the PATH.
+
+See also: \seetag{b},  \seetag{i}; \seetag{u}, \seetag{var} 
 
 % Tag fpdoc-description
 \subsection{\tag{fpdoc-description} : Global tag}
@@ -1843,7 +1874,7 @@ See also: \seetag{note}, \seetag{module}, \seetag{topic} and \seetag{element}.
 
 % Tag notes
 \subsection{\tag{note} : Notes/Annotation entry.}
-\label{tag:notes}
+\label{tag:note}
 The \tag{note} tag contains the text of one note. It must appear below a tag \tag{notes} 
 collection of annotations. The notes will be typeset as a unordered list below the documentation. 
 (usually the \var{descr} node).
@@ -1905,7 +1936,7 @@ be skipped.
 
 Note that if a description node contains a \tag{table}, \tag{pre}, \tag{code}
 or any list tag, then the text surrounding these tags {\em must} be  put 
-inside a \tag{p} paragraph tag. This is different from the behaviour in HTML.
+inside a \tag{p} paragraph tag. This is different from the behavior in HTML.
 
 The paragraph tag must always have an opening tag and a closing tag, unlike
 html where only the opening tag may be present.
@@ -2289,7 +2320,7 @@ Will be typeset as
 
 The \var{Items} property gives indexed access to...
 
-See also: \seetag{b}, \seetag{u}, \seetag{i}, \seetag{code}
+See also: \seetag{b}, \seetag{u}, \seetag{i}, \seetag{code},  \seetag{file}
 
 % Tag var
 \subsection{\tag{version} : version info}
@@ -2425,6 +2456,25 @@ files are compressed, if the --other-files option is used these files are
 collected and compressed. Now if the --auto-index or --auto-toc are used
 the Index and Table of Contents are created and the compression is finished.
 
+% TXT output
+\section{TXT output}
+
+The text output in \fpdoc is a single TXT file. It shares the same structure
+as the LaTeX output.
+
+% RTF output
+\section{RTF output}
+
+The RTF output in \fpdoc is a single TXT file. It shares the same structure
+as the LaTeX output.
+
+% man output
+\section{Man output}
+
+The unix manual output (actually, groff output) creates one manual page file 
+per identifier; the files are named unit.identifier, and are by default
+saved in a directory with the package name (unless modified with the
+--output command-line option).
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % End of file

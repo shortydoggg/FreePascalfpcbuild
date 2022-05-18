@@ -287,7 +287,6 @@ type
     FContentFields: TStrings;
     FCookieFields: TStrings;
     FHTTPVersion: String;
-    FHTTPXRequestedWith: String;
     FFields : THeadersArray;
     FVariables : THTTPVariables;
     FQueryFields: TStrings;
@@ -299,7 +298,7 @@ type
     Function GetFieldCount : Integer;
     Function GetContentLength : Integer;
     Procedure SetContentLength(Value : Integer);
-    Function GetFieldOrigin(AIndex : Integer; Out H : THeader; V : THTTPVAriableType) : Boolean;
+    Function GetFieldOrigin(AIndex : Integer; Out H : THeader; Out V : THTTPVAriableType) : Boolean;
     Function GetServerPort : Word;
     Procedure SetServerPort(AValue : Word);
     Function GetSetFieldValue(Index : Integer) : String; virtual;
@@ -383,7 +382,7 @@ type
     Property ProtocolVersion : String Index ord(hvHTTPVErsion) Read GetHTTPVariable Write SetHTTPVariable;
     // Specials, mostly from CGI protocol/Apache.
     Property PathInfo : String index Ord(hvPathInfo) read GetHTTPVariable Write SetHTTPVariable;
-    Property PathTranslated : String index Ord(hvPathInfo) read GetHTTPVariable Write SetHTTPVariable;
+    Property PathTranslated : String index Ord(hvPathTranslated) read GetHTTPVariable Write SetHTTPVariable;
     Property RemoteAddress : String Index Ord(hvRemoteAddress) read GetHTTPVariable Write SetHTTPVariable;
     Property RemoteAddr : String Index Ord(hvRemoteAddress) read GetHTTPVariable Write SetHTTPVariable; // Alias, Delphi-compat
     Property RemoteHost : String Index Ord(hvRemoteHost) read  GetHTTPVariable Write SetHTTPVariable;
@@ -412,11 +411,12 @@ type
     FFiles : TUploadedFiles;
     FReturnedPathInfo : String;
     FLocalPathPrefix : string;
-    FServerPort : String;
     FContentRead : Boolean;
-    FContent : String;
+    FRouteParams : TStrings;
     function GetLocalPathPrefix: string;
     function GetFirstHeaderLine: String;
+    function GetRP(AParam : String): String;
+    procedure SetRP(AParam : String; AValue: String);
   Protected
     Function AllowReadContent : Boolean; virtual;
     Function CreateUploadedFiles : TUploadedFiles; virtual;
@@ -441,6 +441,7 @@ type
     constructor Create; override;
     destructor destroy; override;
     Function GetNextPathInfo : String;
+    Property RouteParams[AParam : String] : String Read GetRP Write SetRP;
     Property ReturnedPathInfo : String Read FReturnedPathInfo Write FReturnedPathInfo;
     Property LocalPathPrefix : string Read GetLocalPathPrefix;
     Property CommandLine : String Read FCommandLine;
@@ -474,8 +475,8 @@ type
     FContentSent: Boolean;
     FRequest : TRequest;
     FCookies : TCookies;
-    function GetContent: String;
-    procedure SetContent(const AValue: String);
+    function GetContent: RawByteString;
+    procedure SetContent(const AValue: RawByteString);
     procedure SetContents(AValue: TStrings);
     procedure SetContentStream(const AValue: TStream);
     procedure SetFirstHeaderLine(const line: String);
@@ -506,7 +507,7 @@ type
     Property RetryAfter : String  Index Ord(hhRetryAfter) Read GetHeaderValue Write SetHeaderValue;
     Property FirstHeaderLine : String Read GetFirstHeaderLine Write SetFirstHeaderLine;
     Property ContentStream : TStream Read FContentStream Write SetContentStream;
-    Property Content : String Read GetContent Write SetContent;
+    Property Content : RawByteString Read GetContent Write SetContent;
     property Contents : TStrings read FContents Write SetContents;
     Property HeadersSent : Boolean Read FHeadersSent;
     Property ContentSent : Boolean Read FContentSent;
@@ -518,13 +519,20 @@ type
 
 
   { TCustomSession }
+  TSessionState = (ssNew,ssExpired,ssActive,ssResponseInitialized);
+  TSessionStates = set of TSessionState;
 
   TCustomSession = Class(TComponent)
   Private
+    FOnSessionStateChange: TNotifyEvent;
     FSessionCookie: String;
     FSessionCookiePath: String;
+    FStates: TSessionStates;
     FTimeOut: Integer;
+    Procedure SetSessionState(aValue : TSessionStates);
   Protected
+    Procedure AddToSessionState(aValue : TSessionState);
+    Procedure RemoveFromSessionState(aValue : TSessionState);
     // Can be overridden to provide custom behaviour.
     procedure SetSessionCookie(const AValue: String); virtual;
     procedure SetSessionCookiePath(const AValue: String); virtual;
@@ -555,6 +563,10 @@ type
     Property SessionCookiePath : String Read FSessionCookiePath write SetSessionCookiePath;
     // Variables, tracked in session.
     Property Variables[VarName : String] : String Read GetSessionVariable Write SetSessionVariable;
+    // Session state
+    Property SessionState : TSessionStates Read FStates;
+    // Called when state changes
+    Property OnSessionStateChange : TNotifyEvent Read FOnSessionStateChange Write FOnSessionStateChange;
   end;
 
   TRequestEvent = Procedure (Sender: TObject; ARequest : TRequest) of object;
@@ -602,9 +614,7 @@ Resourcestring
   SErrInternalUploadedFileError = 'Internal uploaded file configuration error';
   SErrNoSuchUploadedFile        = 'No such uploaded file : "%s"';
   SErrUnknownCookie             = 'Unknown cookie: "%s"';
-  SErrUnsupportedContentType    = 'Unsupported content type: "%s"';
   SErrNoRequestMethod           = 'No REQUEST_METHOD passed from server.';
-  SErrInvalidRequestMethod      = 'Invalid REQUEST_METHOD passed from server: %s.';
 
 const
    hexTable = '0123456789ABCDEF';
@@ -812,7 +822,7 @@ end;
 
 
 function THTTPHeader.GetFieldOrigin(AIndex: Integer; out H: THeader;
-  V: THTTPVAriableType): Boolean;
+  Out V: THTTPVAriableType): Boolean;
 
 
 begin
@@ -1237,10 +1247,9 @@ end;
 procedure TMimeItems.CreateUploadFiles(Files: TUploadedFiles; Vars : TStrings);
 
 Var
-  I,j : Integer;
+  I : Integer;
   P : TMimeItem;
-  LFN,Name,Value : String;
-  U : TUploadedFile;
+  Name,Value : String;
 
 begin
   For I:=Count-1 downto 0 do
@@ -1453,6 +1462,7 @@ end;
 
 destructor TRequest.destroy;
 begin
+  FreeAndNil(FRouteParams);
   FreeAndNil(FFiles);
   inherited destroy;
 end;
@@ -1532,6 +1542,22 @@ begin
   Result := Command + ' ' + URI;
   if Length(HttpVersion) > 0 then
     Result := Result + ' HTTP/' + HttpVersion;
+end;
+
+function TRequest.GetRP(AParam : String): String;
+begin
+  if Assigned(FRouteParams) then
+    Result:=FRouteParams.Values[AParam]
+  else
+    Result:='';
+end;
+
+procedure TRequest.SetRP(AParam : String; AValue: String);
+begin
+  if (AValue<>GetRP(AParam)) And ((AValue<>'')<>Assigned(FRouteParams)) then
+    FRouteParams:=TStringList.Create;
+  if (AValue<>'') and Assigned(FRouteParams) then
+    FRouteParams.Values[AParam]:=AValue;
 end;
 
 function TRequest.AllowReadContent: Boolean;
@@ -1777,10 +1803,8 @@ procedure TRequest.ProcessMultiPart(Stream: TStream; const Boundary: String;
 Var
   L : TMimeItems;
   B : String;
-  I,J : Integer;
-  S,FF,key, Value : String;
-  FI : TMimeItem;
-  F : TStream;
+  I : Integer;
+  S : String;
 
 begin
 {$ifdef CGIDEBUG} SendMethodEnter('ProcessMultiPart');{$endif CGIDEBUG}
@@ -1820,6 +1844,7 @@ var
   S : String;
 
 begin
+  S:='';
 {$ifdef CGIDEBUG} SendMethodEnter('ProcessURLEncoded');{$endif CGIDEBUG}
   SetLength(S,Stream.Size); // Skip added Null.
   Stream.ReadBuffer(S[1],Stream.Size);
@@ -1915,9 +1940,6 @@ end;
 
 procedure TUploadedFile.DeleteTempUploadedFile;
 
-Var
-  s: String;
-
 begin
   if (FStream is TFileStream) then
     FreeStream;
@@ -1964,7 +1986,7 @@ begin
   FContents:=TStringList.Create;
   TStringList(FContents).OnChange:=@ContentsChanged;
   FCookies:=TCookies.Create(TCookie);
-  FCustomHeaders:=TStringList.Create;
+  FCustomHeaders:=TStringList.Create; // Destroyed in parent
 end;
 
 destructor TResponse.destroy;
@@ -2053,14 +2075,18 @@ begin
   FContents.Assign(AValue);
 end;
 
-function TResponse.GetContent: String;
+function TResponse.GetContent: RawByteString;
 begin
   Result:=Contents.Text;
 end;
 
-procedure TResponse.SetContent(const AValue: String);
+procedure TResponse.SetContent(const AValue: RawByteString);
 begin
-  FContentStream:=Nil;
+  if Assigned(FContentStream) then
+    if FreeContentStream then
+      FreeAndNil(FContentStream)
+    else
+      FContentStream:=Nil;
   FContents.Text:=AValue;
 end;
 
@@ -2251,6 +2277,36 @@ end;
   TCustomSession
   ---------------------------------------------------------------------}
 
+procedure TCustomSession.SetSessionState(aValue: TSessionStates);
+
+begin
+  if FStates=aValue then exit;
+  If Assigned(OnSessionStateChange) then
+    OnSessionStateChange(Self);
+  FStates:=AValue;
+end;
+
+procedure TCustomSession.AddToSessionState(aValue: TSessionState);
+
+Var
+  S: TSessionStates;
+
+begin
+  S:=SessionState;
+  Include(S,AValue);
+  SetSessionState(S);
+end;
+
+procedure TCustomSession.RemoveFromSessionState(aValue: TSessionState);
+Var
+  S: TSessionStates;
+
+begin
+  S:=SessionState;
+  Exclude(S,AValue);
+  SetSessionState(S);
+end;
+
 procedure TCustomSession.SetSessionCookie(const AValue: String);
 begin
   FSessionCookie:=AValue;
@@ -2276,6 +2332,7 @@ constructor TCustomSession.Create(AOwner: TComponent);
 begin
   FTimeOut:=DefaultTimeOut;
   inherited Create(AOwner);
+  FStates:=[];
 end;
 
 procedure TCustomSession.InitResponse(AResponse: TResponse);

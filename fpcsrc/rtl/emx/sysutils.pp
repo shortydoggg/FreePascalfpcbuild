@@ -34,6 +34,8 @@ uses
 { OS has an ansistring/single byte environment variable API }
 {$define SYSUTILS_HAS_ANSISTR_ENVVAR_IMPL}
 
+{$DEFINE executeprocuni} (* Only 1 byte version of ExecuteProcess is provided by the OS *)
+
 { Include platform independent interface part }
 {$i sysutilh.inc}
 
@@ -475,7 +477,7 @@ asm
  xor eax, 112
  jz @FOpenDefSharing
  cmp eax, 64
- jbe FOpen1
+ jbe @FOpen1
 @FOpenDefSharing:
  or ecx, 64
 @FOpen1:
@@ -535,7 +537,7 @@ var
   SystemFileName: RawByteString;
 begin
   SystemFileName := ToSingleByteFileSystemEncodedFileName(FileName);
-  FileOpen := FileCreate(pointer(SystemFileName),ShareMode,Rights);
+  FileCreate := FileCreate(pointer(SystemFileName),ShareMode,Rights);
 end;
 
 function FileRead (Handle: longint; Out Buffer; Count: longint): longint;
@@ -659,7 +661,13 @@ begin
 end;
 
 
-function FileExists (const FileName: RawByteString): boolean;
+function FileGetSymLinkTarget(const FileName: RawByteString; out SymLinkRec: TRawbyteSymLinkRec): Boolean;
+begin
+  Result := False;
+end;
+
+
+function FileExists (const FileName: RawByteString; FollowLink : Boolean): boolean;
 var
   L: longint;
 begin
@@ -693,7 +701,7 @@ var
 begin
   if os_mode = osOS2 then
    begin
-    SystemEncodedPath:=ToSingleByteEncodedFileName(Path);
+    SystemEncodedPath:=ToSingleByteFileSystemEncodedFileName(Path);
     New (FStat);
     Rslt.FindHandle := THandle ($FFFFFFFF);
     Count := 1;
@@ -705,7 +713,7 @@ begin
             Attr and FindResvdMask, FStat, SizeOf (FStat^), Count, ilStandard);
     if (Err = 0) and (Count = 0) then
      Err := 18;
-    FindFirst := -Err;
+    InternalFindFirst := -Err;
     if Err = 0 then
      begin
       Rslt.ExcludeAttr := 0;
@@ -726,7 +734,7 @@ begin
       SetCodePage(Name, DefaultFileSystemCodePage, false);
      end
     else
-     FindClose (Rslt);
+     InternalFindClose (Rslt.FindHandle);
     Dispose (FStat);
    end
   else
@@ -735,7 +743,7 @@ begin
     GetMem (SR, SizeOf (SearchRec));
     Rslt.FindHandle := longint(SR);
     DOS.FindFirst (Path, Attr, SR^);
-    FindFirst := -DOS.DosError;
+    InternalFindFirst := -DOS.DosError;
     if DosError = 0 then
      begin
       Rslt.Time := SR^.Time;
@@ -767,7 +775,7 @@ begin
     Err := DosFindNext (Rslt.FindHandle, FStat, SizeOf (FStat^), Count);
     if (Err = 0) and (Count = 0) then
      Err := 18;
-    FindNext := -Err;
+    InternalFindNext := -Err;
     if Err = 0 then
      begin
       Rslt.ExcludeAttr := 0;
@@ -795,7 +803,7 @@ begin
     if SR <> nil then
      begin
       DOS.FindNext (SR^);
-      FindNext := -DosError;
+      InternalFindNext := -DosError;
       if DosError = 0 then
        begin
         Rslt.Time := SR^.Time;
@@ -892,7 +900,7 @@ begin
 end;
 
 
-function FileGetAttr (const FileName: string): longint; assembler;
+function FileGetAttr (const FileName: rawbytestring): longint; assembler;
 asm
 {$IFDEF REGCALL}
  mov edx, eax
@@ -924,7 +932,7 @@ begin
   end ['eax', 'ecx', 'edx'];
 end;
 
-function DeleteFile (const FileName: string): boolean;
+function DeleteFile (const FileName: rawbytestring): boolean;
 var
   SystemFileName: RawByteString;
 begin
@@ -935,12 +943,12 @@ begin
    call syscall
    mov @result, 0
    jc @FDeleteEnd
-   moc @result, 1
+   mov @result, 1
   @FDeleteEnd:
   end ['eax', 'edx'];
 end;
 
-function RenameFile (const OldName, NewName: string): boolean;
+function RenameFile (const OldName, NewName: rawbytestring): boolean;
 var
   OldSystemFileName, NewSystemFileName: RawByteString;
 Begin
@@ -1048,7 +1056,7 @@ begin
 end;
 
 
-function DirectoryExists (const Directory: RawByteString): boolean;
+function DirectoryExists (const Directory: RawByteString; FollowLink : Boolean): boolean;
 var
   L: longint;
 begin
@@ -1125,9 +1133,6 @@ end {['eax', 'ecx', 'edx', 'edi']};
                               Misc Functions
 ****************************************************************************}
 
-procedure Beep;
-begin
-end;
 
 
 {****************************************************************************
@@ -1240,7 +1245,7 @@ end;
 {$ASMMODE DEFAULT}
 
 
-function ExecuteProcess (const Path: AnsiString; const ComLine: AnsiString;Flags:TExecuteFlags=[]):
+function ExecuteProcess (const Path: RawByteString; const ComLine: RawByteString;Flags:TExecuteFlags=[]):
                                                                        integer;
 var
  HQ: THandle;
@@ -1252,7 +1257,7 @@ var
  CISize: cardinal;
  Prio: byte;
  E: EOSError;
- CommandLine: ansistring;
+ CommandLine: rawbytestring;
 
 begin
  if os_Mode = osOS2 then
@@ -1308,11 +1313,11 @@ begin
 end;
 
 
-function ExecuteProcess (const Path: AnsiString;
-                                  const ComLine: array of AnsiString;Flags:TExecuteFlags=[]): integer;
+function ExecuteProcess (const Path: RawByteString;
+                                  const ComLine: array of RawByteString;Flags:TExecuteFlags=[]): integer;
 
 var
-  CommandLine: AnsiString;
+  CommandLine: RawByteString;
   I: integer;
 
 begin
@@ -1335,5 +1340,6 @@ Initialization
   InitExceptions;       { Initialize exceptions. OS independent }
   InitInternational;    { Initialize internationalization settings }
 Finalization
+  FreeTerminateProcs;
   DoneExceptions;
 end.

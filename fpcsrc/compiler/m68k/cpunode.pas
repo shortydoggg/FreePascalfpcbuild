@@ -39,16 +39,16 @@ unit cpunode;
 //       nppccon,
 //       nppcflw,
          n68kmem,
-//       nppcset,
-//       nppcinl,
+         n68kset,
+         n68kinl,
 //       nppcopt,
        { this not really a node }
 //       nppcobj,
-//       nppcmat,
          n68kmat,
          n68kcnv,
          { symtable }
-         symcpu
+         symcpu,
+         aasmdef
          ;
 
 end.

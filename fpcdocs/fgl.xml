@@ -311,7 +311,7 @@ None.
 <descr>
 <var>IndexOf</var> searches in the list for the item pointed to by
 <var>Item</var>, and returns the position (0-based index) of the item in the list, or -1 if it
-was not found. The items are compared using <link id="system.CompareMem"/>,
+was not found. The items are compared using <link id="sysutils.CompareMem"/>,
 so an exact memory layout match. 
 </descr>
 <errors>
@@ -514,7 +514,7 @@ The sort is done using a quicksort algorithm.
 <var>Capacity</var> is the current capacity (maximum amount of elements) of the list. 
 The list capacity will expand automatically if an item is added and the capacity is reached
 (i.e. <link id="TFPSList.Count"/> equals <var>capacity</var>. Expanding the
-list is an expensive operation involving reallocation of memory and moving of list data in memort, 
+list is an expensive operation involving reallocation of memory and moving of list data in memory, 
 so capacity can be set to a large amount to avoid frequent reallocations.
 </descr>
 <seealso>
@@ -634,7 +634,7 @@ returned.
 
 <!-- constant Visibility: default -->
 <element name="MaxGListSize">
-<short>TFPGList maxmimum list size</short>
+<short>TFPGList maximum list size</short>
 <descr>
 <var>MaxGListSize</var> is the maximum number of elements in the <link
 id="TFPGList"/> list.
@@ -1816,7 +1816,7 @@ None.
 <descr>
 <var>Add</var> adds the memory pointed to by <var>AData</var> to the map using
 the memory pointed to by <var>AKey</var> as the key. If no data is
-specified, it allocates a slot fot <var>AKey</var> and returns a pointer to
+specified, it allocates a slot for <var>AKey</var> and returns a pointer to
 that slot.
 </descr>
 <errors>
@@ -2599,7 +2599,7 @@ If the key does not exist, an <link id="EListError"/> exception will be raised.
 
 <!-- argument Visibility: public -->
 <element name="TFPGMap.KeyData.AKey">
-<short>Key associated with data valueto read or write</short>
+<short>Key associated with data value to read or write</short>
 </element>
 
 <!-- property Visibility: public -->
@@ -2681,7 +2681,7 @@ type, with associated data type that requires manual reference counting: any typ
 For non-reference counted objects, <link id="TFPGMap"/> should be used.
 </p>
 <p>
-This map class is entirely equivalend to <link id="TFPGMap"/>, but operates on
+This map class is entirely equivalent to <link id="TFPGMap"/>, but operates on
 data items that require additional reference counting code on the data.
 </p>
 </descr>
@@ -2741,7 +2741,7 @@ raised.
 
 <!-- function result Visibility: public -->
 <element name="TFPGMapInterfacedObjectData.Add.Result">
-<short>Index of the new ke</short>
+<short>Index of the new key</short>
 </element>
 
 <!-- argument Visibility: public -->
@@ -3007,7 +3007,7 @@ raised.
 
 <!-- argument Visibility: public -->
 <element name="TFPGMapInterfacedObjectData.KeyData.AKey">
-<short>Key associated with data valueto read or write</short>
+<short>Key associated with data value to read or write</short>
 </element>
 
 <!-- property Visibility: public -->
@@ -3446,7 +3446,7 @@ If the key does not exist, an <link id="EListError"/> exception will be raised.
 
 <!-- argument Visibility: public -->
 <element name="TFPGMapObject.KeyData.AKey">
-<short>Key associated with data valueto read or write</short>
+<short>Key associated with data value to read or write</short>
 </element>
 
 <!-- property Visibility: public -->
@@ -3591,6 +3591,168 @@ None.
 </seealso>
 </element>
 
+<!-- uses unit Visibility: default -->
+<element name="types">
+<short>Several base types</short>
+</element>
+
+<!-- uses unit Visibility: default -->
+<element name="sysutils">
+<short>Exceptions and other auxiliary routines</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPSList.DeleteRange">
+<short>Delete a range of elements</short>
+<descr>
+<var>DeleteRange</var> deletes elements from <var>IndexFrom</var> till <var>IndexTo</var>. Both indexes are zero based, and 
+<var>IndexTo</var> must be bigger than <var>IndexFrom</var>. 
+Using this method results in less moving of data in memory, 
+and as such is more effective than deleting the elements one by one using <link id="TFPSList.Delete"/>.
+</descr>
+<errors>
+If invalid indexes are specified, an <link id="EListError"/> exception will be raised.
+</errors>
+<seealso>
+<link id="EListError"/>
+<link id="TFPSList.Delete"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPSList.AddList">
+<short>Adds the elements from another list</short>
+<descr>
+<var>AddList</var> adds all the elements from list <var>Obj</var> to the current list. A check is done that the 2 lists have the same element size.
+</descr>
+<errors>
+If the lists have different element size, an <link id="EListError"/> exception will be raised.
+</errors>
+<seealso>
+<link id="TFPSList.Add"/>
+<link id="EListError"/>
+</seealso>
+</element>
+
+<!-- generic type Visibility: default -->
+<element name="TFPGListEnumerator.T">
+<short>List enumerator type</short>
+<descr>
+<var>T</var> is the type of element in the enumerator
+</descr>
+</element>
+
+<!-- generic type Visibility: default -->
+<element name="TFPGList.T">
+<short>List element type</short>
+<descr>
+<var>T</var> is the type of element in the list
+</descr>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPGList.AddList">
+<short>Adds the elements from another list</short>
+<descr>
+<var>AddList</var> adds all the elements from list <var>Source</var> to the current list. 
+</descr>
+<seealso>
+<link id="TFPGList.Add"/>
+<link id="TFPSList.AddList"/>
+<link id="TFPGObjectList.AddList"/>
+</seealso>
+</element>
+
+<!-- generic type Visibility: default -->
+<element name="TFPGObjectList.T">
+<short>Object list element type</short>
+<descr>
+<var>T</var> is the type of element in the list.
+</descr>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPGObjectList.AddList">
+<short>Adds the elements from another list</short>
+<descr>
+<var>AddList</var> adds all the elements from list <var>Source</var> to the current list. 
+</descr>
+<seealso>
+<link id="TFPGList.AddList"/>
+<link id="TFPSList.AddList"/>
+<link id="TFPGObjectList.Add"/>
+</seealso>
+</element>
+
+<!-- generic type Visibility: default -->
+<element name="TFPGInterfacedObjectList.T">
+<short>Interfaced object list element type</short>
+<descr>
+<var>AddList</var> adds all the elements from list <var>Source</var> to the current list.
+</descr>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TFPGInterfacedObjectList.AddList">
+<short>Adds the elements from another list</short>
+<descr>
+<var>AddList</var> adds all the elements from list <var>Source</var> to the current list. 
+</descr>
+<seealso>
+<link id="TFPGList.AddList"/>
+<link id="TFPSList.AddList"/>
+<link id="TFPGObjectList.AddList"/>
+<link id="TFPGInterfacedObjectList.Add"/>
+</seealso>
+</element>
+
+<!-- generic type Visibility: default -->
+<element name="TFPGMap.TKey">
+<short>Key type</short>
+<descr>
+<var>TKey</var> is the map key type.
+</descr>
+</element>
+
+<!-- generic type Visibility: default -->
+<element name="TFPGMap.TData">
+<short>Data type</short>
+<descr>
+<var>TData</var> is the map data element type.
+</descr>
+</element>
+
+<!-- generic type Visibility: default -->
+<element name="TFPGMapObject.TKey">
+<short>Key type</short>
+<descr>
+<var>TKey</var> is the map key type.
+</descr>
+</element>
+
+<!-- generic type Visibility: default -->
+<element name="TFPGMapObject.TData">
+<short>Data type</short>
+<descr>
+<var>TData</var> is the map data type. It must be a descendent of <var>TObject</var>
+</descr>
+</element>
+
+<!-- generic type Visibility: default -->
+<element name="TFPGMapInterfacedObjectData.TKey">
+<short>Key type</short>
+<descr>
+<var>TKey</var> is the map key type.
+</descr>
+</element>
+
+<!-- generic type Visibility: default -->
+<element name="TFPGMapInterfacedObjectData.TData">
+<short>Data type</short>
+<descr>
+<var>TData</var> is the map data type. It must be a descendent of <var>TInterfacedObject</var>
+</descr>
+</element>
 
 </module> <!-- fgl -->
 

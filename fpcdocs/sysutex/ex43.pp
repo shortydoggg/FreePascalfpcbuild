@@ -9,7 +9,7 @@ Var Info : TSearchRec;
 
 Begin
   Count:=0;
-  If FindFirst ('*',faAnyFile and faDirectory,Info)=0 then
+  If FindFirst ('*',faAnyFile,Info)=0 then
     begin
     Repeat
       Inc(Count);
@@ -20,8 +20,7 @@ Begin
         Writeln (Name:40,Size:15);
         end;
     Until FindNext(info)<>0;
+    FindClose(Info);
     end;
-  FindClose(Info);
   Writeln ('Finished search. Found ',Count,' matches');
-
 End.

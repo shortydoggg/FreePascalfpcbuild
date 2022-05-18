@@ -20,7 +20,7 @@
 *****************************************************************************}
 
 function Fptime(tloc:pTime_t): Time_t; [public, alias : 'FPC_SYSC_TIME'];
-{$ifdef FPC_USEGETTIMEOFDAY}
+{$if defined(generic_linux_syscalls) or defined(FPC_USEGETTIMEOFDAY)}
 VAR tv     : timeval;
     tz     : timezone;
     retval : longint;
@@ -49,7 +49,11 @@ end;
 function Fpopen(path: pchar; flags : cint; mode: mode_t):cint; [public, alias : 'FPC_SYSC_OPEN'];
 
 Begin
+{$if defined(generic_linux_syscalls)}
+ Fpopen:=do_syscall(syscall_nr_openat,AT_FDCWD,TSysParam(path),TSysParam(flags or O_LARGEFILE),TSysParam(mode));
+{$else}
  Fpopen:=do_syscall(syscall_nr_open,TSysParam(path),TSysParam(flags or O_LARGEFILE),TSysParam(mode));
+{$endif}
 End;
 
 function Fpclose(fd : cint): cint; [public, alias : 'FPC_SYSC_CLOSE'];
@@ -64,7 +68,6 @@ begin
   result:=do_syscall(syscall_nr_lseek,tsysparam(fd),tsysparam(offset),tsysparam(whence));
 {$else}
   if do_syscall(syscall_nr__llseek,tsysparam(fd),
-//      {$ifdef FPC_ABI_EABI}      0,  { align parameters as required with dummy } {$endif FPC_ABI_EABI}
       tsysparam(hi(offset)),tsysparam(lo(offset)),
       tsysparam(@result), tsysparam(whence)) = -1 then
     result:=off_t(-1);
@@ -82,36 +85,37 @@ function Fpwrite(fd: cint;buf:pchar; nbytes : size_t): ssize_t; [public, alias :
 begin
  Fpwrite:=do_syscall(syscall_nr_write,Fd,TSysParam(buf),nbytes);
 end;
-{
-function Fppread(fd: cint; buf: pchar; nbytes : size_t; offset:Toff): ssize_t; [public, alias : 'FPC_SYSC_PREAD'];
-   !! check 64 bit off_t sycall
-begin
-  Fpread:=do_syscall(syscall_nr_pread,Fd,TSysParam(buf),nbytes,offset);
-end;
 
-function Fppwrite(fd: cint;buf:pchar; nbytes : size_t; offset:Toff): ssize_t; [public, alias : 'FPC_SYSC_PWRITE'];
-   !! check 64 bit off_t sycall
-begin
- Fpwrite:=do_syscall(syscall_nr_pwrite,Fd,TSysParam(buf),nbytes,offset);
-end;
-}
 function Fpunlink(path: pchar): cint; [public, alias : 'FPC_SYSC_UNLINK'];
 
 begin
+{$if defined(generic_linux_syscalls)}
+  Fpunlink:=do_syscall(syscall_nr_unlinkat,AT_FDCWD,TSysParam(path),0);
+{$else}
   Fpunlink:=do_syscall(syscall_nr_unlink,TSysParam(path));
+{$endif}
 end;
 
 function Fprename(old : pchar; newpath: pchar): cint; [public, alias : 'FPC_SYSC_RENAME'];
 
 begin
+{$if defined(generic_linux_syscalls)}
+  Fprename:=do_syscall(syscall_nr_renameat,AT_FDCWD,TSysParam(old),AT_FDCWD,TSysParam(newpath));
+{$else}
   Fprename:=do_syscall(syscall_nr_rename,TSysParam(old),TSysParam(newpath));
+{$endif}
 end;
 
 function Fpstat(path: pchar; var buf: stat):cint; [public, alias : 'FPC_SYSC_STAT'];
 
 begin
-{$if defined(cpu64)}
-  Fpstat:=do_syscall(syscall_nr_stat,TSysParam(path),TSysParam(@buf));
+{ standard stat call is 32 bit on sparc64, so explicitly force a stat64 call }
+{$if defined(cpu64) and not(defined(cpusparc64))}
+  {$if defined(generic_linux_syscalls)}
+    Fpstat:=do_syscall(syscall_nr_fstatat,AT_FDCWD,TSysParam(path),TSysParam(@buf),0);
+  {$else}
+    Fpstat:=do_syscall(syscall_nr_stat,TSysParam(path),TSysParam(@buf));
+  {$endif}
 {$else}
   Fpstat:=do_syscall(syscall_nr_stat64,TSysParam(path),TSysParam(@buf));
 {$endif}
@@ -130,13 +134,21 @@ end;
 function Fpmkdir(path : pchar; mode: mode_t):cint; [public, alias : 'FPC_SYSC_MKDIR'];
 
 begin
+{$if defined(generic_linux_syscalls)}
+  Fpmkdir:=do_syscall(syscall_nr_mkdirat,AT_FDCWD,TSysParam(path),TSysParam(mode));
+{$else}
   Fpmkdir:=do_syscall(syscall_nr_mkdir,TSysParam(path),TSysParam(mode));
+{$endif}
 end;
 
 function Fprmdir(path : pchar): cint;  [public, alias : 'FPC_SYSC_RMDIR'];
 
 begin
+{$if defined(generic_linux_syscalls)}
+ Fprmdir:=do_syscall(syscall_nr_unlinkat,AT_FDCWD,TSysParam(path),AT_REMOVEDIR);
+{$else}
  Fprmdir:=do_syscall(syscall_nr_rmdir,TSysParam(path));
+{$endif}
 end;
 
 function Fpopendir(dirname : pchar): pdir;  [public, alias : 'FPC_SYSC_OPENDIR'];
@@ -225,13 +237,25 @@ end;
 }
 
 
-{$ifdef cpusparc}
+{$if defined(cpusparc) or defined(cpusparc64)}
 procedure Fprt_sigreturn_stub;assembler;nostackframe;
 asm
   mov syscall_nr_rt_sigreturn,%g1
+  {$ifdef cpusparc}
   ta  0x10
+  {$else}
+  ta 0x6d
+  {$endif}
 end;
-{$endif cpusparc}
+{$endif cpusparc or cpusparc64}
+
+{$if defined(android)}
+
+{$if defined(cpux86_64)}
+  {$define NEED_USER_TRAMPOLINE}
+{$endif}
+
+{$else not android}
 
 {$if defined(cpui386) or defined(cpuarm) or defined(cpux86_64)}
   {$define NEED_USER_TRAMPOLINE}
@@ -239,6 +263,8 @@ end;
 {$if defined(cpui386) or defined(cpuarm)}
   {$define NEED_USER_TRAMPOLINE_RT_DIFFERENT}
 {$endif}
+
+{$endif android}
 
 {$ifdef NEED_USER_TRAMPOLINE}
 
@@ -311,7 +337,7 @@ function Fpsigaction(sig: cint; new_action, old_action: psigactionrec): cint; [p
   If OldAct is non-nil the previous action is saved there.
 }
 begin
-{$ifdef cpusparc}
+{$if defined(cpusparc) or defined(cpusparc64)}
   { Sparc has an extra stub parameter }
   Fpsigaction:=do_syscall(syscall_nr_rt_sigaction,TSysParam(sig),TSysParam(new_action),TSysParam(old_action),TSysParam(ptruint(@Fprt_sigreturn_stub)-8),TSysParam(8));
 {$else cpusparc}
@@ -342,6 +368,11 @@ begin
 {$endif cpusparc}
 end;
 
+{ this is used by the FpFtruncate below. for more information,
+  check the syscall() Linux man page (KB) }
+{$if defined(FPC_ABI_EABI) or defined(CPUMIPS32) or defined(CPUMIPSEL32) or defined(CPUPOWERPC32)}
+{$define FPC_ALIGN_DUMMY}
+{$endif}
 
 function Fpftruncate(fd : cint; flength : off_t): cint; [public, alias : 'FPC_SYSC_FTRUNCATE'];
 { See notes lseek. This one is completely similar for the parameter (but
@@ -352,18 +383,24 @@ begin
  Fpftruncate:=Do_syscall(syscall_nr_ftruncate,TSysParam(fd),TSysParam(flength));
 {$else}
  Fpftruncate:=Do_syscall(syscall_nr_ftruncate64,TSysParam(fd),
-   {$ifdef FPC_ABI_EABI}      0,  { align parameters as required with dummy } {$endif FPC_ABI_EABI}
+   {$ifdef FPC_ALIGN_DUMMY}   0,  {$endif FPC_ALIGN_DUMMY} { align parameters as required with dummy }
    {$ifdef FPC_BIG_ENDIAN}    tsysparam(hi(flength)),tsysparam(lo(flength)){$endif}
    {$ifdef FPC_LITTLE_ENDIAN} tsysparam(lo(flength)),tsysparam(hi(flength)){$endif}
    );
 {$endif}
 end;
 
+{$undef FPC_ALIGN_DUMMY}
+
 function Fpfstat(fd : cint; var sb : stat): cint;  [public, alias : 'FPC_SYSC_FSTAT'];
 
 begin
-{$if defined(cpu64)}
-  FpFStat:=do_SysCall(syscall_nr_fstat,TSysParam(fd),TSysParam(@sb));
+{$if defined(cpu64) and not(defined(cpusparc64))}
+  {$if defined(generic_linux_syscalls)}
+    FpFStat:=do_SysCall(syscall_nr_fstat,TSysParam(fd),TSysParam(@sb));
+  {$else}
+    FpFStat:=do_SysCall(syscall_nr_fstat,TSysParam(fd),TSysParam(@sb));
+  {$endif}
 {$else}
   FpFStat:=do_SysCall(syscall_nr_fstat64,TSysParam(fd),TSysParam(@sb));
 {$endif}
@@ -380,9 +417,16 @@ function Fpfork : pid_t;  [public, alias : 'FPC_SYSC_FORK'];
   A negative value indicates that an error has occurred, the error is returned in
   LinuxError.
 }
-
+{$if defined(generic_linux_syscalls)}
+var
+  pid : Int64;
+{$endif}
 Begin
+{$if defined(generic_linux_syscalls)}
+ Fpfork:=Do_syscall(syscall_nr_clone,clone_flags_fork,0,0,0,TSysParam(@pid));
+{$else}
  Fpfork:=Do_syscall(SysCall_nr_fork);
+{$endif}
 End;
 {$endif FPC_SYSTEM_HAS_FPFORK}
 
@@ -425,7 +469,7 @@ function Fpwaitpid(pid : pid_t; stat_loc : pcint; options: cint): pid_t; [public
 }
 
 begin
-{$ifdef WAIT4}
+{$if defined(generic_linux_syscalls) or defined(WAIT4)}
  FpWaitPID:=do_syscall(syscall_nr_Wait4,PID,TSysParam(Stat_loc),options,0);
 {$else WAIT4}
  FpWaitPID:=do_syscall(syscall_nr_WaitPID,PID,TSysParam(Stat_loc),options);
@@ -447,7 +491,11 @@ function Fpaccess(pathname : pchar; amode : cint): cint; [public, alias : 'FPC_S
 }
 
 begin
+{$if defined(generic_linux_syscalls)}
+ FpAccess:=do_syscall(syscall_nr_faccessat,AT_FDCWD,TSysParam(pathname),amode,0);
+{$else}
  FpAccess:=do_syscall(syscall_nr_access,TSysParam(pathname),amode);
+{$endif}
 end;
 
 (* overloaded
@@ -481,7 +529,16 @@ end;
 Function FpDup2(fildes,fildes2:cint):cint; [public, alias : 'FPC_SYSC_DUP2'];
 
 begin
+{$if defined(generic_linux_syscalls)}
+ if fildes<>fildes2 then
+   Fpdup2:=do_syscall(syscall_nr_dup3,TSysParam(fildes),TSysParam(fildes2),0)
+ else if do_syscall(syscall_nr_fcntl,TSysParam(fildes),1)<>-1 then
+   Fpdup2:=fildes2
+ else
+   Fpdup2:=-1;
+{$else}
  Fpdup2:=do_syscall(syscall_nr_dup2,TSysParam(fildes),TSysParam(fildes2));
+{$endif}
 end;
 
 
@@ -542,6 +599,12 @@ begin
   Fpmunmap:=do_syscall(syscall_nr_munmap,TSysParam(Adr),TSysParam(Len));
 end;
 
+
+Function Fpmprotect(adr:pointer;len:size_t;prot:cint):cint; [public, alias : 'FPC_SYSC_MPROTECT'];
+begin
+  Fpmprotect:=do_syscall(syscall_nr_mprotect,TSysParam(adr),TSysParam(len),TSysParam(prot));
+end;
+
 {
   Interface to Unix ioctl call.
   Performs various operations on the filedescriptor Handle.
@@ -572,7 +635,11 @@ end;
 Function FpReadLink(name,linkname:pchar;maxlen:size_t):cint;  [public, alias : 'FPC_SYSC_READLINK'];
 
 begin
+{$if defined(generic_linux_syscalls)}
+  Fpreadlink:=do_syscall(syscall_nr_readlinkat,AT_FDCWD,TSysParam(name),TSysParam(linkname),maxlen);
+{$else}
   Fpreadlink:=do_syscall(syscall_nr_readlink, TSysParam(name),TSysParam(linkname),maxlen);
+{$endif}
 end;
 
 

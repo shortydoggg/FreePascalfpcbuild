@@ -3,15 +3,13 @@
  
      Contains:   File quarantine property keys
  
-     Copyright:  Copyright 2003-2009 by Apple Inc., all rights reserved.
+     Copyright:  (c) 2003-2012 by Apple Inc. All rights reserved.
  
      Bugs?:      For bug reports, consult the following page on
                  the World Wide Web:
  
-                     http://www.freepascal.org/bugs.html
+                     http://bugs.freepascal.org
 }
-{	 Pascal Translation: Gorazd Krosl <gorazd_1957@yahoo.ca>, October 2009 }
-{	 Updated Pascal Translation: Jonas Maebe <jonas@freepascal.org>, September 2012 }
 
 {
     Modified for use with Free Pascal
@@ -21,6 +19,7 @@
 
 {$ifc not defined MACOSALLINCLUDE or not MACOSALLINCLUDE}
 {$mode macpas}
+{$modeswitch cblocks}
 {$packenum 1}
 {$macro on}
 {$inline on}
@@ -67,6 +66,11 @@ interface
 {$elsec}
 	{$setc __arm__ := 0}
 {$endc}
+{$ifc not defined __arm64__ and defined CPUAARCH64}
+  {$setc __arm64__ := 1}
+{$elsec}
+  {$setc __arm64__ := 0}
+{$endc}
 
 {$ifc defined cpu64}
   {$setc __LP64__ := 1}
@@ -85,6 +89,7 @@ interface
 	{$setc TARGET_CPU_X86 := FALSE}
 	{$setc TARGET_CPU_X86_64 := FALSE}
 	{$setc TARGET_CPU_ARM := FALSE}
+	{$setc TARGET_CPU_ARM64 := FALSE}
 	{$setc TARGET_OS_MAC := TRUE}
 	{$setc TARGET_OS_IPHONE := FALSE}
 	{$setc TARGET_IPHONE_SIMULATOR := FALSE}
@@ -95,6 +100,7 @@ interface
 	{$setc TARGET_CPU_X86 := FALSE}
 	{$setc TARGET_CPU_X86_64 := FALSE}
 	{$setc TARGET_CPU_ARM := FALSE}
+	{$setc TARGET_CPU_ARM64 := FALSE}
 	{$setc TARGET_OS_MAC := TRUE}
 	{$setc TARGET_OS_IPHONE := FALSE}
 	{$setc TARGET_IPHONE_SIMULATOR := FALSE}
@@ -105,6 +111,7 @@ interface
 	{$setc TARGET_CPU_X86 := TRUE}
 	{$setc TARGET_CPU_X86_64 := FALSE}
 	{$setc TARGET_CPU_ARM := FALSE}
+	{$setc TARGET_CPU_ARM64 := FALSE}
 {$ifc defined(iphonesim)}
  	{$setc TARGET_OS_MAC := FALSE}
 	{$setc TARGET_OS_IPHONE := TRUE}
@@ -121,9 +128,16 @@ interface
 	{$setc TARGET_CPU_X86 := FALSE}
 	{$setc TARGET_CPU_X86_64 := TRUE}
 	{$setc TARGET_CPU_ARM := FALSE}
+	{$setc TARGET_CPU_ARM64 := FALSE}
+{$ifc defined(iphonesim)}
+ 	{$setc TARGET_OS_MAC := FALSE}
+	{$setc TARGET_OS_IPHONE := TRUE}
+	{$setc TARGET_IPHONE_SIMULATOR := TRUE}
+{$elsec}
 	{$setc TARGET_OS_MAC := TRUE}
 	{$setc TARGET_OS_IPHONE := FALSE}
 	{$setc TARGET_IPHONE_SIMULATOR := FALSE}
+{$endc}
 	{$setc TARGET_OS_EMBEDDED := FALSE}
 {$elifc defined __arm__ and __arm__}
 	{$setc TARGET_CPU_PPC := FALSE}
@@ -131,13 +145,26 @@ interface
 	{$setc TARGET_CPU_X86 := FALSE}
 	{$setc TARGET_CPU_X86_64 := FALSE}
 	{$setc TARGET_CPU_ARM := TRUE}
+	{$setc TARGET_CPU_ARM64 := FALSE}
+	{ will require compiler define when/if other Apple devices with ARM cpus ship }
+	{$setc TARGET_OS_MAC := FALSE}
+	{$setc TARGET_OS_IPHONE := TRUE}
+	{$setc TARGET_IPHONE_SIMULATOR := FALSE}
+	{$setc TARGET_OS_EMBEDDED := TRUE}
+{$elifc defined __arm64__ and __arm64__}
+	{$setc TARGET_CPU_PPC := FALSE}
+	{$setc TARGET_CPU_PPC64 := FALSE}
+	{$setc TARGET_CPU_X86 := FALSE}
+	{$setc TARGET_CPU_X86_64 := FALSE}
+	{$setc TARGET_CPU_ARM := FALSE}
+	{$setc TARGET_CPU_ARM64 := TRUE}
 	{ will require compiler define when/if other Apple devices with ARM cpus ship }
 	{$setc TARGET_OS_MAC := FALSE}
 	{$setc TARGET_OS_IPHONE := TRUE}
 	{$setc TARGET_IPHONE_SIMULATOR := FALSE}
 	{$setc TARGET_OS_EMBEDDED := TRUE}
 {$elsec}
-	{$error __ppc__ nor __ppc64__ nor __i386__ nor __x86_64__ nor __arm__ is defined.}
+	{$error __ppc__ nor __ppc64__ nor __i386__ nor __x86_64__ nor __arm__ nor __arm64__ is defined.}
 {$endc}
 
 {$ifc defined __LP64__ and __LP64__ }
@@ -253,7 +280,7 @@ uses MacTypes,CFBase;
  *  kLSQuarantineAgentNameKey
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }
@@ -263,7 +290,7 @@ var kLSQuarantineAgentNameKey: CFStringRef; external name '_kLSQuarantineAgentNa
  *  kLSQuarantineAgentBundleIdentifierKey
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }
@@ -273,7 +300,7 @@ var kLSQuarantineAgentBundleIdentifierKey: CFStringRef; external name '_kLSQuara
  *  kLSQuarantineTimeStampKey
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }
@@ -283,7 +310,7 @@ var kLSQuarantineTimeStampKey: CFStringRef; external name '_kLSQuarantineTimeSta
  *  kLSQuarantineTypeKey
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }
@@ -293,7 +320,7 @@ var kLSQuarantineTypeKey: CFStringRef; external name '_kLSQuarantineTypeKey'; (*
  *  kLSQuarantineTypeWebDownload
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }
@@ -303,7 +330,7 @@ var kLSQuarantineTypeWebDownload: CFStringRef; external name '_kLSQuarantineType
  *  kLSQuarantineTypeOtherDownload
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }
@@ -313,7 +340,7 @@ var kLSQuarantineTypeOtherDownload: CFStringRef; external name '_kLSQuarantineTy
  *  kLSQuarantineTypeEmailAttachment
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }
@@ -323,7 +350,7 @@ var kLSQuarantineTypeEmailAttachment: CFStringRef; external name '_kLSQuarantine
  *  kLSQuarantineTypeInstantMessageAttachment
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }
@@ -333,7 +360,7 @@ var kLSQuarantineTypeInstantMessageAttachment: CFStringRef; external name '_kLSQ
  *  kLSQuarantineTypeCalendarEventAttachment
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }
@@ -343,7 +370,7 @@ var kLSQuarantineTypeCalendarEventAttachment: CFStringRef; external name '_kLSQu
  *  kLSQuarantineTypeOtherAttachment
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }
@@ -353,7 +380,7 @@ var kLSQuarantineTypeOtherAttachment: CFStringRef; external name '_kLSQuarantine
  *  kLSQuarantineOriginURLKey
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }
@@ -363,7 +390,7 @@ var kLSQuarantineOriginURLKey: CFStringRef; external name '_kLSQuarantineOriginU
  *  kLSQuarantineDataURLKey
  *  
  *  Availability:
- *    Mac OS X:         in version 10.5 and later in ApplicationServices.framework
+ *    Mac OS X:         in version 10.5 and later in CoreServices.framework
  *    CarbonLib:        not available
  *    Non-Carbon CFM:   not available
  }

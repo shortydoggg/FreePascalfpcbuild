@@ -89,7 +89,9 @@ Type
     Procedure ComboBoxFromQuery(Const ComboName,Qry,Value : String);
     Function  GetSingleTon(Const Qry : String) : String;
     Function GetOSName(ID : String) : String;
+    Function GetOSID(AName : String) : String;
     Function GetCPUName(ID : String) : String;
+    Function GetCPUID(AName : String) : String;
     Function GetVersionName(ID : String) : String;
     Function GetCategoryName(ID : String) : String;
     Function GetTestFileName(ID : String) : String;
@@ -202,7 +204,14 @@ type
     ver_2_6_3,
     ver_2_6_4,
     ver_2_6_5,
-    ver_2_7_1);
+    ver_2_7_1,
+    ver_3_0_0,
+    ver_3_0_1,
+    ver_3_0_2,
+    ver_3_0_3,
+    ver_3_0_4,
+    ver_3_0_5,
+    ver_3_1_1);
 
 const
   ver_trunk = high (known_versions);
@@ -240,7 +249,17 @@ const
    '2.6.3',
    '2.6.4',
    '2.6.5',
-   '2.7.1'
+   '2.7.1',
+   '3.0.0',
+   '3.0.1',
+   '3.0.2',
+   '3.0.3',
+   '3.0.4',
+   '3.0.5',
+   '3.1.1',
+   '3.2.0',
+   '3.2.1',
+   '3.3.1'
   );
 
   ver_branch : array [known_versions] of string =
@@ -275,6 +294,16 @@ const
    'tags/release_2_6_4',
    'tags/release_2_6_4',
    'branches/fixes_2_6',
+   'branches/release_3_0_0',
+   'branches/release_3_0_0',
+   'branches/release_3_0_2',
+   'branches/release_3_0_2',
+   'branches/release_3_0_4',
+   'branches/release_3_0_4',
+   'branches/fixes_3_0',
+   'branches/fixes_3_2',
+   'branches/fixes_3_2',
+   'branches/fixes_3_2',
    'trunk'
   );
 
@@ -460,6 +489,12 @@ begin
   FDB.Transaction := FTrans;
   FDB.Connected:=True;
   Result:=True;
+  { All is not the first anymore, we need to put it by default explicity }
+  if Length(FOS) = 0 then
+    FOS:=GetOSID('All');
+  { All is not the first anymore, we need to put it by default explicity }
+  if Length(FCPU) = 0 then
+    FCPU:=GetCPUID('All');
 end;
 
 procedure TTestsuite.LDump(Const St : String);
@@ -1010,6 +1045,15 @@ begin
     Result:='';
 end;
 
+Function TTestSuite.GetOSID(AName : String) : String;
+
+begin
+  if (AName<>'') then
+    Result:=GetSingleTon('SELECT TO_ID FROM TESTOS WHERE TO_NAME='''+Aname+'''')
+  else
+    Result:='';
+end;
+
 Function TTestSuite.GetTestFileName(ID : String) : String;
 
 begin
@@ -1032,6 +1076,15 @@ Function TTestSuite.GetCPUName(ID : String) : String;
 begin
   if (ID<>'') then
     Result:=GetSingleTon('SELECT TC_NAME FROM TESTCPU WHERE TC_ID='+ID)
+  else
+    Result:='';
+end;
+
+Function TTestSuite.GetCPUID(AName : String) : String;
+
+begin
+  if (AName<>'') then
+    Result:=GetSingleTon('SELECT TC_ID FROM TESTCPU WHERE TC_NAME='''+AName+'''')
   else
     Result:='';
 end;
@@ -1435,7 +1488,7 @@ begin
           Open;
           while not EOF do
             Next;
-          RecNo:=0;
+          RecNo:=1;
 
           DumpLn(Format('<p>Record count: %d </p>',[Q.RecordCount]));
           Try
@@ -1785,7 +1838,8 @@ end;
 Procedure TTestSuite.ShowHistory;
 
 Const
-  MaxCombo = 50;
+  { We already have 53 versions }
+  MaxCombo = 100;
 
 Type
   StatusLongintArray = Array [TTestStatus] of longint;
@@ -1933,9 +1987,9 @@ begin
       if FRunID<>'' then
         S:=S+' AND (TR_TESTRUN_FK='+FRunID+')';
       If FOnlyFailed then
-        S:=S+' AND (TR_OK="-")';
+        S:=S+' AND (NOT TR_OK)';
       If FNoSkipped then
-        S:=S+' AND (TR_SKIP="-")';
+        S:=S+' AND (NOT TR_SKIP)';
       If FCond<>'' then
         S:=S+' AND ('+FCond+')';
 
@@ -1946,7 +2000,7 @@ begin
         end
       else
         begin
-          cpu_last:=StrToInt(GetSingleton('SELECT COUNT(*) FROM TESTCPU'));
+          cpu_last:=StrToInt(GetSingleton('SELECT MAX(TC_ID) FROM TESTCPU'));
           cpu_size:=Sizeof(StatusLongintArray)*(1+cpu_last);
           cpu_count:=GetMem(cpu_size);
           FillChar(cpu_count^,cpu_size,#0);
@@ -1966,7 +2020,7 @@ begin
         end
       else
         begin
-          version_last:=StrToInt(GetSingleton('SELECT COUNT(*) FROM TESTVERSION'));
+          version_last:=StrToInt(GetSingleton('SELECT MAX(TV_ID) FROM TESTVERSION'));
           version_size:=Sizeof(StatusLongintArray)*(1+version_last);
           version_count:=GetMem(version_size);
           FillChar(version_count^,version_size,#0);
@@ -1988,7 +2042,7 @@ begin
         end
       else
         begin
-          os_last:=StrToInt(GetSingleton('SELECT COUNT(*) FROM TESTOS'));
+          os_last:=StrToInt(GetSingleton('SELECT MAX(TO_ID) FROM TESTOS'));
           os_size:=Sizeof(StatusLongintArray)*(1+os_last);
           os_count:=GetMem(os_size);
           FillChar(os_count^,os_size,#0);
@@ -2043,7 +2097,7 @@ begin
 
           DumpLn(Format('<p>Record count: %d </p>',[Q.RecordCount]));
           if RecordCount>0 then
-            RecNo:=0;
+            RecNo:=1;
 
           Try
            { if FDebug then
@@ -2067,7 +2121,7 @@ begin
           version_ind:=FieldByName('TV_ID').Index;
           date_ind:=FieldByName('Date').Index;
           run_ind:=FieldByName('TU_ID').Index;
-          For i:=0 to Q.RecordCount-1 do
+          For i:=1 to Q.RecordCount do
             begin
               Q.RecNo:=i;
               inc(total_count);
@@ -2317,7 +2371,7 @@ begin
           if total_count>0 then
             begin
               TableEnd;
-              RecNo:=0;
+              RecNo:=1;
             end;
           If FDebug or FListAll then
            begin

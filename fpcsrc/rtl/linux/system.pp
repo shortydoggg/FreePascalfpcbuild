@@ -33,16 +33,41 @@ Unit System;
 
 {$I sysunixh.inc}
 
-function get_cmdline:Pchar; 
+{$if defined(VER3_0) and defined(CPUX86_64)}
+{$define FPC_BOOTSTRAP_INDIRECT_ENTRY}
+const
+  { this constant only exists during bootstrapping of the RTL with FPC 3.0.x,
+    so that the whole condition doesn't need to be repeated in si_intf }
+  indirect_bootstrap = true;
+{$endif defined(VER3_0) and defined(CPUX86_64)}
+
+
+function get_cmdline:Pchar; deprecated 'use paramstr' ;
 property cmdline:Pchar read get_cmdline;
 
 {$if defined(CPUARM) or defined(CPUM68K) or (defined(CPUSPARC) and defined(VER2_6))}
+{$define FPC_LOAD_SOFTFPU}
+{$endif}
 
+{$ifdef FPC_SOFT_FPUX80}
+{$define FPC_SOFTFLOAT_FLOATX80}
+{$define LOAD_SOFTFPU}
+{$endif}
+
+{$ifdef FPC_SOFT_FPU128}
+{$define FPC_SOFTFLOAT_FLOAT128}
+{$define FPC_LOAD_SOFTFPU}
+{$endif}
+
+{$ifdef FPC_LOAD_SOFTFPU}
 {$define fpc_softfpu_interface}
 {$i softfpu.pp}
 {$undef fpc_softfpu_interface}
+{$endif FPC_LOAD_SOFTFPU}
 
-{$endif defined(CPUARM) or defined(CPUM68K) or (defined(CPUSPARC) and defined(VER2_6))}
+{$ifdef android}
+  {$I sysandroidh.inc}
+{$endif android}
 
 {*****************************************************************************}
                                  implementation
@@ -53,11 +78,20 @@ var
   sysenter_supported: LongInt = 0;
 {$endif}
 
-const calculated_cmdline:Pchar=nil;
+const 
+  calculated_cmdline:Pchar=nil;
+{$ifdef FPC_HAS_INDIRECT_ENTRY_INFORMATION}
+{$define FPC_SYSTEM_HAS_OSSETUPENTRYINFORMATION}
+procedure OsSetupEntryInformation(constref info: TEntryInformation); forward;
+{$endif FPC_HAS_INDIRECT_ENTRY_INFORMATION}
 
-{$if defined(CPUARM) or defined(CPUM68K) or (defined(CPUSPARC) and defined(VER2_6))}
+{$ifdef FPC_LOAD_SOFTFPU}
 
 {$define fpc_softfpu_implementation}
+{$if defined(CPUM68K)}
+{$define softfpu_compiler_mul32to64}
+{$define softfpu_inline}
+{$endif}
 {$i softfpu.pp}
 {$undef fpc_softfpu_implementation}
 
@@ -73,23 +107,74 @@ const calculated_cmdline:Pchar=nil;
 {$define FPC_SYSTEM_HAS_extractFloat32Exp}
 {$define FPC_SYSTEM_HAS_extractFloat32Sign}
 
-{$endif defined(CPUARM) or defined(CPUM68K) or (defined(CPUSPARC) and defined(VER2_6))}
+{$endif FPC_LOAD_SOFTFPU}
 
 {$I system.inc}
 
 {$ifdef android}
-{$I sysandroid.inc}
+  {$I sysandroid.inc}
 {$endif android}
 
 {*****************************************************************************
-                       Misc. System Dependent Functions
+                       Indirect Entry Point
 *****************************************************************************}
+
+{$ifdef FPC_HAS_INDIRECT_ENTRY_INFORMATION}
+var
+  initialstkptr : Pointer;
+
+procedure OsSetupEntryInformation(constref info: TEntryInformation);
+begin
+  argc := info.OS.argc;
+  argv := info.OS.argv;
+  envp := info.OS.envp;
+  initialstkptr := info.OS.stkptr;
+  initialstklen := info.OS.stklen;
+end;
+
+procedure SysEntry(constref info: TEntryInformation);[public,alias:'FPC_SysEntry'];
+begin
+  SetupEntryInformation(info);
+{$ifdef cpui386}
+  Set8087CW(Default8087CW);
+{$endif cpui386}
+  info.PascalMain();
+end;
+
+{$else}
+var
+{$ifndef FPC_BOOTSTRAP_INDIRECT_ENTRY}
+  initialstkptr : Pointer;external name '__stkptr';
+{$else FPC_BOOTSTRAP_INDIRECT_ENTRY}
+  initialstkptr : Pointer; public name '__stkptr';
+  operatingsystem_parameter_envp : Pointer; public name 'operatingsystem_parameter_envp';
+  operatingsystem_parameter_argc : LongInt; public name 'operatingsystem_parameter_argc';
+  operatingsystem_parameter_argv : Pointer; public name 'operatingsystem_parameter_argv';
+
+
+procedure SysEntry(constref info: TEntryInformation);[public,alias:'FPC_SysEntry'];
+begin
+  initialstkptr := info.OS.stkptr;
+  operatingsystem_parameter_envp := info.OS.envp;
+  operatingsystem_parameter_argc := info.OS.argc;
+  operatingsystem_parameter_argv := info.OS.argv;
+{$ifdef cpui386}
+  Set8087CW(Default8087CW);
+{$endif cpui386}
+  info.PascalMain();
+end;
+{$endif FPC_BOOTSTRAP_INDIRECT_ENTRY}
 
 {$if defined(CPUARM) and defined(FPC_ABI_EABI)}
 procedure haltproc(e:longint);cdecl;external name '_haltproc_eabi';
 {$else}
 procedure haltproc(e:longint);cdecl;external name '_haltproc';
 {$endif}
+{$endif FPC_HAS_INDIRECT_ENTRY_INFORMATION}
+
+{*****************************************************************************
+                       Misc. System Dependent Functions
+*****************************************************************************}
 
 {$ifdef FPC_USE_LIBC}
 function  FpPrCtl(options : cInt; const args : ptruint) : cint; cdecl; external clib name 'prctl';
@@ -97,7 +182,11 @@ function  FpPrCtl(options : cInt; const args : ptruint) : cint; cdecl; external 
 
 procedure System_exit;
 begin
+{$ifdef FPC_HAS_INDIRECT_ENTRY_INFORMATION}
+  EntryInformation.OS.haltproc(ExitCode);
+{$else FPC_HAS_INDIRECT_ENTRY_INFORMATION}
   haltproc(ExitCode);
+{$endif FPC_HAS_INDIRECT_ENTRY_INFORMATION}
 End;
 
 
@@ -157,17 +246,22 @@ var
   buf    : pchar;
 
   procedure AddBuf;
+  var
+    p : Pchar;
   begin
-    reallocmem(calculated_cmdline,size+bufsize);
-    move(buf^,calculated_cmdline[size],bufsize);
+    p:=SysGetmem(size+bufsize);
+    move(calculated_cmdline^,p^,size);
+    move(buf^,p[size],bufsize);
     inc(size,bufsize);
+    sysfreemem(calculated_cmdline);
+    calculated_cmdline:=p;
     bufsize:=0;
   end;
 
 begin
   if argc<=0 then
     exit;
-  GetMem(buf,ARG_MAX);
+  Buf:=SysGetMem(ARG_MAX);
   size:=0;
   bufsize:=0;
   i:=0;
@@ -209,7 +303,7 @@ begin
      inc(i);
    end;
   AddBuf;
-  FreeMem(buf,ARG_MAX);
+  SysFreeMem(buf);
 end;
 
 function get_cmdline:Pchar;
@@ -282,6 +376,9 @@ begin
   OpenStdIO(ErrOutput,fmOutput,StdErrorHandle);
   OpenStdIO(StdOut,fmOutput,StdOutputHandle);
   OpenStdIO(StdErr,fmOutput,StdErrorHandle);
+{$ifdef android}
+  InitStdIOAndroid;
+{$endif android}
 end;
 
 Procedure RestoreOldSignalHandlers;
@@ -317,6 +414,15 @@ function FpUGetRLimit(resource : cInt; rlim : PRLimit) : cInt; cdecl; external c
 {$endif}
 {$endif}
 
+{$if defined(CPUPOWERPC) or defined(CPUPOWERPC64)}
+const
+  page_size = $10000;
+  {$define LAST_PAGE_GENERATES_SIGNAL}
+{$else}
+const
+  page_size = $1000;
+{$endif}
+
 function CheckInitialStkLen(stklen : SizeUInt) : SizeUInt;
 var
   limits : TRLimit;
@@ -337,8 +443,6 @@ begin
     result := stklen;
 end;
 
-var
-  initialstkptr : Pointer;external name '__stkptr';
 begin
 {$if defined(i386) and not defined(FPC_USE_LIBC)}
   InitSyscallIntf;
@@ -353,7 +457,10 @@ begin
 {$endif}
   IsConsole := TRUE;
   StackLength := CheckInitialStkLen(initialStkLen);
-  StackBottom := initialstkptr - StackLength;
+  StackBottom := pointer((ptruint(initialstkptr) or (page_size - 1)) + 1 - StackLength);
+{$ifdef LAST_PAGE_GENERATES_SIGNAL}
+  StackBottom:=StackBottom + page_size;
+{$endif}
   { Set up signals handlers (may be needed by init code to test cpu features) }
   InstallSignals;
 {$if defined(cpui386) or defined(cpuarm)}
@@ -372,6 +479,11 @@ begin
   InOutRes:=0;
   { threading }
   InitSystemThreads;
+  { dynamic libraries }
+  InitSystemDynLibs;
+{$ifdef android}
+  InitAndroid;
+{$endif android}
   { restore original signal handlers in case this is a library }
   if IsLibrary then
     RestoreOldSignalHandlers;

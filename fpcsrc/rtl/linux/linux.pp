@@ -17,6 +17,8 @@
 **********************************************************************}
 unit Linux;
 
+{$i osdefs.inc}
+
 {$packrecords c}
 {$ifdef FPC_USE_LIBC} 
  {$linklib rt} // for clock* functions
@@ -27,6 +29,9 @@ interface
 uses
   BaseUnix, unixtype;
 
+Const
+  O_CLOEXEC = $80000;
+  
 type
   TSysInfo = record
     uptime: clong;                     //* Seconds since boot */
@@ -105,6 +110,7 @@ const
      wake UADDR2; }
 
 {$ifndef FPC_USE_LIBC}
+{$ifndef android}
 function futex(uaddr:Pcint;op,val:cint;timeout:Ptimespec;addr2:Pcint;val3:cint):cint;{$ifdef SYSTEMINLINE}inline;{$endif}
 function futex(var uaddr;op,val:cint;timeout:Ptimespec;var addr2;val3:cint):cint;{$ifdef SYSTEMINLINE}inline;{$endif}
 function futex(var uaddr;op,val:cint;var timeout:Ttimespec;var addr2;val3:cint):cint;{$ifdef SYSTEMINLINE}inline;{$endif}
@@ -112,6 +118,7 @@ function futex(var uaddr;op,val:cint;var timeout:Ttimespec;var addr2;val3:cint):
 function futex(uaddr:Pcint;op,val:cint;timeout:Ptimespec):cint;{$ifdef SYSTEMINLINE}inline;{$endif}
 function futex(var uaddr;op,val:cint;timeout:Ptimespec):cint;{$ifdef SYSTEMINLINE}inline;{$endif}
 function futex(var uaddr;op,val:cint;var timeout:Ttimespec):cint;{$ifdef SYSTEMINLINE}inline;{$endif}
+{$endif android}
 {$else}
 // futex is currently not exposed by glibc
 //function futex(uaddr:Pcint;op,val:cint;timeout:Ptimespec;addr2:Pcint;val3:cint):cint; cdecl; external name 'futex';
@@ -217,7 +224,7 @@ type
 function clone(func:TCloneFunc;sp:pointer;flags:longint;args:pointer):longint; {$ifdef FPC_USE_LIBC} cdecl; external name 'clone'; {$endif}
 {$endif}
 
-{$ifndef FPC_USE_LIBC}
+{$if not defined(FPC_USE_LIBC) and not defined(android)}
 {$if defined(cpui386) or defined(cpux86_64)}
 const
   MODIFY_LDT_CONTENTS_DATA       = 0;
@@ -263,7 +270,8 @@ type
   TEPoll_Data =  Epoll_Data;
   PEPoll_Data = ^Epoll_Data;
 
-  EPoll_Event = {$ifdef cpu64} packed {$endif} record
+  { x86_64 uses a packed record so it is compatible with i386 }
+  EPoll_Event = {$ifdef cpux86_64} packed {$endif} record
     Events: cuint32;
     Data  : TEpoll_Data;
   end;
@@ -333,6 +341,7 @@ const CAP_CHOWN            = 0;
 
 
 //***********************************************SPLICE from kernel 2.6.17+****************************************
+{$ifndef android}
 
 const
 {* Flags for SPLICE and VMSPLICE.  *}
@@ -354,7 +363,9 @@ function splice (fdin: cInt; offin: off64_t; fdout: cInt;
 function tee(fd_in: cInt; fd_out: cInt; len: size_t; flags: cuInt): cInt; {$ifdef FPC_USE_LIBC} cdecl; external name 'tee'; {$ENDIF}
 
 {$endif} // x86
+{$endif android}
 
+{$ifndef android}
 const
   { flags for sync_file_range }
   SYNC_FILE_RANGE_WAIT_BEFORE = 1;
@@ -362,6 +373,7 @@ const
   SYNC_FILE_RANGE_WAIT_AFTER  = 4;
 
 function sync_file_range(fd: cInt; offset, nbytes: off64_t; flags: cuInt): cInt; {$ifdef FPC_USE_LIBC} cdecl; external name 'sync_file_range'; {$ENDIF}
+{$endif android}
 function fdatasync (fd: cint): cint; {$ifdef FPC_USE_LIBC} cdecl; external name 'sync_file_range'; {$ENDIF}
 
 {$PACKRECORDS 1}
@@ -527,7 +539,11 @@ end;
 
 function epoll_create(size: cint): cint;
 begin
+{$if defined(generic_linux_syscalls)}
+  epoll_create := do_syscall(syscall_nr_epoll_create1,0)
+{$else}
   epoll_create := do_syscall(syscall_nr_epoll_create,tsysparam(size));
+{$endif}
 end;
 
 function epoll_ctl(epfd, op, fd: cint; event: pepoll_event): cint;
@@ -538,8 +554,13 @@ end;
 
 function epoll_wait(epfd: cint; events: pepoll_event; maxevents, timeout: cint): cint;
 begin
+{$if defined(generic_linux_syscalls)}
+  epoll_wait := do_syscall(syscall_nr_epoll_pwait, tsysparam(epfd),
+    tsysparam(events), tsysparam(maxevents), tsysparam(timeout),0,sizeof(TSigSet));
+{$else}
   epoll_wait := do_syscall(syscall_nr_epoll_wait, tsysparam(epfd),
     tsysparam(events), tsysparam(maxevents), tsysparam(timeout));
+{$endif}
 end;
 
 function capget(header:Puser_cap_header;data:Puser_cap_data):cint;
@@ -554,6 +575,7 @@ begin
   capset:=do_syscall(syscall_nr_capset,Tsysparam(header),Tsysparam(data));
 end;
 
+{$ifndef android}
 // TODO: update also on non x86!
 {$ifdef cpu86} // didn't update syscall_nr on others yet
 
@@ -598,10 +620,14 @@ begin
 {$endif}
 end;
 
+{$endif android}
+
 function fdatasync (fd: cint): cint;
 begin
   fdatasync:=do_SysCall(syscall_nr_fdatasync, fd);
 end;
+
+{$ifndef android}
 
 function futex(uaddr:Pcint;op,val:cint;timeout:Ptimespec;addr2:Pcint;val3:cint):cint;{$ifdef SYSTEMINLINE}inline;{$endif}
 
@@ -642,6 +668,8 @@ begin
   futex:=do_syscall(syscall_nr_futex,Tsysparam(@uaddr),Tsysparam(op),Tsysparam(val),Tsysparam(@timeout));
 end;
 
+{$endif android}
+
 {$else}
 
 {Libc case.}
@@ -666,7 +694,7 @@ end;
 *)
 {$endif} // non-libc
 
-{$ifndef FPC_USE_LIBC}
+{$if not defined(FPC_USE_LIBC) and not defined(android)}
 {$if defined(cpui386) or defined(cpux86_64)}
 { does not exist as a wrapper in glibc, and exists only for x86 }
 function modify_ldt(func:cint;p:pointer;bytecount:culong):cint;
@@ -695,7 +723,11 @@ end;
 function inotify_init1(flags:cint):cint;
 
 begin
+{$if defined(generic_linux_syscalls)}
+  inotify_init1:=do_SysCall(syscall_nr_inotify_init1,tsysparam(flags));
+{$else}
   inotify_init1:=do_SysCall(syscall_nr_inotify_init,tsysparam(flags));
+{$endif}
 end;
 
 function inotify_add_watch(fd:cint; name:Pchar; mask:cuint32):cint;

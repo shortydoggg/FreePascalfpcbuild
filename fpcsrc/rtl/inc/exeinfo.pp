@@ -16,6 +16,13 @@
   This unit should not be compiled in objfpc mode, since this would make it
   dependent on objpas unit.
 }
+
+{ Disable checks of pointers explictly,
+  as we are dealing here with special pointer that
+  might be seen as invalid by heaptrc unit CheckPointer function }
+
+{$checkpointer off}
+
 unit exeinfo;
 interface
 
@@ -29,11 +36,14 @@ type
     isopen    : boolean;
     nsects    : longint;
     sechdrofs,
-    secstrofs : ptruint;
-    processaddress : ptruint;
+    secstrofs : {$ifdef cpui8086}longword{$else}ptruint{$endif};
+    processaddress : {$ifdef cpui8086}word{$else}ptruint{$endif};
+{$ifdef cpui8086}
+    processsegment : word;
+{$endif cpui8086}
     FunctionRelative: boolean;
     // Offset of the binary image forming permanent offset to all retrieved values
-    ImgOffset: ptruint;
+    ImgOffset: {$ifdef cpui8086}longword{$else}ptruint{$endif};
     filename  : string;
     // Allocate static buffer for reading data
     buf       : array[0..4095] of byte;
@@ -46,14 +56,18 @@ function FindExeSection(var e:TExeFile;const secname:string;var secofs,seclen:lo
 function CloseExeFile(var e:TExeFile):boolean;
 function ReadDebugLink(var e:TExeFile;var dbgfn:string):boolean;
 
+{$ifdef CPUI8086}
+procedure GetModuleByAddr(addr: farpointer; var baseaddr: farpointer; var filename: string);
+{$else CPUI8086}
 procedure GetModuleByAddr(addr: pointer; var baseaddr: pointer; var filename: string);
+{$endif CPUI8086}
 
 implementation
 
 uses
   strings{$ifdef windows},windows{$endif windows};
 
-{$ifdef unix}
+{$if defined(unix) and not defined(beos) and not defined(haiku)}
 
   procedure GetModuleByAddr(addr: pointer; var baseaddr: pointer; var filename: string);
     begin
@@ -66,8 +80,7 @@ uses
         end;
     end;
 
-{$else unix}
-{$ifdef windows}
+{$elseif defined(windows)}
 
   var
     Tmm: TMemoryBasicInformation;
@@ -85,25 +98,88 @@ uses
         begin
           baseaddr:=Tmm.AllocationBase;
           TST[0]:= #0;
-          GetModuleFileName(THandle(Tmm.AllocationBase), TST, Length(TST));
+          if baseaddr <> nil then
+            begin
+              GetModuleFileName(THandle(Tmm.AllocationBase), TST, Length(TST));
 {$ifdef FPC_OS_UNICODE}
-          filename:= String(PWideChar(@TST));
+              filename:= String(PWideChar(@TST));
 {$else}
-          filename:= String(PChar(@TST));
+              filename:= String(PChar(@TST));
 {$endif FPC_OS_UNICODE}
+            end;
         end;
     end;
 
-{$else windows}
+{$elseif defined(morphos)}
+
+  procedure startsymbol; external name '_start';
 
   procedure GetModuleByAddr(addr: pointer; var baseaddr: pointer; var filename: string);
     begin
-      baseaddr:= nil;
+      baseaddr:= @startsymbol;
+{$ifdef FPC_HAS_FEATURE_COMMANDARGS}
+      filename:=ParamStr(0);
+{$else FPC_HAS_FEATURE_COMMANDARGS}
+      filename:='';
+{$endif FPC_HAS_FEATURE_COMMANDARGS}
+    end;
+
+{$elseif defined(msdos)}
+
+  procedure GetModuleByAddr(addr: farpointer; var baseaddr: farpointer; var filename: string);
+    begin
+      baseaddr:=Ptr(PrefixSeg+16,0);
       filename:=ParamStr(0);
     end;
 
-{$endif windows}
-{$endif unix}
+{$elseif defined(beos) or defined(haiku)}
+
+{$i ptypes.inc}
+{$i ostypes.inc}
+
+  function get_next_image_info(team: team_id; var cookie:longint; var info:image_info; size: size_t) : status_t;cdecl; external 'root' name '_get_next_image_info';
+
+  procedure GetModuleByAddr(addr: pointer; var baseaddr: pointer; var filename: string);
+    const
+      B_OK = 0;
+    var
+      cookie    : longint;
+      info      : image_info;
+    begin
+      filename:='';
+      baseaddr:=nil;
+
+      cookie:=0;
+      fillchar(info, sizeof(image_info), 0);
+
+      while get_next_image_info(0,cookie,info,sizeof(info))=B_OK do
+        begin
+          if (info._type = B_APP_IMAGE) and
+             (addr >= info.text) and (addr <= (info.text + info.text_size)) then
+            begin
+              baseaddr:=info.text;
+              filename:=PChar(@info.name);
+            end;
+        end;
+    end;
+
+{$else}
+
+{$ifdef CPUI8086}
+  procedure GetModuleByAddr(addr: farpointer; var baseaddr: farpointer; var filename: string);
+{$else CPUI8086}
+  procedure GetModuleByAddr(addr: pointer; var baseaddr: pointer; var filename: string);
+{$endif CPUI8086}
+    begin
+      baseaddr:= nil;
+{$ifdef FPC_HAS_FEATURE_COMMANDARGS}
+      filename:=ParamStr(0);
+{$else FPC_HAS_FEATURE_COMMANDARGS}
+      filename:='';
+{$endif FPC_HAS_FEATURE_COMMANDARGS}
+    end;
+
+{$endif}
 
 {****************************************************************************
                              Executable Loaders
@@ -112,9 +188,27 @@ uses
 {$if defined(freebsd) or defined(netbsd) or defined (openbsd) or defined(linux) or defined(sunos) or defined(android) or defined(dragonfly)}
   {$ifdef cpu64}
     {$define ELF64}
+    {$define FIND_BASEADDR_ELF}
+  {$else}
+    {$define ELF32}
+    {$define FIND_BASEADDR_ELF}
+  {$endif}
+{$endif}
+
+{$if defined(beos) or defined(haiku)}
+  {$ifdef cpu64}
+    {$define ELF64}
   {$else}
     {$define ELF32}
   {$endif}
+{$endif}
+
+{$if defined(morphos)}
+  {$define ELF32}
+{$endif}
+
+{$if defined(msdos)}
+  {$define ELF32}
 {$endif}
 
 {$if defined(win32) or defined(wince)}
@@ -138,7 +232,7 @@ uses
                               DOS Stub
 ****************************************************************************}
 
-{$if defined(EMX) or defined(PE32) or defined(PE32PLUS) or defined(GO32V2)}
+{$if defined(EMX) or defined(PE32) or defined(PE32PLUS) or defined(GO32V2) or defined(MSDOS)}
 type
   tdosheader = packed record
      e_magic : word;
@@ -180,7 +274,7 @@ function getByte(var f:file):byte;
   begin
     for i := 1 to bytes do getbyte(f);
   end;
-  
+
   function get0String (var f:file) : string;
   var c : char;
   begin
@@ -192,7 +286,7 @@ function getByte(var f:file):byte;
       c := char (getbyte(f));
     end;
   end;
-  
+
   function getint32 (var f:file): longint;
   begin
     blockread (F, getint32, 4);
@@ -209,7 +303,7 @@ var valid : boolean;
     hdrLength,
     dataOffset,
     dataLength : longint;
-  
+
 
   function getLString : String;
   var Res:string;
@@ -235,12 +329,12 @@ var valid : boolean;
     blockread (e.F, getword, 2);
   end;
 
-  
+
 
 begin
   e.sechdrofs := 0;
   openNetwareNLM:=false;
-  
+
   // read and check header
   Skip (e.f,SIZE_OF_NLM_INTERNAL_FIXED_HEADER);
   getLString;  // NLM Description
@@ -694,7 +788,7 @@ end;
                                  ELF
 ****************************************************************************}
 
-{$if defined(ELF32) or defined(BEOS)}
+{$if defined(ELF32)}
 type
   telfheader=packed record
       magic0123         : longint;
@@ -738,7 +832,7 @@ type
     p_flags           : longword;
     p_align           : longword;
   end;
-{$endif ELF32 or BEOS}
+{$endif ELF32}
 {$ifdef ELF64}
 type
   telfheader=packed record
@@ -788,33 +882,167 @@ type
 {$endif ELF64}
 
 
-{$if defined(ELF32) or defined(ELF64) or defined(BEOS)}
+{$if defined(ELF32) or defined(ELF64)}
+
+{$ifdef FIND_BASEADDR_ELF}
+var
+  LocalJmpBuf : Jmp_Buf;
+procedure LocalError;
+begin
+  Longjmp(LocalJmpBuf,1);
+end;
+
+procedure GetExeInMemoryBaseAddr(addr : pointer; var BaseAddr : pointer;
+                                 var filename : openstring);
+type
+  AT_HDR = record
+    typ : ptruint;
+    value : ptruint;
+  end;
+  P_AT_HDR = ^AT_HDR;
+
+{ Values taken from /usr/include/linux/auxvec.h }
+const
+  AT_HDR_COUNT = 5;{ AT_PHNUM }
+  AT_HDR_SIZE = 4; { AT_PHENT }
+  AT_HDR_Addr = 3; { AT_PHDR }
+  AT_EXE_FN = 31;  {AT_EXECFN }
+
+var
+  pc : ppchar;
+  pat_hdr : P_AT_HDR;
+  i, phdr_count : ptrint;
+  phdr_size : ptruint;
+  phdr :  ^telfproghdr;
+  found_addr : ptruint;
+  SavedExitProc : pointer;
+begin
+  filename:=ParamStr(0);
+  SavedExitProc:=ExitProc;
+  ExitProc:=@LocalError;
+  if SetJmp(LocalJmpBuf)=0 then
+  begin
+  { Try, avoided in order to remove exception installation }
+    pc:=envp;
+    phdr_count:=-1;
+    phdr_size:=0;
+    phdr:=nil;
+    found_addr:=ptruint(-1);
+    while (assigned(pc^)) do
+      inc (pointer(pc), sizeof(ptruint));
+    inc(pointer(pc), sizeof(ptruint));
+    pat_hdr:=P_AT_HDR(pc);
+    while assigned(pat_hdr) do
+      begin
+        if (pat_hdr^.typ=0) and (pat_hdr^.value=0) then
+          break;
+        if pat_hdr^.typ = AT_HDR_COUNT then
+          phdr_count:=pat_hdr^.value;
+        if pat_hdr^.typ = AT_HDR_SIZE then
+          phdr_size:=pat_hdr^.value;
+        if pat_hdr^.typ = AT_HDR_Addr then
+          phdr := pointer(pat_hdr^.value);
+        if pat_hdr^.typ = AT_EXE_FN then
+          filename:=strpas(pchar(pat_hdr^.value));
+        inc (pointer(pat_hdr),sizeof(AT_HDR));
+      end;
+    if (phdr_count>0) and (phdr_size = sizeof (telfproghdr))
+       and  assigned(phdr) then
+      begin
+        for i:=0 to phdr_count -1 do
+          begin
+            if (phdr^.p_type = 1 {PT_LOAD}) and (ptruint(phdr^.p_vaddr) < found_addr) then
+              found_addr:=phdr^.p_vaddr;
+            inc(pointer(phdr), phdr_size);
+          end;
+      {$ifdef DEBUG_LINEINFO}
+      end
+    else
+      begin
+        if (phdr_count=-1) then
+           writeln(stderr,'AUX entry AT_PHNUM not found');
+        if (phdr_size=0) then
+           writeln(stderr,'AUX entry AT_PHENT not found');
+        if (phdr=nil) then
+           writeln(stderr,'AUX entry AT_PHDR not found');
+      {$endif DEBUG_LINEINFO}
+      end;
+
+     if found_addr<>ptruint(-1) then
+       begin
+          {$ifdef DEBUG_LINEINFO}
+          Writeln(stderr,'Found addr = $',hexstr(found_addr,2 * sizeof(ptruint)));
+          {$endif}
+          BaseAddr:=pointer(found_addr);
+       end
+  {$ifdef DEBUG_LINEINFO}
+     else
+    writeln(stderr,'Error parsing stack');
+  {$endif DEBUG_LINEINFO}
+  end
+  else
+  begin
+  {$ifdef DEBUG_LINEINFO}
+    writeln(stderr,'Exception parsing stack');
+  {$endif DEBUG_LINEINFO}
+  end;
+  ExitProc:=SavedExitProc;
+end;
+{$endif FIND_BASEADDR_ELF}
+
 function OpenElf(var e:TExeFile):boolean;
+{$ifdef MSDOS}
+const
+  ParagraphSize = 512;
+{$endif MSDOS}
 var
   elfheader : telfheader;
   elfsec    : telfsechdr;
   phdr      : telfproghdr;
   i         : longint;
+{$ifdef MSDOS}
+  DosHeader : tdosheader;
+  BRead     : cardinal;
+{$endif MSDOS}
 begin
   OpenElf:=false;
+{$ifdef MSDOS}
   { read and check header }
-  if e.size<sizeof(telfheader) then
+  if E.Size < SizeOf (DosHeader) then
+   Exit;
+  BlockRead (E.F, DosHeader, SizeOf (DosHeader), BRead);
+  if BRead <> SizeOf (DosHeader) then
+   Exit;
+  if DosHeader.E_Magic = $5A4D then
+  begin
+   E.ImgOffset := LongWord(DosHeader.e_cp) * ParagraphSize;
+   if DosHeader.e_cblp > 0 then
+    E.ImgOffset := E.ImgOffset + DosHeader.e_cblp - ParagraphSize;
+  end;
+{$endif MSDOS}
+  { read and check header }
+  if e.size<(sizeof(telfheader)+e.ImgOffset) then
    exit;
+  seek(e.f,e.ImgOffset);
   blockread(e.f,elfheader,sizeof(telfheader));
  if elfheader.magic0123<>{$ifdef ENDIAN_LITTLE}$464c457f{$else}$7f454c46{$endif} then
    exit;
   if elfheader.e_shentsize<>sizeof(telfsechdr) then
    exit;
   { read section names }
-  seek(e.f,elfheader.e_shoff+elfheader.e_shstrndx*cardinal(sizeof(telfsechdr)));
+  seek(e.f,e.ImgOffset+elfheader.e_shoff+elfheader.e_shstrndx*cardinal(sizeof(telfsechdr)));
   blockread(e.f,elfsec,sizeof(telfsechdr));
   e.secstrofs:=elfsec.sh_offset;
   e.sechdrofs:=elfheader.e_shoff;
   e.nsects:=elfheader.e_shnum;
 
+{$ifdef MSDOS}
+  { e.processaddress is already initialized to 0 }
+  e.processsegment:=PrefixSeg+16;
+{$else MSDOS}
   { scan program headers to find the image base address }
   e.processaddress:=High(e.processaddress);
-  seek(e.f,elfheader.e_phoff);
+  seek(e.f,e.ImgOffset+elfheader.e_phoff);
   for i:=1 to elfheader.e_phnum do
     begin
       blockread(e.f,phdr,sizeof(phdr));
@@ -824,6 +1052,7 @@ begin
 
   if e.processaddress = High(e.processaddress) then
     e.processaddress:=0;
+{$endif MSDOS}
 
   OpenElf:=true;
 end;
@@ -838,94 +1067,26 @@ var
   bufsize,i  : longint;
 begin
   FindSectionElf:=false;
-  seek(e.f,e.sechdrofs);
+  seek(e.f,e.ImgOffset+e.sechdrofs);
   for i:=1 to e.nsects do
    begin
      blockread(e.f,elfsec,sizeof(telfsechdr));
      fillchar(secnamebuf,sizeof(secnamebuf),0);
      oldofs:=filepos(e.f);
-     seek(e.f,e.secstrofs+elfsec.sh_name);
+     seek(e.f,e.ImgOffset+e.secstrofs+elfsec.sh_name);
      blockread(e.f,secnamebuf,sizeof(secnamebuf)-1,bufsize);
      seek(e.f,oldofs);
      secname:=strpas(secnamebuf);
      if asecname=secname then
        begin
-         secofs:=elfsec.sh_offset;
+         secofs:=e.ImgOffset+elfsec.sh_offset;
          seclen:=elfsec.sh_size;
          FindSectionElf:=true;
          exit;
        end;
    end;
 end;
-{$endif ELF32 or ELF64 or BEOS}
-
-
-{$ifdef beos}
-
-{$i ptypes.inc}
-
-type
-  // Descriptive formats
-  status_t = Longint;
-  team_id   = Longint;
-  image_id = Longint;
-
-    { image types }
-const
-   B_APP_IMAGE     = 1;
-   B_LIBRARY_IMAGE = 2;
-   B_ADD_ON_IMAGE  = 3;
-   B_SYSTEM_IMAGE  = 4;
-   B_OK = 0;
-   
-type
-    image_info = packed record
-     id      : image_id;
-     _type   : longint;
-     sequence: longint;
-     init_order: longint;
-     init_routine: pointer;
-     term_routine: pointer;
-     device: dev_t;
-     node: ino_t;
-     name: array[0..MAXPATHLEN-1] of char;
-{     name: string[255];
-     name2: string[255];
-     name3: string[255];
-     name4: string[255];
-     name5: string[5];
-}
-     text: pointer;
-     data: pointer;
-     text_size: longint;
-     data_size: longint;
-    end;
-
-function get_next_image_info(team: team_id; var cookie:longint; var info:image_info; size: size_t) : status_t;cdecl; external 'root' name '_get_next_image_info';
-
-function OpenElf32Beos(var e:TExeFile):boolean;
-var
-  cookie    : longint;
-  info      : image_info;
-begin
-  // The only BeOS specific part is setting the processaddress
-  cookie := 0;
-  OpenElf32Beos:=false;
-  fillchar(info, sizeof(image_info), 0);
-  while get_next_image_info(0,cookie,info,sizeof(info))=B_OK do
-    begin
-        if e.filename=String(pchar(@info.name)) then
-          begin
-              if (info._type = B_APP_IMAGE) then
-                e.processaddress := cardinal(info.text)
-             else
-                e.processaddress := 0;
-             OpenElf32Beos := OpenElf(e);
-             exit;
-         end;
-    end;
-end;
-{$endif beos}
+{$endif ELF32 or ELF64}
 
 
 {****************************************************************************
@@ -1094,10 +1255,6 @@ const
      openproc : @OpenElf;
      findproc : @FindSectionElf;
 {$endif ELF32 or ELF64}
-{$ifdef BEOS}
-     openproc : @OpenElf32Beos;
-     findproc : @FindSectionElf;
-{$endif BEOS}
 {$ifdef darwin}
      openproc : @OpenMachO32PPC;
      findproc : @FindSectionMachO32PPC;
@@ -1236,4 +1393,8 @@ begin
 end;
 
 
+begin
+{$ifdef FIND_BASEADDR_ELF}
+  UnixGetModuleByAddrHook:=@GetExeInMemoryBaseAddr;
+{$endif FIND_BASEADDR_ELF}
 end.

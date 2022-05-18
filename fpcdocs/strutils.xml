@@ -21,8 +21,7 @@
 <element name="AnsiResemblesText">
 <short>Check whether 2 strings resemble each other.</short>
 <descr>
-<var>AnsiResemblesText</var>
- will check whether <link id="AnsiResemblesProc"/> is set. 
+<var>AnsiResemblesText</var> will check whether <link id="AnsiResemblesProc"/> is set. 
 If it is not set, <var>False</var> is returned. If it is set, <var>AText</var> and <var>AOtherText</var> are passed to it and it's result is returned.</descr>
 <errors>None.</errors>
 <seealso>
@@ -267,42 +266,26 @@ The strings are matched ignoring case.
 
 <element name="AnsiMatchText.Result">
 <short>
-<var>True</var>
-
-  if the value appears in the array, <var>False</var>  if not.</short>
-<descr/>
-<errors/>
-<seealso/>
+<var>True</var> if the value appears in the array, <var>False</var>  if not.</short>
 </element>
 
 
 <element name="AnsiMatchText.AText">
 <short>String to check for</short>
-<descr/>
-<errors/>
-<seealso/>
 </element>
 
 
 <element name="AnsiMatchText.AValues">
 <short>Array of string values to search in</short>
-<descr/>
-<errors/>
-<seealso/>
 </element>
 
 
 <element name="AnsiIndexText">
 <short>Searches, case insensitive, for a string in an array of strings.</short>
 <descr>
-<var>AnsiIndexStr</var>
- matches <var>AText</var>
- against each string in <var>AValues</var>
-. 
-If a match is found, the corresponding index (zero-based) in the <var>AValues</var>
- array is returned. 
-If no match is found, -1 is returned.
-The strings are matched ignoring case.</descr>
+<var>AnsiIndexText</var>  matches <var>AText</var>  against each string in <var>AValues</var>. 
+If a match is found, the corresponding index (zero-based) in the <var>AValues</var>  array is returned. 
+If no match is found, -1 is returned. The strings are matched ignoring case.</descr>
 <errors>None</errors>
 <seealso>
 <link id="AnsiIndexStr"/>
@@ -316,25 +299,16 @@ The strings are matched ignoring case.</descr>
 
 <element name="AnsiIndexText.Result">
 <short>Index of the matching element in the array, otherwise -1.</short>
-<descr/>
-<errors/>
-<seealso/>
 </element>
 
 
 <element name="AnsiIndexText.AText">
 <short>String to search for</short>
-<descr/>
-<errors/>
-<seealso/>
 </element>
 
 
 <element name="AnsiIndexText.AValues">
 <short>Array of strings to search in.</short>
-<descr/>
-<errors/>
-<seealso/>
 </element>
 
 
@@ -2197,7 +2171,7 @@ The standard routine compares the soundexes of the two strings and returns <var>
 
 
 <element name="IsEmptyStr">
-<short>Check whether a string is empty, disregaring whitespace characters</short>
+<short>Check whether a string is empty, disregarding whitespace characters</short>
 <descr>
 <var>IsEmptyStr</var>
  returns <var>True</var> if the string <var>S</var> only contains characters whitespace characters, all characters in <var>EmptyChars</var> are considered whitespace characters. 
@@ -2354,7 +2328,7 @@ If a character not present in <var>EmptyChars</var> is found in <var>S</var>, <v
 
 
 <element name="Tab2Space.Result">
-<short>Strng with tab characters replaced</short>
+<short>String with tab characters replaced</short>
 <descr/>
 <errors/>
 <seealso/>
@@ -2524,7 +2498,7 @@ The resulting string can be thought of as a left-aligned version of <var>S</var>
 <descr>
 <var>PadLeft</var> add spaces to the left of the string <var>S</var>
 till the result reaches length <var>Len</var>. If the string <var>S</var>
-has length equal to or largert than <var>Len</var>, no spaces are added, and
+has length equal to or larger than <var>Len</var>, no spaces are added, and
 the string <var>S</var> is returned as-is. The resulting string is <var>S</var>,
 right-justified on length <var>Len</var>.</descr>
 <errors>None.</errors>
@@ -2565,8 +2539,8 @@ right-justified on length <var>Len</var>.</descr>
 <short>Add spaces to the right of a string till a certain length is reached.</short>
 <descr>
 <var>PadRight</var>
- add spaces to the left of the string <var>S</var> till the result reaches length <var>Len</var>.
-If the string <var>S</var> has length equal to or largert than <var>Len</var>, no spaces are added, and the string <var>S</var> is returned as-is.
+ add spaces to the right of the string <var>S</var> till the result reaches length <var>Len</var>.
+If the string <var>S</var> has length equal to or larger than <var>Len</var>, no spaces are added, and the string <var>S</var> is returned as-is.
 The resulting string is <var>S</var>, left-justified on length <var>Len</var>.</descr>
 <errors>None.</errors>
 <seealso>
@@ -2608,7 +2582,7 @@ The resulting string is <var>S</var>, left-justified on length <var>Len</var>.</
 <var>PadCenter</var>
  add spaces to the left and right of the string <var>S</var> till the result reaches length <var>Len</var>. 
 If the number of spaces to add is odd, then the extra space will be added at the end.
-If the string <var>S</var> has length equal to or largert than <var>Len</var>, no spaces are added, and the string <var>S</var> is returned as-is.</descr>
+If the string <var>S</var> has length equal to or larger than <var>Len</var>, no spaces are added, and the string <var>S</var> is returned as-is.</descr>
 <errors>None.</errors>
 <seealso>
 <link id="PadLeft"/>
@@ -2845,7 +2819,7 @@ The constant <link id="StdWordDelims"/> can be used for this.</descr>
  returns the number of words in the string <var>S</var>. 
 A word is a non-empty string of characters bounded by one of the characters in <var>WordDelims</var>.
 </p>
-<p>The pre-defined <link id="StdWordDelims"/> constant can be used for the <var>WordDelims</var> argument.
+<p>The predefined <link id="StdWordDelims"/> constant can be used for the <var>WordDelims</var> argument.
 </p>
 </descr>
 <errors>None.</errors>
@@ -2891,7 +2865,7 @@ A word is a non-empty string of characters bounded by one of the characters in <
 A word is a non-empty string of characters bounded by one of the characters in <var>WordDelims</var>.
 If <var>N</var>  is out of range, zero is returned.
 </p>
-<p>The pre-defined <link id="StdWordDelims"/> constant can be used for the <var>WordDelims</var> argument.
+<p>The predefined <link id="StdWordDelims"/> constant can be used for the <var>WordDelims</var> argument.
 </p>
 </descr>
 <errors>None</errors>
@@ -2950,7 +2924,7 @@ If an <var>N</var>-th word cannot be found, an empty string is returned.
 <p>Unlike <link id="ExtractDelimited"/>, an empty string is not a valid return value, i.e. is not a word. 
 If an empty string is returned, the index <var>N</var> was out of range.
 </p>
-<p>The pre-defined constant <link id="StdWordDelims"/> can be used for the <var>WordDelims</var> argument.
+<p>The predefined constant <link id="StdWordDelims"/> can be used for the <var>WordDelims</var> argument.
 </p>
 </descr>
 <errors>None.</errors>
@@ -3016,7 +2990,7 @@ If an <var>N</var>
 <p>Unlike <link id="ExtractDelimited"/>, an empty string is not a valid return value, i.e. is not a word. 
 If an empty string is returned, the index <var>N</var> was out of range. 
 </p>
-<p>The pre-defined constant <link id="StdWordDelims"/> can be used for the <var>WordDelims</var> argument.
+<p>The predefined constant <link id="StdWordDelims"/> can be used for the <var>WordDelims</var> argument.
 </p>
 </descr>
 <errors>None.</errors>
@@ -3084,8 +3058,8 @@ This means that if 2 delimiter characters appear next to each other, there is an
 If an <var>N</var>-th part cannot be found, an empty string is returned. However,
 unlike <link id="ExtractWord"/>, an empty string is a valid return value, i.e. a part can be empty.
 </p>
-<p>The pre-defined constant <link id="StdWordDelims"/> can be used for the <var>Delims</var> argument.
-The pre-defined constant <link id="Brackets"/> would be better suited the <var>Delims</var> argument 
+<p>The predefined constant <link id="StdWordDelims"/> can be used for the <var>Delims</var> argument.
+The predefined constant <link id="Brackets"/> would be better suited the <var>Delims</var> argument 
 e.g. in case factors in a  mathematical expression are searched.
 </p>
 </descr>
@@ -3141,7 +3115,7 @@ The delimiter character is not included in the result.
 <var>Pos</var> is then updated to point to the next first non-delimiter character in <var>S</var>.
 If <var>Pos</var> is larger than the Length of <var>S</var>, an empty string is returned.
 </p>
-<p>The pre-defined constant <link id="StdWordDelims"/> can be used for the <var>Delims</var> argument.
+<p>The predefined constant <link id="StdWordDelims"/> can be used for the <var>Delims</var> argument.
 </p>
 </descr>
 <errors>None.</errors>
@@ -3413,7 +3387,7 @@ which will representing each resulting ASCII code as a hexadecimal number (of le
 
 
 <element name="XorEncode.Source">
-<short>String ro encode.</short>
+<short>String to encode.</short>
 <descr/>
 <errors/>
 <seealso/>
@@ -4135,7 +4109,7 @@ to decide how to react to invalid roman numerals.
 </p>
 <dl>
 <dt>rcsStrict</dt>
-<dd>Strict adherance to roman numerals. 
+<dd>Strict adherence to roman numerals. 
 Up to 3 consecutive identical letters. No negative numbers. Ordering must be correct.
 </dd>
 <dt>rcsRelaxed</dt>
@@ -4211,7 +4185,7 @@ If the conversion fails, <var>ADefault</var> is returned.
 <short>Check whether a string occurs in an array of strings, observing case.</short>
 <descr>
 <p>
-<var>MatchStr</var>  matches <var>AText</var> against each unicode string in <var>AValues</var>. 
+<var>MatchStr</var>  matches <var>AText</var> against each Unicode string in <var>AValues</var>. 
 If a match is found, it returns <var>True</var>, otherwise <var>False</var> is returned.
 The strings are matched observing case. 
 </p>
@@ -4228,7 +4202,7 @@ The strings are matched observing case.
 <element name="IndexStr">
 <short>Searches, observing case, for a string in an array of strings.</short>
 <descr>
-<var>IndexStr</var> matches <var>AText</var> against each unicode string in <var>AValues</var>. 
+<var>IndexStr</var> matches <var>AText</var> against each Unicode string in <var>AValues</var>. 
 If a match is found, the corresponding index (zero-based) in the <var>AValues</var> array is returned. 
 If no match is found, -1 is returned. The strings are matched observing case.
 </descr>
@@ -4297,7 +4271,7 @@ None.
 </errors>
 <seealso>
 <link id="FindMatchesBoyerMooreCaseInSensitive"/>
-<link id="SringReplace"/>
+<link id="StringReplace"/>
 </seealso>
 </element>
 
@@ -4317,7 +4291,7 @@ None.
 </errors>
 <seealso>
 <link id="FindMatchesBoyerMooreCaseSensitive"/>
-<link id="SringReplace"/>
+<link id="StringReplace"/>
 </seealso>
 </element>
 
@@ -4366,7 +4340,7 @@ these algorithms may produce faster results.
 <var>StringReplace</var> replaces one or all occurrences of
 <var>OldPattern</var> with <var>NewPattern</var> in the string <var>S</var>.
 The behaviour is controlled by <var>Flags</var> and the search mechanism may be
-optimized usin <var>Algorithm</var>. A list of possible algorithms is
+optimized using <var>Algorithm</var>. A list of possible algorithms is
 specified in <link id="TStringReplaceAlgorithm"/>.
 </p>
 <p>
@@ -4380,6 +4354,200 @@ None.
 <seealso>
 <link id="#rtl.sysutils.stringreplace">SysUtils.StringReplace</link>
 <link id="TStringReplaceAlgorithm"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="StartsText">
+<short>Check whether one text starts with another</short>
+<descr>
+<var>StarsText</var> checks whether <var>aText</var> starts with <var>aSubText</var>  and returns <var>True</var> if it does. 
+i.e. it returns true if the first characters of <var>aText</var> are <var>aSubText</var>. 
+It follows that the length of <var>aText</var> must be at least the length of <var>aSubText</var>.
+The comparison is made case-insensitive. If you wish to compare case-sensitively, use <link id="StartsStr"/> instead.
+</descr>
+<seealso>
+<link id="AnsiStartsText"/>
+<link id="EndsText"/>
+<link id="StartsStr"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="EndsText">
+<short>Check whether one text ends with another</short>
+<descr>
+<var>StarsText</var> checks whether <var>aText</var> ends with <var>aSubText</var>  and returns <var>True</var> if it does. 
+i.e. it returns true if the last characters of <var>aText</var> are <var>aSubText</var>. 
+It follows that the length of <var>aText</var> must be at least the length of <var>aSubText</var>.
+The comparison is made case-insensitive. If you wish to compare case-sensitively, use <link id="EndsStr"/> instead.
+</descr>
+<seealso>
+<link id="AnsiEndsStr"/>
+<link id="EndsStr"/>
+<link id="StartsText"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="StartsStr">
+<short>Check whether one string starts with another</short>
+<descr>
+<var>StarsText</var> checks whether <var>aText</var> starts with <var>aSubText</var>  and returns <var>True</var> if it does. 
+i.e. it returns true if the first characters of <var>aText</var> are <var>aSubText</var>. 
+It follows that the length of <var>aText</var> must be at least the length of <var>aSubText</var>.
+The comparison is made case-sensitive. If you wish to compare case-insentively, use <link id="StartsText"/> instead.
+</descr>
+<seealso>
+<link id="AnsiStartsStr"/>
+<link id="EndsStr"/>
+<link id="StartsText"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="EndsStr">
+<short>Check whether one string ends with another</short>
+<descr>
+<var>StarsText</var> checks whether <var>aText</var> ends with <var>aSubText</var>  and returns <var>True</var> if it does. 
+i.e. it returns true if the last characters of <var>aText</var> are <var>aSubText</var>. 
+It follows that the length of <var>aText</var> must be at least the length of <var>aSubText</var>.
+The comparison is made case-sensitive. If you wish to compare case-insensitively, use <link id="EndsText"/> instead.
+</descr>
+<seealso>
+<link id="AnsiEndsStr"/>
+<link id="EndsText"/>
+<link id="StartsText"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="MatchText">
+<short>Check if a string is in a list of values</short>
+<descr>
+<var>MatchText</var> returns <var>True</var> if <var>aText</var> equals one of the strings in <var>aValues</var>. 
+The comparison is done case insensitively. If you wish to compare case sensitively, use <link id="MatchStr"/> instead.
+</descr>
+<seealso>
+<link id="MatchStr"/> 
+<link id="AnsiMatchText"/> 
+<link id="IndexText"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="IndexText">
+<short>Index of text in a list of values</short>
+<descr>
+<var>MatchText</var> returns the index of  the string in the array <var>aValues</var> that matches <var>aText</var>.
+The comparison is done case insensitively. If you wish to compare case sensitively, use <link id="IndexStr"/> instead.
+</descr>
+<seealso>
+<link id="IndexStr"/> 
+<link id="MatchText"/> 
+<link id="AnsiIndexText"/> 
+</seealso>
+</element>
+
+<!-- operator Visibility: default -->
+<element name="in(string,):Boolean">
+<short>Check presence of string in an array of strings</short>
+<descr>
+This is the (string) operator equivalent of <link id="IndexStr"/>
+</descr>
+<seealso>
+<link id="IndexStr"/>
+</seealso>
+</element>
+
+<!-- operator Visibility: default -->
+<element name="in(UnicodeString,):Boolean">
+<short>Check presence of string in an array of strings</short>
+<descr>
+This is the (unicode string) operator equivalent of <link id="IndexStr"/>
+</descr>
+<seealso>
+<link id="IndexStr"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="Hex2Dec64">
+<short>Convert hexadecimal value to 64-bit integer</short>
+<descr>
+<var>Hex2Dec64</var> converts the hexadecimal number in S to a 64-bit value and returns the result. 
+It is equivalent  to <var>StrToInt('$'+S)</var>.
+</descr>
+<seealso>
+<link id="Hex2Dec"/>
+</seealso>
+</element>
+
+<!-- uses unit Visibility: default -->
+<element name="Types">
+<short>Basic types</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="ResemblesText">
+<short>Check whether 2 strings resemble each other</short>
+<descr>
+<var>ResemblesText</var> is an alias for <link id="AnsiResemblesText"/>
+</descr>
+<seealso>
+<link id="AnsiResemblesText"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="ContainsText">
+<short>Check whether one text contains another (case insensitive)</short>
+<descr>
+<var>ContainsText</var> is an alias for <link id="AnsiContainsText"/>
+</descr>
+<seealso>
+<link id="AnsiContainsText"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="ContainsStr">
+<short>Check whether one text contains another (case sensitive)</short>
+<descr>
+<var>ContainsStr</var> is an alias for <link id="AnsiContainsStr"/>
+</descr>
+<seealso>
+<link id="AnsiContainsStr"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="SplitString">
+<short>Split a string in words</short>
+<descr>
+<p>
+<var>SplitString</var> will split the string (<var>S</var>) using the characters in <var>Delimiters</var> as separator characters. 
+The result contains all words separated by one of the characters in  <var>Delimiters</var>.
+</p>
+<p>
+This function is a simplified wrapper around <link id="TStringHelper.Split"/>.
+</p>
+</descr>
+<seealso>
+<link id="TStringHelper.Split"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="ResemblesProc">
+<short>Callback to compute string soundex</short>
+<descr>
+<var>ResemblesProc</var> is a procedure variable which can be set to compare 2 string.
+It is similar to <link id="AnsiResemblesProc"/>, and by default is set to the <link id="SoundExProc"/> function.
+</descr>
+<seealso>
+<link id="SoundExProc"/>
+<link id="AnsiResemblesProc"/>
 </seealso>
 </element>
 

@@ -38,6 +38,12 @@ implementation
     {$ifndef NOTARGETMSDOS}
       ,t_msdos
     {$endif}
+    {$ifndef NOTARGETWIN}
+      ,t_win16
+    {$endif}
+    {$ifndef NOTARGETEMBEDDED}
+      ,t_embed
+    {$endif}
 
 {**************************************
              Assemblers
@@ -53,10 +59,7 @@ implementation
 //      ,agx86int
     {$endif}
 
-//      ,ogcoff
-//      ,ogelf
-//      ,ogmacho
-//      ,cpuelf
+        ,ogomf
 
 {**************************************
         Assembler Readers
@@ -76,12 +79,12 @@ implementation
   {$ifndef NoCFIDwarf}
       ,cfidwarf
   {$endif NoCFIDwarf}
-  {$ifndef NoDbgStabs}
-      ,dbgstabs
-  {$endif NoDbgStabs}
   {$ifndef NoDbgDwarf}
       ,dbgdwarf
   {$endif NoDbgDwarf}
+  {$ifndef NoDbgCodeView}
+      ,dbgcodeview
+  {$endif NoDbgCodeView}
 
       ;
 

@@ -28,7 +28,10 @@ Type
                        jsoDateTimeAsString,       // Format a TDateTime value as a string
                        jsoUseFormatString,        // Use FormatString when creating JSON strings.
                        jsoCheckEmptyDateTime,     // If TDateTime value is empty and jsoDateTimeAsString is used, 0 date returns empty string
-                       jsoLegacyDateTime);         // Set this to enable old date/time formatting. Current behaviour is to save date/time as a ISO 9601 value.
+                       jsoLegacyDateTime,         // Set this to enable old date/time formatting. Current behaviour is to save date/time as a ISO 9601 value.
+                       jsoLowerPropertyNames,     // Set this to force lowercase names when streaming to JSON.
+                       jsoStreamTList             // Set this to assume that TList contains a list of TObjects. Use with care!
+                       );  
   TJSONStreamOptions = Set of TJSONStreamOption;
 
   TJSONFiler = Class(TComponent)
@@ -70,6 +73,8 @@ Type
     function StreamCollection(Const ACollection: TCollection): TJSONArray;
     // Stream an objectlist - always returns an array
     function StreamObjectList(Const AnObjectList: TObjectList): TJSONArray;
+    // Stream a List - always returns an array
+    function StreamTList(Const AList: TList): TJSONArray;
     // Stream a TStrings instance as an array
     function StreamTStringsArray(Const AStrings: TStrings): TJSONArray;
     // Stream a TStrings instance as an object
@@ -129,6 +134,9 @@ Type
     Function ExtractDateTime(S : String): TDateTime;
     function GetObject(AInstance : TObject; const APropName: TJSONStringType; D: TJSONObject; PropInfo: PPropInfo): TObject;
     procedure DoRestoreProperty(AObject: TObject; PropInfo: PPropInfo;  PropData: TJSONData); virtual;
+    function DoMapProperty(AObject: TObject; PropInfo: PPropInfo; JSON: TJSONObject): TJSONData; virtual;
+    procedure DoBeforeReadObject(Const JSON: TJSONObject; AObject: TObject); virtual;
+    procedure DoAfterReadObject(Const JSON: TJSONObject; AObject: TObject); virtual;
     Function ObjectFromString(Const JSON : TJSONStringType) : TJSONData; virtual;
     procedure RestoreProperty(AObject: TObject; PropInfo: PPropInfo; PropData: TJSONData);
   Public
@@ -235,6 +243,10 @@ Var
 
 begin
   D:=ObjectFromString(JSON);
+
+  if not Assigned(D) then
+    Exit;
+
   try
     If D.JSONType=jtObject then
       JSONToObject(D as TJSONObject,AObject)
@@ -500,15 +512,38 @@ begin
   end;
 end;
 
-procedure TJSONDeStreamer.JSONToObject(const JSON: TJSONObject; AObject: TObject
-  );
-Var
-  I,J : Integer;
-  PIL : TPropInfoList;
+function TJSONDeStreamer.DoMapProperty(AObject: TObject; PropInfo: PPropInfo; JSON: TJSONObject): TJSONData;
+var
+  J: Integer;
+begin
+  J := JSON.IndexOfName(PropInfo^.Name,(jdoCaseInsensitive in Options));
+  if J > -1 then
+    Result := JSON.Items[J]
+  else
+    Result := nil;
+end;
 
+procedure TJSONDeStreamer.DoBeforeReadObject(Const JSON: TJSONObject; AObject: TObject);
 begin
   If Assigned(FBeforeReadObject) then
     FBeforeReadObject(Self,AObject,JSON);
+end;
+
+procedure TJSONDeStreamer.DoAfterReadObject(Const JSON: TJSONObject; AObject: TObject);
+begin
+  If Assigned(FAfterReadObject) then
+    FAfterReadObject(Self,AObject,JSON)
+end;
+
+procedure TJSONDeStreamer.JSONToObject(const JSON: TJSONObject; AObject: TObject
+  );
+Var
+  I : Integer;
+  PIL : TPropInfoList;
+  JD: TJSONData;
+
+begin
+  DoBeforeReadObject(JSON, AObject);
   If (AObject is TStrings) then
     JSONToStrings(JSON,AObject as TStrings)
   else If (AObject is TCollection) then
@@ -519,16 +554,15 @@ begin
     try
       For I:=0 to PIL.Count-1 do
         begin
-        J:=JSON.IndexOfName(Pil.Items[i]^.Name,FCaseInsensitive);
-        If (J<>-1) then
-          RestoreProperty(AObject,PIL.Items[i],JSON.Items[J]);
+        JD:=DoMapProperty(AObject, Pil.Items[i], JSON);
+        If Assigned(JD) then
+          RestoreProperty(AObject,PIL.Items[i],JD);
         end;
     finally
       FreeAndNil(PIL);
     end;
     end;
-  If Assigned(FAfterReadObject) then
-    FAfterReadObject(Self,AObject,JSON)
+  DoAfterReadObject(JSON, AObject);
 end;
 
 procedure TJSONDeStreamer.JSONToCollection(const JSON: TJSONStringType;
@@ -539,7 +573,8 @@ Var
 begin
   D:=ObjectFromString(JSON);
   try
-    JSONToCollection(D,ACollection);
+    if Assigned(D) then
+      JSONToCollection(D,ACollection);
   finally
     D.Free;
   end;
@@ -741,6 +776,8 @@ begin
       Result.Add('Items',StreamCollection(TCollection(AObject)))
     else If AObject is TObjectList then
       Result.Add('Objects',StreamObjectList(TObjectList(AObject)))
+    else if (jsoStreamTlist in Options) and (AObject is TList) then
+      Result.Add('Objects', StreamTList(TList(AObject)))
     else
       begin
       PIL:=TPropInfoList.Create(AObject,tkProperties);
@@ -748,8 +785,12 @@ begin
         For I:=0 to PIL.Count-1 do
           begin
           PD:=StreamProperty(AObject,PIL.Items[i]);
-          If (PD<>Nil) then
+            If (PD<>Nil) then begin
+              if jsoLowerPropertyNames in Options then
+                Result.Add(LowerCase(PIL.Items[I]^.Name),PD)
+              else
             Result.Add(PIL.Items[I]^.Name,PD);
+          end;
           end;
       finally
         FReeAndNil(Pil);
@@ -893,6 +934,24 @@ begin
       Result:=D.AsJSON;
   finally
     FreeAndNil(D);
+  end;
+end;
+
+function TJSONStreamer.StreamTList(const AList: TList): TJSONArray;
+var
+  I : Integer;
+  o : TJSONObject;
+begin
+  Result:=TJSONArray.Create;
+  try
+    for I:=0 to AList.Count-1 do begin
+      o := ObjectToJSON(TObject(AList.Items[i]));
+      if Assigned(o) then
+        Result.Add(o);
+    end;
+  except
+    FreeAndNil(Result);
+    Raise;
   end;
 end;
 

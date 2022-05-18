@@ -36,6 +36,7 @@
         <unit file="{{FPCDIR}}/packages/fcl-base/src/syncobjs.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/fcl-base/src/custapp.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/fcl-base/src/blowfish.pp" options=""/>
+        <unit file="{{FPCDIR}}/packages/fcl-base/src/nullstream.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/fcl-process/src/simpleipc.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/fcl-base/src/inifiles.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/fcl-base/src/rttiutils.pp" options=""/>
@@ -46,12 +47,15 @@
         <unit file="{{FPCDIR}}/packages/fcl-base/src/ascii85.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/fcl-base/src/fptimer.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/fcl-db/src/base/db.pas" options=""/>
+        <unit file="{{FPCDIR}}/packages/fcl-db/src/base/bufdataset.pas" options=""/>
+        <unit file="{{FPCDIR}}/packages/fcl-db/src/memds/memds.pp" options="-Fi{{FPCDIR}}/packages/fcl-db/src/memds -dFPC"/>
         <unit file="{{FPCDIR}}/packages/fcl-db/src/base/sqltypes.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/paszlib/src/zipper.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/fcl-db/src/sqldb/sqldb.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/fcl-db/src/sqldb/interbase/ibconnection.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/fcl-db/src/sqldb/mssql/mssqlconn.pp" options=""/>
         <unit file="{{FPCDIR}}/packages/fcl-json/src/fpjson.pp" options=""/>
+        <unit file="{{FPCDIR}}/packages/fcl-web/src/base/fpmimetypes.pp" options=""/>
       </units>
       <descriptions>
         <description file="fcl.xml"/>
@@ -77,6 +81,7 @@
         <description file="syncobjs.xml"/>
         <description file="custapp.xml"/>
         <description file="blowfish.xml"/>
+        <description file="nullstream.xml"/>
         <description file="simpleipc.xml"/>
         <description file="inifiles.xml"/>
         <description file="rttiutils.xml"/>
@@ -87,12 +92,15 @@
         <description file="ascii85.xml"/>
         <description file="fptimer.xml"/>
         <description file="db.xml"/>
+        <description file="bufdataset.xml"/>
+        <description file="memds.xml"/>
         <description file="zipper.xml"/>
         <description file="sqldb.xml"/>
         <description file="sqltypes.xml"/>
         <description file="ibconnection.xml"/>
         <description file="mssqlconn.xml"/>
         <description file="fpjson.xml"/>
+        <description file="fpmimetypes.xml"/>
       </descriptions>
       <imports>
         <import file="rtl.xct" prefix="../rtl/"/>

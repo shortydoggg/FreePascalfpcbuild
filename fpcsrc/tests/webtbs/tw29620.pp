@@ -1,3 +1,10 @@
+{ %opt=-OoNOCONSTPROP }
+{ This test explicity checks results
+  of qword multiplication for which overflow happens.
+  Thus, we need an explicit $Q- }
+
+{$Q-}
+
 var x:uint64;
     y:longword;
 begin

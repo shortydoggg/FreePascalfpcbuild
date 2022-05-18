@@ -28,7 +28,6 @@ override FPC:=$(subst \,/,$(FPC))$(SRCEXEEXT)
 # Unit directory
 # UNITDIR=/usr/lib/ppc/0.99.0/linuxunits
 
-
 # Any options you wish to pass.
 PPOPTS=
 
@@ -45,6 +44,11 @@ MAKETEX=make1tex
 ifdef UNITDIR
 PPOPTS:=$(PPOPTS) -Up$(UNITDIR);
 endif
+ifdef inUnix
+EXECPREFIX=./
+else
+EXECPREFIX=
+endif
 
 .SUFFIXES: .pp .tex
 
@@ -57,8 +61,10 @@ OBJECTS=ex1 ex2 ex3 ex4 ex5 ex6 ex7 ex8 ex9 ex10 ex11 ex12 ex13 ex14 \
         ex54 ex55 ex56 ex57 ex58 ex59 ex60 ex61 ex62 ex63 ex64 ex65 ex66 \
         ex67 ex68 ex69 ex70 ex71 ex72 ex73 ex74 ex75 ex76 ex77 ex78 ex79 \
 	ex80 ex81 ex82 ex83 ex84 ex85 ex86 ex87 ex88 ex89 \
-	ex90 ex91 ex92 ex93 ex94 ex95 ex96 ex97 ex98 ex99 ex100 ex101 ex102\
+	ex96 ex97 ex98 ex99 ex100 ex101 ex102\
         ex103 ex104 ex105 ex106 ex107 ex108 ex109 ex110 ex111 ex112
+
+EXEOBJECTS=$(addsuffix $(EXEEXT), $(OBJECTS))
 
 TEXOBJECTS=$(addsuffix .tex, $(OBJECTS))
 
@@ -71,24 +77,26 @@ TOTEST=ex1 ex2 ex3 ex4 ex5 ex8 ex9 ex10 ex11 ex12 ex13 ex14 \
         ex54 ex56 ex59 ex60 ex62 ex63 ex64 ex65 ex66 \
         ex67 ex68 ex69 ex70 ex71 ex72 ex73 ex75 ex76 ex78 ex79 \
 	ex80 ex81 ex82 ex83 ex85 ex86 ex87 ex88 ex89 \
-	ex90 ex91 ex92 ex93 ex96 ex97 ex98 ex99 ex100 ex101 ex102\
+	ex96 ex97 ex98 ex99 ex100 ex101 ex102\
         ex103 ex104 ex105 ex106 ex107 ex108 ex109 ex110 ex111 ex112
-LOGFILE=$(addsuffix .log, $(TOTEST))
+
+
+LOGFILES=$(addsuffix .log, $(TOTEST))
 
 
 all : $(OBJECTS)
 
 tex : $(TEXOBJECTS)
 
-execute: $(LOGFILE)
+execute: $(LOGFILES)
 
 onetex : tex
 	$(MAKETEX) $(TEXOBJECTS)
 
 clean : 
 	-rm -f *.o *.s *.rst $(OBJECTS)
-	-rm -f $(TEXOBJECTS)
-	-rm -f *.ow *.sw *.exe *.dll *.log *.tmp
+	-rm -f $(TEXOBJECTS) Test.txt
+	-rm -f *.exe *.dll *.so *.rsj *.log *.tmp
  
 $(OBJECTS): %: %.pp
 	$(FPC) $(PPOPTS) $*
@@ -96,5 +104,5 @@ $(OBJECTS): %: %.pp
 $(TEXOBJECTS): %.tex: %.pp head.tex foot.tex
 	$(PP2TEX) $*
 
-$(LOGFILE): %.log: %.exe 
-	$* > $*.log
+$(LOGFILES): %.log: %$(EXEEXT)
+	$(EXECPREFIX)$*$(EXEEXT) > $*.log

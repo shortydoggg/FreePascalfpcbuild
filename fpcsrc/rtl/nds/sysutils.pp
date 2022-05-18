@@ -179,7 +179,13 @@ begin
 end;
 
 
-Function FileExists (Const FileName : RawByteString) : Boolean;
+function FileGetSymLinkTarget(const FileName: RawByteString; out SymLinkRec: TRawbyteSymLinkRec): Boolean;
+begin
+  Result := False;
+end;
+
+
+Function FileExists (Const FileName : RawByteString; FollowLink : Boolean) : Boolean;
 var
   SystemFileName: RawByteString;
 begin
@@ -248,7 +254,7 @@ Begin
 End;
 
 
-function DirectoryExists(const Directory: RawByteString): Boolean;
+function DirectoryExists(const Directory: RawByteString; FollowLink : Boolean): Boolean;
 begin
   result := false;
 end;
@@ -315,14 +321,36 @@ begin
   result := '';
 end;
 
-function ExecuteProcess (const Path: AnsiString; const ComLine: AnsiString;Flags:TExecuteFlags=[]): integer;
+function ExecuteProcess (const Path: RawByteString; const ComLine: RawByteString;Flags:TExecuteFlags=[]): integer;
 begin
   result := -1;
 end;
 
-function ExecuteProcess (const Path: AnsiString; const ComLine: array of AnsiString;Flags:TExecuteFlags=[]): integer;
+function ExecuteProcess (const Path: RawByteString; const ComLine: array of RawByteString;Flags:TExecuteFlags=[]): integer;
 begin
   result := -1;
+end;
+
+function ExecuteProcess(const Path: UnicodeString; const ComLine: UnicodeString;
+  Flags: TExecuteFlags = []): Integer;
+begin
+  { TODO : implement }
+  result := -1;
+end;
+
+function ExecuteProcess(const Path: UnicodeString;
+  const ComLine: Array of UnicodeString; Flags:TExecuteFlags = []): Integer;
+var
+  CommandLine: UnicodeString;
+  I: integer;
+begin
+  Commandline := '';
+  for I := 0 to High (ComLine) do
+   if Pos (' ', ComLine [I]) <> 0 then
+    CommandLine := CommandLine + ' ' + '"' + ComLine [I] + '"'
+   else
+    CommandLine := CommandLine + ' ' + Comline [I];
+  ExecuteProcess := ExecuteProcess (Path, CommandLine,Flags);
 end;
 
 function GetLastOSError: Integer;
@@ -336,5 +364,6 @@ end;
 Initialization
   InitExceptions;
 Finalization
+  FreeTerminateProcs;
   DoneExceptions;
 end.

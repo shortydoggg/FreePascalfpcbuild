@@ -23,58 +23,14 @@ type
   ObjpasInt = LongInt;
 {$endif CPU16}
 
-{ The RTTI is implemented through a series of constants : }
-
-Const
-   // please update tkManagedTypes below if you add new
-   // values
-   tkUnknown        = 0;
-   tkInteger        = 1;
-   tkChar           = 2;
-   tkEnumeration    = 3;
-   tkFloat          = 4;
-   tkSet            = 5;
-   tkMethod         = 6;
-   tkSString        = 7;
-   tkString         = tkSString;
-   tkLString        = 8;
-   tkAString        = 9;
-   tkWString        = 10;
-   tkVariant        = 11;
-   tkArray          = 12;
-   tkRecord         = 13;
-   tkInterface      = 14;
-   tkClass          = 15;
-   tkObject         = 16;
-   tkWChar          = 17;
-   tkBool           = 18;
-   tkInt64          = 19;
-   tkQWord          = 20;
-   tkDynArray       = 21;
-   tkInterfaceCorba = 22;
-   tkProcVar        = 23;
-   tkUString        = 24;
-   tkHelper         = 26;
-   tkFile           = 27;
-   tkClassRef       = 28;
-   tkPointer        = 29;
-
-  // all potentially managed types
-  tkManagedTypes   = [tkAstring,tkWstring,tkUstring,tkArray,
-                     tkObject,tkRecord,tkDynArray,tkInterface,tkVariant];
-
 {****************************************************************************
                                 Local types
 ****************************************************************************}
 
 {$ifdef FPC_HAS_FEATURE_EXITCODE}
-  {$ifdef FPC_OBJFPC_EXTENDED_IF}
-    {$if High(errorcode)<>maxExitCode}
-      {$define FPC_LIMITED_EXITCODE}
-    {$endif}
-  {$else}
+  {$if High(errorcode)<>maxExitCode}
     {$define FPC_LIMITED_EXITCODE}
-  {$endif FPC_OBJFPC_EXTENDED_IF}
+  {$endif}
 {$endif FPC_HAS_FEATURE_EXITCODE}
 
 Procedure HandleError (Errno : Longint); external name 'FPC_HANDLEERROR';
@@ -102,8 +58,41 @@ var
 {$ifndef FPC_NO_GENERIC_STACK_CHECK}
   { if the OS does the stack checking, we don't need any stklen from the
     main program }
-  initialstklen : SizeUint;external name '__stklen';
+  initialstklen : SizeUint{$ifndef FPC_HAS_INDIRECT_ENTRY_INFORMATION}; external name '__stklen';{$else} = 0;{$endif}
 {$endif FPC_NO_GENERIC_STACK_CHECK}
+
+{$ifdef FPC_HAS_INDIRECT_ENTRY_INFORMATION}
+  EntryInformation: TEntryInformation;
+{$endif FPC_HAS_INDIRECT_ENTRY_INFORMATION}
+
+var
+{$ifdef FPC_HAS_INDIRECT_ENTRY_INFORMATION}
+{$ifdef FPC_HAS_RESSTRINITS}
+  FPCResStrInitTables : Pointer;public name '_FPC_ResStrInitTables';
+{$endif FPC_HAS_RESSTRINITS}
+  FPCResourceStringTables : Pointer;public name '_FPC_ResourceStringTables';
+  FPCResLocation : Pointer;public name'_FPC_ResLocation';
+{$else FPC_HAS_INDIRECT_ENTRY_INFORMATION}
+{$ifdef FPC_HAS_RESSTRINITS}
+  FPCResStrInitTablesVar : record end; external name 'FPC_RESSTRINITTABLES';
+  FPCResStrInitTables : Pointer = @FPCResStrInitTablesVar;public name '_FPC_ResStrInitTables';
+{$endif FPC_HAS_RESSTRINITS}
+  FPCResourceStringTablesVar : record end; External Name 'FPC_RESOURCESTRINGTABLES';
+  FPCResourceStringTables : Pointer = @FPCResourceStringTablesVar;public name '_FPC_ResourceStringTables';
+{$endif FPC_HAS_INDIRECT_ENTRY_INFORMATION}
+
+{$ifdef FPC_HAS_INDIRECT_ENTRY_INFORMATION}
+procedure SetupEntryInformation(constref info: TEntryInformation);[public,alias:'_FPC_SetupEntryInformation'];
+begin
+  EntryInformation := info;
+  FPCResStrInitTables := info.ResStrInitTables;
+  FPCResourceStringTables := info.ResourceStringTables;
+  FPCResLocation := info.ResLocation;
+{$ifdef FPC_SYSTEM_HAS_OSSETUPENTRYINFORMATION}
+  OSSetupEntryInformation(info);
+{$endif FPC_SYSTEM_HAS_OSSETUPENTRYINFORMATION}
+end;
+{$endif FPC_HAS_INDIRECT_ENTRY_INFORMATION}
 
 { checks whether the given suggested size for the stack of the current
  thread is acceptable. If this is the case, returns it unaltered.
@@ -139,6 +128,10 @@ function do_isdevice(handle:thandle):boolean;forward;
 ****************************************************************************}
 
 {$ifdef FPC_USE_LIBC}
+{$ifdef USE_CPU_MOVE}
+  { Avoid use of generic C code for move procedure }
+  {$define FPC_SYSTEM_HAS_MOVE}
+{$endif}
 { Under Haiku, bcopy cause a problem when searching for include file
   in the compiler. So, we use the internal implementation for now
   under BeOS and Haiku.  }
@@ -147,6 +140,10 @@ function do_isdevice(handle:thandle):boolean;forward;
 {$i cgeneric.inc}
 { is now declared as external reference to another routine in the interface }
 {$i cgenstr.inc}
+{$endif}
+{$ifdef USE_CPU_MOVE}
+  { Avoid use of generic C code for move procedure }
+  {$undef FPC_SYSTEM_HAS_MOVE}
 {$endif}
 {$endif FPC_USE_LIBC}
 
@@ -222,6 +219,14 @@ function do_isdevice(handle:thandle):boolean;forward;
   {$define SYSPROCDEFINED}
 {$endif cpusparc}
 
+{$ifdef cpusparc64}
+  {$ifdef SYSPROCDEFINED}
+    {$Error Can't determine processor type !}
+  {$endif}
+  {$i sparc64.inc}  { Case dependent, don't change }
+  {$define SYSPROCDEFINED}
+{$endif cpusparc64}
+
 {$ifdef cpuarm}
   {$ifdef SYSPROCDEFINED}
     {$Error Can't determine processor type !}
@@ -264,24 +269,31 @@ function do_isdevice(handle:thandle):boolean;forward;
 {$endif cpumips}
 {$endif not cpumipsel}
 
+{$ifdef cpuaarch64}
+  {$ifdef SYSPROCDEFINED}
+    {$Error Can't determine processor type !}
+  {$endif}
+  {$i aarch64.inc}  { Case dependent, don't change }
+  {$define SYSPROCDEFINED}
+{$endif cpuaarch64}
 
 {$ifndef SYSPROCDEFINED}
   {$Error Can't determine processor type !}
 {$endif}
 
-procedure fillchar(var x;count : SizeInt;value : boolean);
+procedure fillchar(var x;count : {$ifdef FILLCHAR_HAS_SIZEUINT_COUNT}SizeUInt{$else}SizeInt{$endif};value : boolean);
 begin
   fillchar(x,count,byte(value));
 end;
 
 
-procedure fillchar(var x;count : SizeInt;value : char);
+procedure fillchar(var x;count : {$ifdef FILLCHAR_HAS_SIZEUINT_COUNT}SizeUInt{$else}SizeInt{$endif};value : char);
 begin
   fillchar(x,count,byte(value));
 end;
 
 
-procedure FillByte (var x;count : SizeInt;value : byte );
+procedure FillByte (var x;count : {$ifdef FILLCHAR_HAS_SIZEUINT_COUNT}SizeUInt{$else}SizeInt{$endif};value : byte );
 begin
   FillChar (X,Count,VALUE);
 end;
@@ -299,13 +311,13 @@ begin
 end;
 
 
-procedure fpc_zeromem(p:pointer;len:ptruint);
+procedure fpc_zeromem(p:pointer;len:sizeuint);
 begin
   FillChar(p^,len,0);
 end;
 
 
-procedure fpc_fillmem(out data;len:ptruint;b : byte);
+procedure fpc_fillmem(out data;len:sizeuint;b : byte);
 begin
   FillByte(data,len,b);
 end;
@@ -408,6 +420,24 @@ function aligntoptr(p : pointer) : pointer;inline;
   end;
 
 
+function aligntoqword(p : pointer) : pointer;inline;
+{$push}
+{$packrecords c}
+  type
+    TAlignCheck = record
+      b : byte;
+      q : qword;
+    end;
+{$pop}
+  begin
+{$ifdef FPC_REQUIRES_PROPER_ALIGNMENT}
+    result:=align(p,PtrInt(@TAlignCheck(nil^).q))
+{$else FPC_REQUIRES_PROPER_ALIGNMENT}
+    result:=p;
+{$endif FPC_REQUIRES_PROPER_ALIGNMENT}
+  end;
+
+
 {****************************************************************************
                   Subroutines for String handling
 ****************************************************************************}
@@ -433,6 +463,14 @@ function aligntoptr(p : pointer) : pointer;inline;
 {$endif FPC_HAS_FEATURE_WIDESTRINGS}
 
 {$i aliases.inc}
+
+{****************************************************************************
+                  Run-Time Type Information (RTTI) declarations
+****************************************************************************}
+
+{$ifdef FPC_HAS_FEATURE_RTTI}
+{$i rttidecl.inc}
+{$endif FPC_HAS_FEATURE_RTTI}
 
 {*****************************************************************************
                         Dynamic Array support
@@ -468,155 +506,138 @@ function aligntoptr(p : pointer) : pointer;inline;
 
 {$if defined(FPC_HAS_FEATURE_RANDOM)}
 
-{----------------------------------------------------------------------
-   Mersenne Twister: A 623-Dimensionally Equidistributed Uniform
-   Pseudo-Random Number Generator.
+{ Pascal translation of https://github.com/dajobe/libmtwist }
 
-   What is Mersenne Twister?
-   Mersenne Twister(MT) is a pseudorandom number generator developped by
-   Makoto Matsumoto and Takuji Nishimura (alphabetical order) during
-   1996-1997. MT has the following merits:
-   It is designed with consideration on the flaws of various existing
-   generators.
-   Far longer period and far higher order of equidistribution than any
-   other implemented generators. (It is proved that the period is 2^19937-1,
-   and 623-dimensional equidistribution property is assured.)
-   Fast generation. (Although it depends on the system, it is reported that
-   MT is sometimes faster than the standard ANSI-C library in a system
-   with pipeline and cache memory.)
-   Efficient use of the memory. (The implemented C-code mt19937.c
-   consumes only 624 words of working area.)
-
-   home page
-     http://www.math.keio.ac.jp/~matumoto/emt.html
-   original c source
-     http://www.math.keio.ac.jp/~nisimura/random/int/mt19937int.c
-
-   Coded by Takuji Nishimura, considering the suggestions by
-   Topher Cooper and Marc Rieffel in July-Aug. 1997.
-
-   This library is free software; you can redistribute it and/or
-   modify it under the terms of the GNU Library General Public
-   License as published by the Free Software Foundation; either
-   version 2 of the License, or (at your option) any later
-   version.
-   This library is distributed in the hope that it will be useful,
-   but WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
-   See the GNU Library General Public License for more details.
-   You should have received a copy of the GNU Library General
-   Public License along with this library; if not, write to the
-   Free Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA
-   02111-1307  USA
-
-   Copyright (C) 1997, 1999 Makoto Matsumoto and Takuji Nishimura.
-   When you use this, send an email to: matumoto@math.keio.ac.jp
-   with an appropriate reference to your work.
-
-   REFERENCE
-   M. Matsumoto and T. Nishimura,
-   "Mersenne Twister: A 623-Dimensionally Equidistributed Uniform
-   Pseudo-Random Number Generator",
-   ACM Transactions on Modeling and Computer Simulation,
-   Vol. 8, No. 1, January 1998, pp 3--30.
-
-
-  Translated to OP and Delphi interface added by Roman Krejci (6.12.1999)
-
-  http://www.rksolution.cz/delphi/tips.htm
-
-  Revised 21.6.2000: Bug in the function RandInt_MT19937 fixed
-
-  2003/10/26: adapted to use the improved intialisation mentioned at
-  <http://www.math.keio.ac.jp/~matumoto/MT2002/emt19937ar.html> and
-  removed the assembler code
-
- ----------------------------------------------------------------------}
+{* -*- Mode: c; c-basic-offset: 2 -*-
+ *
+ * mt.c - Mersenne Twister functions
+ *
+ * This is free and unencumbered software released into the public domain.
+ *
+ * Anyone is free to copy, modify, publish, use, compile, sell, or
+ * distribute this software, either in source code form or as a compiled
+ * binary, for any purpose, commercial or non-commercial, and by any
+ * means.
+ *
+ * In jurisdictions that recognize copyright laws, the author or authors
+ * of this software dedicate any and all copyright interest in the
+ * software to the public domain. We make this dedication for the benefit
+ * of the public at large and to the detriment of our heirs and
+ * successors. We intend this dedication to be an overt act of
+ * relinquishment in perpetuity of all present and future rights to this
+ * software under copyright law.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND,
+ * EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
+ * MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT.
+ * IN NO EVENT SHALL THE AUTHORS BE LIABLE FOR ANY CLAIM, DAMAGES OR
+ * OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE,
+ * ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR
+ * OTHER DEALINGS IN THE SOFTWARE.
+ *
+ * For more information, please refer to <http://unlicense.org/>
+ *
+ *}
 
 {$R-} {range checking off}
 {$Q-} {overflow checking off}
 
-{ Period parameter }
-Const
-  MT19937N=624;
-
-Type
-  tMT19937StateArray = array [0..MT19937N-1] of longint; // the array for the state vector
-
-{ Period parameters }
 const
-  MT19937M=397;
-  MT19937MATRIX_A  =$9908b0df;  // constant vector a
-  MT19937UPPER_MASK=longint($80000000);  // most significant w-r bits
-  MT19937LOWER_MASK=longint($7fffffff);  // least significant r bits
+  MTWIST_N = 624;
+  MTWIST_M = 397;
 
-{ Tempering parameters }
-  TEMPERING_MASK_B=longint($9d2c5680);
-  TEMPERING_MASK_C=longint($efc60000);
+  MT_STATIC_SEED = 5489;
 
+  MTWIST_UPPER_MASK = cardinal($80000000);
+  MTWIST_LOWER_MASK = cardinal($7FFFFFFF);
 
-VAR
-  mt : tMT19937StateArray;
-  mti: longint=MT19937N+1; // mti=MT19937N+1 means mt[] is not initialized
+  MTWIST_MATRIX_A   = cardinal($9908B0DF);
 
-{ Initializing the array with a seed }
-procedure sgenrand_MT19937(seed: longint);
+var
+  mt_state: array[0..MTWIST_N-1] of cardinal;
+
+const
+  mt_index: cardinal = MTWIST_N+1;
+
+function MTWIST_MIXBITS(u, v: cardinal): cardinal; inline;
+begin
+  result:=(u and MTWIST_UPPER_MASK) or (v and MTWIST_LOWER_MASK);
+end;
+
+function MTWIST_TWIST(u, v: cardinal): cardinal; inline;
+begin
+  { the construct at the end is equivalent to
+    if odd(v) then
+      MTWIST_MATRIX_A
+    else
+      0
+  }
+  result:=(MTWIST_MIXBITS(u,v) shr 1) xor (cardinal(-(v and 1)) and MTWIST_MATRIX_A);
+end;
+
+procedure mtwist_init(seed: cardinal);
 var
   i: longint;
 begin
-  mt[0] := seed;
-  for i := 1 to MT19937N-1 do
-    begin
-      mt[i] := 1812433253 * (mt[i-1] xor (mt[i-1] shr 30)) + i;
-      { See Knuth TAOCP Vol2. 3rd Ed. P.106 for multiplier. }
-      { In the previous versions, MSBs of the seed affect   }
-      { only MSBs of the array mt[].                        }
-      { 2002/01/09 modified by Makoto Matsumoto             }
-    end;
-  mti := MT19937N;
+  mt_state[0]:=seed;
+  for i:=1 to MTWIST_N-1 do
+    mt_state[i]:=cardinal(1812433253) * (mt_state[i-1] xor (mt_state[i-1] shr 30)) + i;
+   { still need to update the state }
+  mt_index:=MTWIST_N;
+end;
+
+procedure mtwist_update_state;
+var
+  count: longint;
+begin
+  { The original C code uses pointers, doesn't play nice with JVM backend;
+    it counts from N-M+1 downto 0 (0 not included) for the first loop, which
+    should initialise the first N-M+1 elements -- doing so gives the wrong
+    results though (different from the old generator, and it also doesn't
+    match the algorithm description), so we use only N-M iterations. They don't
+    seem to test this one element and its value does not impact subsequent
+    numbers, so it's probably a bug in their implementation.
+  }
+  for count:=0 to MTWIST_N-MTWIST_M-1 do
+    mt_state[count]:=mt_state[count+MTWIST_M] xor MTWIST_TWIST(mt_state[count],mt_state[count+1]);
+  for count:=MTWIST_N-MTWIST_M to MTWIST_N-2 do
+    mt_state[count]:=mt_state[count+(MTWIST_M-MTWIST_N)] xor MTWIST_TWIST(mt_state[count],mt_state[count+1]);
+  mt_state[MTWIST_N-1]:=mt_state[MTWIST_M-1] xor MTWIST_TWIST(mt_state[MTWIST_N-1],mt_state[0]);
+  mt_index:=0;
 end;
 
 
-function genrand_MT19937: longint;
-const
-  mag01 : array [0..1] of longint =(0, longint(MT19937MATRIX_A));
+function mtwist_u32rand: cardinal;
 var
-  y: longint;
-  kk: longint;
+  l_index :cardinal;
 begin
-  if RandSeed<>OldRandSeed then
-    mti:=MT19937N+1;
-  if (mti >= MT19937N) { generate MT19937N longints at one time }
-  then begin
-     if mti = (MT19937N+1) then  // if sgenrand_MT19937() has not been called,
-       begin
-         sgenrand_MT19937(randseed);   // default initial seed is used
-         { hack: randseed is not used more than once in this algorithm. Most }
-         {  user changes are re-initialising reandseed with the value it had }
-         {  at the start -> with the "not", we will detect this change.      }
-         {  Detecting other changes is not useful, since the generated       }
-         {  numbers will be different anyway.                                }
-         randseed := not(randseed);
-         oldrandseed := randseed;
-       end;
-     for kk:=0 to MT19937N-MT19937M-1 do begin
-        y := (mt[kk] and MT19937UPPER_MASK) or (mt[kk+1] and MT19937LOWER_MASK);
-        mt[kk] := mt[kk+MT19937M] xor (y shr 1) xor mag01[y and $00000001];
-     end;
-     for kk:= MT19937N-MT19937M to MT19937N-2 do begin
-       y := (mt[kk] and MT19937UPPER_MASK) or (mt[kk+1] and MT19937LOWER_MASK);
-       mt[kk] := mt[kk+(MT19937M-MT19937N)] xor (y shr 1) xor mag01[y and $00000001];
-     end;
-     y := (mt[MT19937N-1] and MT19937UPPER_MASK) or (mt[0] and MT19937LOWER_MASK);
-     mt[MT19937N-1] := mt[MT19937M-1] xor (y shr 1) xor mag01[y and $00000001];
-     mti := 0;
-  end;
-  y := mt[mti]; inc(mti);
-  y := y xor (y shr 11);
-  y := y xor (y shl 7)  and TEMPERING_MASK_B;
-  y := y xor (y shl 15) and TEMPERING_MASK_C;
-  y := y xor (y shr 18);
-  Result := y;
+  l_index:=mt_index;
+  inc(mt_index);
+  if (RandSeed<>OldRandSeed) or
+     (l_index>=MTWIST_N+1) then
+    begin
+      mtwist_init(RandSeed);
+      { Detect resets of randseed
+
+        This will break if someone coincidentally uses not(randseed) as the
+        next randseed, but it's much more common that you will reset randseed
+        to the same value as before to regenerate the same sequence of numbers
+      }
+      RandSeed:=not(RandSeed);
+      OldRandSeed:=RandSeed;
+      l_index:=MTWIST_N;
+    end;
+  if l_index=MTWIST_N then
+    begin
+      mtwist_update_state;
+      l_index:=0;
+      mt_index:=1;
+    end;
+  result:=mt_state[l_index];
+  result:=result xor (result shr 11);
+  result:=result xor ((result shl 7) and cardinal($9D2C5680));
+  result:=result xor ((result shl 15) and cardinal($EFC60000));
+  result:=result xor (result shr 18);
 end;
 
 
@@ -625,13 +646,16 @@ begin
   { otherwise we can return values = l (JM) }
   if (l < 0) then
     inc(l);
-  random := longint((int64(cardinal(genrand_MT19937))*l) shr 32);
+  random := longint((int64(mtwist_u32rand)*l) shr 32);
 end;
 
 function random(l:int64): int64;
 begin
   { always call random, so the random generator cycles (TP-compatible) (JM) }
-  random := int64((qword(cardinal(genrand_MT19937)) or ((qword(cardinal(genrand_MT19937)) shl 32))) and $7fffffffffffffff);
+  { also do it in two separate steps, so the order in which the two calls
+    are performed is predictable (JM) }
+  random:=mtwist_u32rand;
+  random:=random or ((qword(mtwist_u32rand) shl 32) and high(int64));
   if (l<>0) then
     random := random mod l
   else
@@ -641,7 +665,7 @@ end;
 {$ifndef FPUNONE}
 function random: extended;
 begin
-  random := cardinal(genrand_MT19937) * (extended(1.0)/(int64(1) shl 32));
+  random := mtwist_u32rand * (extended(1.0)/(int64(1) shl 32));
 end;
 {$endif}
 {$endif FPC_HAS_FEATURE_RANDOM}
@@ -693,7 +717,11 @@ End;
 {$ifndef FPC_SYSTEM_HAS_STACKTOP}
 function StackTop: pointer;
 begin
-  result:=StackBottom+StackLength;
+  { Avoid wrap to zero on 32-bit }
+  if ptruint(StackBottom)+ StackLength > high(ptruint) then
+    result:=pointer(ptruint(high(ptruint)))
+  else
+    result:=StackBottom + StackLength;
 end;
 {$endif FPC_SYSTEM_HAS_STACKTOP}
 
@@ -724,6 +752,46 @@ begin
 end;
 {$endif ndef FPC_SYSTEM_HAS_GET_CALLER_STACKINFO}
 
+{$ifdef FPC_HAS_EXPLICIT_INTERLOCKED_POINTER}
+{$ifndef FPC_SYSTEM_HAS_EXPLICIT_INTERLOCKED_POINTER}
+
+function InterLockedDecrement (var Target: pointer) : pointer;
+  begin
+    Result := Pointer(InterLockedDecrement(PtrInt(Target)));
+  end;
+
+function InterLockedIncrement (var Target: pointer) : pointer;
+  begin
+    Result := Pointer(InterLockedIncrement(PtrInt(Target)));
+  end;
+
+function InterLockedExchange (var Target: pointer; Source : pointer) : pointer;
+  begin
+    Result := Pointer(InterLockedExchange(PtrInt(Target), PtrInt(Source)));
+  end;
+
+function InterLockedExchangeAdd (var Target: pointer; Source : pointer) : pointer;
+  begin
+    Result := Pointer(InterLockedExchangeAdd(PtrInt(Target), PtrInt(Source)));
+  end;
+
+function InterLockedCompareExchange (var Target: pointer; NewValue: pointer; Comperand: pointer): pointer;
+  begin
+    Result := Pointer(InterLockedCompareExchange(PtrInt(Target), PtrInt(NewValue), PtrInt(Comperand)));
+  end;
+
+function InterLockedCompareExchangePointer (var Target: pointer; NewValue: pointer; Comperand: pointer): pointer;
+  begin
+    Result := Pointer(InterLockedCompareExchange(PtrInt(Target), PtrInt(NewValue), PtrInt(Comperand)));
+  end;
+
+{$endif FPC_SYSTEM_HAS_EXPLICIT_INTERLOCKED_POINTER}
+{$endif FPC_HAS_EXPLICIT_INTERLOCKED_POINTER}
+
+procedure fpc_objecterror; compilerproc;
+begin
+  HandleErrorAddrFrameInd(210,get_pc_addr,get_frame);
+end;
 
 procedure fpc_rangeerror;[public,alias:'FPC_RANGEERROR']; compilerproc;
 begin
@@ -745,7 +813,7 @@ end;
 
 procedure fpc_threaderror; [public,alias:'FPC_THREADERROR'];
 begin
-  HandleErrorAddrFrameInd(6,get_pc_addr,get_frame);
+    HandleErrorAddrFrameInd(236{RuntimeErrorExitCodes[reThreadError]},get_pc_addr,get_frame);
 end;
 
 
@@ -820,15 +888,27 @@ begin
   { Avoid recursive calls when called from the exit routines }
   if StackError then
    exit;
-  { don't use sack_size, since the stack pointer has already been
+  { check stack alignment }
+{$ifdef CPUI386}
+{$ifdef FPC_STACKALIGNMENT}
+{$if FPC_STACKALIGNMENT=16}
+  if ((PtrUInt(Sptr)+4) mod 16)<>0 then
+    begin
+      StackError:=true;
+      HandleError(202);
+    end;
+{$endif FPC_STACKALIGNMENT=16}
+{$endif FPC_STACKALIGNMENT}
+{$endif CPUI386}
+  { don't use stack_size, since the stack pointer has already been
     decreased when this routine is called
   }
   c := Sptr - STACK_MARGIN;
   if (c <= StackBottom) then
-   begin
-     StackError:=true;
-     HandleError(202);
-   end;
+    begin
+      StackError:=true;
+      HandleError(202);
+    end;
 end;
 {$POP}
 
@@ -847,40 +927,43 @@ type
   end;
   TInitFinalTable = record
     TableCount,
-    InitCount  : {$ifdef VER2_6}longint{$else}sizeint{$endif};
+    InitCount  : {$if defined(VER2)}longint
+                 {$elseif defined(VER3_0)}sizeint
+                 {$else}ALUUInt{$endif}
+                 ;
     Procs      : array[1..maxunits] of TInitFinalRec;
   end;
   PInitFinalTable = ^TInitFinalTable;
 
 
-{$ifndef FPC_HAS_INDIRECT_MAIN_INFORMATION}
+{$ifndef FPC_HAS_INDIRECT_ENTRY_INFORMATION}
 var
   InitFinalTable : TInitFinalTable;external name 'INITFINAL';
-{$endif FPC_HAS_INDIRECT_MAIN_INFORMATION}
+{$endif FPC_HAS_INDIRECT_ENTRY_INFORMATION}
 
 
 procedure fpc_InitializeUnits;[public,alias:'FPC_INITIALIZEUNITS']; compilerproc;
 var
-  i : ObjpasInt;
+  i : ALUUInt;
 {$ifdef DEBUG}
   pt : PInitFinalTable;
 {$endif}
 begin
   { call cpu/fpu initialisation routine }
   fpc_cpuinit;
-{$ifdef FPC_HAS_INDIRECT_MAIN_INFORMATION}
+{$ifdef FPC_HAS_INDIRECT_ENTRY_INFORMATION}
 {$ifdef DEBUG}
   pt := PInitFinalTable(EntryInformation.InitFinalTable);
 {$endif}
   with PInitFinalTable(EntryInformation.InitFinalTable)^ do
-{$else FPC_HAS_INDIRECT_MAIN_INFORMATION}
+{$else FPC_HAS_INDIRECT_ENTRY_INFORMATION}
 {$ifdef DEBUG}
   pt := @InitFinalTable;
 {$endif}
   with InitFinalTable do
-{$endif FPC_HAS_INDIRECT_MAIN_INFORMATION}
+{$endif FPC_HAS_INDIRECT_ENTRY_INFORMATION}
    begin
-     for i:=1 to TableCount do
+     for i:=1 to ALUUInt(TableCount) do
       begin
         if assigned(Procs[i].InitProc) then
          Procs[i].InitProc();
@@ -894,7 +977,7 @@ end;
 
 procedure internal_initializeunits; external name 'FPC_INITIALIZEUNITS';
 
-procedure fpc_LibInitializeUnits;[public,alias:'FPC_LIBINITIALIZEUNITS'];
+procedure fpc_LibInitializeUnits;[public,alias:'FPC_LIBINITIALIZEUNITS'];compilerproc;
 begin
 {$ifdef FPC_HAS_FEATURE_DYNLIBS}
   IsLibrary:=true;
@@ -905,13 +988,17 @@ begin
 end;
 
 
+{$ifdef CPUAVR}
+procedure FinalizeUnits; external name 'FPC_FINALIZE_FUNC_TABLE';
+
+{$else CPUAVR}
 procedure FinalizeUnits;[public,alias:'FPC_FINALIZEUNITS'];
 begin
-{$ifdef FPC_HAS_INDIRECT_MAIN_INFORMATION}
+{$ifdef FPC_HAS_INDIRECT_ENTRY_INFORMATION}
   with PInitFinalTable(EntryInformation.InitFinalTable)^ do
-{$else FPC_HAS_INDIRECT_MAIN_INFORMATION}
+{$else FPC_HAS_INDIRECT_ENTRY_INFORMATION}
   with InitFinalTable do
-{$endif FPC_HAS_INDIRECT_MAIN_INFORMATION}
+{$endif FPC_HAS_INDIRECT_ENTRY_INFORMATION}
    begin
      while (InitCount>0) do
       begin
@@ -923,6 +1010,7 @@ begin
       end;
    end;
 end;
+{$endif CPUAVR}
 
 {*****************************************************************************
                           Error / Exit / ExitProc
@@ -944,10 +1032,12 @@ begin
     Flush(Output);
   if Textrec(ErrOutput).Mode=fmOutput then
     Flush(ErrOutput);
+{$ifndef FPC_STDOUT_TRUE_ALIAS}
   if Textrec(stdout).Mode=fmOutput then
     Flush(stdout);
   if Textrec(StdErr).Mode=fmOutput then
     Flush(StdErr);
+{$endif FPC_STDOUT_TRUE_ALIAS}
 end;
 {$endif FPC_HAS_FEATURE_CONSOLEIO}
 
@@ -964,6 +1054,7 @@ Begin
 {$ifdef SYSTEMDEBUG}
   writeln('InternalExit');
 {$endif SYSTEMDEBUG}
+{$ifndef CPUAVR}
   while exitProc<>nil Do
    Begin
      InOutRes:=0;
@@ -971,6 +1062,7 @@ Begin
      exitProc:=nil;
      current_exit();
    End;
+{$endif CPUAVR}
 
 {$ifdef FPC_HAS_FEATURE_CONSOLEIO}
   { the embedded system unit itself contains no routines for console i/o
@@ -980,7 +1072,7 @@ Begin
   { Show runtime error and exit }
   if WriteErrorsToStdErr then
     pstdout:=@stderr
-  else  
+  else
     pstdout:=@stdout;
   If erroraddr<>nil Then
    Begin
@@ -997,7 +1089,7 @@ Begin
   { Finalize units }
   FinalizeUnits;
 
-{$if defined(MSWINDOWS) or defined(OS2)}
+{$if (defined(MSWINDOWS) and not defined(win16)) or defined(OS2)}
   { finally release the heap if possible, especially
     important for DLLs.
     Reset the array to nil, and finally also argv itself to
@@ -1036,11 +1128,13 @@ Begin
 End;
 
 
-Procedure do_exit;[Public,Alias:'FPC_DO_EXIT'];
+Procedure fpc_do_exit;[Public,Alias:'FPC_DO_EXIT']; compilerproc;
 begin
   InternalExit;
   System_exit;
 end;
+
+procedure internal_do_exit; external name 'FPC_DO_EXIT';
 
 
 Procedure lib_exit;[Public,Alias:'FPC_LIB_EXIT'];
@@ -1049,7 +1143,7 @@ begin
 end;
 
 
-Procedure Halt(ErrNum: Longint);
+Procedure Halt(ErrNum: Longint);noreturn;
 Begin
 {$ifdef FPC_HAS_FEATURE_EXITCODE}
 {$ifdef FPC_LIMITED_EXITCODE}
@@ -1059,7 +1153,7 @@ Begin
 {$endif FPC_LIMITED_EXITCODE}
     ExitCode:=ErrNum;
 {$endif FPC_HAS_FEATURE_EXITCODE}
-  Do_Exit;
+  internal_do_exit;
 end;
 
 
@@ -1145,7 +1239,7 @@ begin
 end;
 
 
-procedure RunError(w : word);[alias: 'FPC_RUNERROR'];
+procedure RunError(w : word);[alias: 'FPC_RUNERROR'];noreturn;
 var
   bp : pointer;
   pcaddr : codepointer;
@@ -1160,13 +1254,13 @@ begin
 end;
 
 
-Procedure RunError;{$ifdef SYSTEMINLINE}inline;{$endif}
+Procedure RunError;{$ifdef SYSTEMINLINE}inline;{$endif}noreturn;
 Begin
   RunError (0);
 End;
 
 
-Procedure Halt;{$ifdef SYSTEMINLINE}inline;{$endif}
+Procedure Halt;{$ifdef SYSTEMINLINE}inline;{$endif}noreturn;
 Begin
   Halt(0);
 End;
@@ -1208,7 +1302,7 @@ Begin
      End;
 {$ifdef FPC_HAS_FEATURE_EXCEPTIONS}
    except
-     { prevent endless dump if an exception occured }
+     { prevent endless dump if an exception occurred }
    end;
 {$endif FPC_HAS_FEATURE_EXCEPTIONS}
 End;
@@ -1294,7 +1388,13 @@ End;
 
 
 {$ifdef FPC_HAS_FEATURE_HEAP}
+{$ifdef FPC_HAS_FEATURE_ANSISTRINGS}
 function ArrayStringToPPchar(const S:Array of AnsiString;reserveentries:Longint):ppchar; // const ?
+{$ifdef EXCLUDE_COMPLEX_PROCS}
+begin
+  runerror(217);
+end;
+{$else EXCLUDE_COMPLEX_PROCS}
 // Extra allocate reserveentries pchar's at the beginning (default param=0 after 1.0.x ?)
 // Note: for internal use by skilled programmers only
 // if "s" goes out of scope in the parent procedure, the pointer is dangling.
@@ -1317,6 +1417,7 @@ begin
   p[high(s)+1+Reserveentries]:=nil;
   ArrayStringToPPchar:=p;
 end;
+{$endif EXCLUDE_COMPLEX_PROCS}
 
 
 Function StringToPPChar(Var S:AnsiString;ReserveEntries:integer):ppchar;
@@ -1328,6 +1429,7 @@ Function StringToPPChar(Var S:AnsiString;ReserveEntries:integer):ppchar;
 begin
   StringToPPChar:=StringToPPChar(PChar(S),ReserveEntries);
 end;
+{$endif FPC_HAS_FEATURE_ANSISTRINGS}
 
 
 Function StringToPPChar(S: PChar;ReserveEntries:integer):ppchar;
@@ -1484,9 +1586,23 @@ end;
 
 
 {*****************************************************************************
-                            File Handling
+                          Dynamic library support
 *****************************************************************************}
 
+
+{$ifdef FPC_HAS_FEATURE_DYNLIBS}
+{$i dynlib.inc}
+
+{$ifdef DISABLE_NO_DYNLIBS_MANAGER}
+{ OS Dependant implementation }
+{$i sysdl.inc}
+{$endif DISABLE_NO_DYNLIBS_MANAGER}
+{$endif FPC_HAS_FEATURE_DYNLIBS}
+
+
+{*****************************************************************************
+                            File Handling
+*****************************************************************************}
 
 {$ifdef FPC_HAS_FEATURE_FILEIO}
 { Allow slash and backslash as separators }

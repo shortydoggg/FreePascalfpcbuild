@@ -47,22 +47,22 @@ Unit rappcgas;
       { helpers }
       cutils,
       { global }
-      globtype,verbose,
+      globtype,globals,verbose,
       systems,
       { aasm }
       cpubase,aasmbase,aasmtai,aasmdata,aasmcpu,
       { symtable }
-      symconst,symsym,
+      symconst,symsym,symdef,
       { parser }
       procinfo,
       rabase,rautils,
-      cgbase,cgobj,cgppc
+      cgbase,cgobj,cgppc,paramgr
       ;
 
     procedure tppcattreader.ReadSym(oper : tppcoperand);
       var
          tempstr, mangledname : string;
-         typesize,l,k : aint;
+         typesize,l,k : tcgint;
       begin
         tempstr:=actasmpattern;
         Consume(AS_ID);
@@ -139,7 +139,7 @@ Unit rappcgas;
         end;
 
       var
-        l : aint;
+        l : tcgint;
         relsym: string;
         asmsymtyp: tasmsymtype;
         isflags: tindsymflags;
@@ -159,7 +159,8 @@ Unit rappcgas;
                End
               Else
                Begin
-                 oper.opr.Ref.Offset:=BuildConstExpression(false,true);
+                 { cast explicitly to avoid range check errors }
+                 oper.opr.Ref.Offset:=ASizeInt(BuildConstExpression(false,true));
                  Consume(AS_RPAREN);
                  if actasmtoken=AS_AT then
                    ReadAt(oper);
@@ -232,7 +233,7 @@ Unit rappcgas;
                     if (relsym<>'') then
                       begin
                         if (oper.opr.typ = OPR_REFERENCE) then
-                          oper.opr.ref.relsymbol:=current_asmdata.RefAsmSymbol(relsym)
+                          oper.opr.ref.relsymbol:=current_asmdata.RefAsmSymbol(relsym,asmsymtyp)
                         else
                           begin
                             Message(asmr_e_invalid_reference_syntax);
@@ -287,7 +288,7 @@ Unit rappcgas;
     Procedure tppcattreader.BuildOperand(oper : tppcoperand);
       var
         expr : string;
-        typesize,l : aint;
+        typesize,l : tcgint;
 
 
         procedure AddLabelOperand(hl:tasmlabel);
@@ -312,11 +313,12 @@ Unit rappcgas;
             hasdot  : boolean;
             l,
             toffset,
-            tsize   : aint;
+            tsize   : tcgint;
           begin
             if not(actasmtoken in [AS_DOT,AS_PLUS,AS_MINUS]) then
              exit;
             l:=0;
+            mangledname:='';
             hasdot:=(actasmtoken=AS_DOT);
             if hasdot then
               begin
@@ -338,10 +340,8 @@ Unit rappcgas;
                   { don't allow direct access to fields of parameters, because that
                     will generate buggy code. Allow it only for explicit typecasting }
                   if hasdot and
-                     (not oper.hastype) and
-                     (tabstractvarsym(oper.opr.localsym).owner.symtabletype=parasymtable) and
-                     (current_procinfo.procdef.proccalloption<>pocall_register) then
-                    Message(asmr_e_cannot_access_field_directly_for_parameters);
+                     (not oper.hastype) then
+                     checklocalsubscript(oper.opr.localsym);
                   inc(oper.opr.localsymofs,l)
                 end;
               OPR_CONSTANT :
@@ -350,7 +350,7 @@ Unit rappcgas;
                     if (oper.opr.val<>0) then
                       Message(asmr_e_wrong_sym_type);
                     oper.opr.typ:=OPR_SYMBOL;
-                    oper.opr.symbol:=current_asmdata.DefineAsmSymbol(mangledname,AB_EXTERNAL,AT_FUNCTION);
+                    oper.opr.symbol:=current_asmdata.DefineAsmSymbol(mangledname,AB_EXTERNAL,AT_FUNCTION,voidcodepointertype);
                   end
                 else
                   inc(oper.opr.val,l);
@@ -407,7 +407,7 @@ Unit rappcgas;
       var
         tempreg : tregister;
         hl : tasmlabel;
-        ofs : aint;
+        ofs : tcgint;
       Begin
         expr:='';
         case actasmtoken of
@@ -763,15 +763,15 @@ Unit rappcgas;
             if (instr.Operands[1].opr.ref.base<>NR_NO) or
                (instr.Operands[1].opr.ref.index<>NR_NO) then
               Message(asmr_e_syn_operand);
-            if (target_info.system in systems_dotted_function_names) and
+            if use_dotted_functions and
                assigned(instr.Operands[1].opr.ref.symbol) then
-              instr.Operands[1].opr.ref.symbol:=current_asmdata.DefineAsmSymbol('.'+instr.Operands[1].opr.ref.symbol.name,instr.Operands[1].opr.ref.symbol.bind,AT_FUNCTION);
+              instr.Operands[1].opr.ref.symbol:=current_asmdata.DefineAsmSymbol('.'+instr.Operands[1].opr.ref.symbol.name,instr.Operands[1].opr.ref.symbol.bind,AT_FUNCTION,voidcodepointertype);
           end;
         { regular name is toc entry, .-based name is actual code }
-        if (target_info.system in systems_dotted_function_names) and
+        if use_dotted_functions and
            (instr.Operands[1].opr.typ = OPR_SYMBOL) and
            (instr.Operands[1].opr.symbol.typ=AT_FUNCTION) then
-          instr.Operands[1].opr.symbol:=current_asmdata.DefineAsmSymbol('.'+instr.Operands[1].opr.symbol.name,instr.Operands[1].opr.symbol.bind,AT_FUNCTION);
+          instr.Operands[1].opr.symbol:=current_asmdata.DefineAsmSymbol('.'+instr.Operands[1].opr.symbol.name,instr.Operands[1].opr.symbol.bind,AT_FUNCTION,voidcodepointertype);
       end;
 
 

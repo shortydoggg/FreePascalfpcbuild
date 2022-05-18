@@ -31,7 +31,7 @@ interface
        { target }
        systems,
        { assembler }
-       cpuinfo,cpubase,aasmbase,aasmtai,aasmdata,assemble,
+       aasmbase,assemble,
        { ELF definitions }
        elfbase,
        { output }
@@ -53,8 +53,8 @@ interface
           shlink,
           shinfo,
           shentsize : longint;
-          constructor create(AList:TFPHashObjectList;const Aname:string;Aalign:shortint;Aoptions:TObjSectionOptions);override;
-          constructor create_ext(aobjdata:TObjData;const Aname:string;Ashtype,Ashflags:longint;Aalign:shortint;Aentsize:longint);
+          constructor create(AList:TFPHashObjectList;const Aname:string;Aalign:longint;Aoptions:TObjSectionOptions);override;
+          constructor create_ext(aobjdata:TObjData;const Aname:string;Ashtype,Ashflags:longint;Aalign:longint;Aentsize:longint);
           constructor create_reloc(aobjdata:TObjData;const Aname:string;allocflag:boolean);
           procedure writeReloc_internal(aTarget:TObjSection;offset:aword;len:byte;reltype:TObjRelocationType);override;
        end;
@@ -104,7 +104,7 @@ interface
        end;
 
        TElfAssembler = class(tinternalassembler)
-         constructor create(smart:boolean);override;
+         constructor create(info: pasminfo; smart:boolean);override;
        end;
 
        PSectionRec=^TSectionRec;
@@ -181,6 +181,7 @@ interface
        TEncodeRelocProc=function(objrel:TObjRelocation):byte;
        TLoadRelocProc=procedure(objrel:TObjRelocation);
        TLoadSectionProc=function(objinput:TElfObjInput;objdata:TObjData;const shdr:TElfsechdr;shindex:longint):boolean;
+       TEncodeFlagsProc=function:longword;
        TDynamicReloc=(
          dr_relative,
          dr_glob_dat,
@@ -199,6 +200,7 @@ interface
          encodereloc: TEncodeRelocProc;
          loadreloc: TLoadRelocProc;
          loadsection: TLoadSectionProc;
+         encodeflags: TEncodeFlagsProc;
        end;
 
 
@@ -254,7 +256,9 @@ interface
          hashobjsec: TElfObjSection;
          neededlist: TFPHashList;
          dyncopysyms: TFPObjectList;
-
+         preinitarraysec,
+         initarraysec,
+         finiarraysec: TObjSection;
          function AttachSection(objsec:TObjSection):TElfExeSection;
          function CreateSegment(atype,aflags,aalign:longword):TElfSegment;
          procedure WriteHeader;
@@ -340,7 +344,7 @@ implementation
         SysUtils,
         verbose,
         export,expunix,
-        cutils,globals,fmodule;
+        cutils,globals,fmodule,owar;
 
     const
       symbolresize = 200*18;
@@ -375,248 +379,6 @@ implementation
           result:=(sym shl 8) or typ;
         end;
 {$endif cpu64bitaddr}
-
-      procedure MayBeSwapHeader(var h : telf32header);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                e_type:=swapendian(e_type);
-                e_machine:=swapendian(e_machine);
-                e_version:=swapendian(e_version);
-                e_entry:=swapendian(e_entry);
-                e_phoff:=swapendian(e_phoff);
-                e_shoff:=swapendian(e_shoff);
-                e_flags:=swapendian(e_flags);
-                e_ehsize:=swapendian(e_ehsize);
-                e_phentsize:=swapendian(e_phentsize);
-                e_phnum:=swapendian(e_phnum);
-                e_shentsize:=swapendian(e_shentsize);
-                e_shnum:=swapendian(e_shnum);
-                e_shstrndx:=swapendian(e_shstrndx);
-              end;
-        end;
-
-
-      procedure MayBeSwapHeader(var h : telf64header);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                e_type:=swapendian(e_type);
-                e_machine:=swapendian(e_machine);
-                e_version:=swapendian(e_version);
-                e_entry:=swapendian(e_entry);
-                e_phoff:=swapendian(e_phoff);
-                e_shoff:=swapendian(e_shoff);
-                e_flags:=swapendian(e_flags);
-                e_ehsize:=swapendian(e_ehsize);
-                e_phentsize:=swapendian(e_phentsize);
-                e_phnum:=swapendian(e_phnum);
-                e_shentsize:=swapendian(e_shentsize);
-                e_shnum:=swapendian(e_shnum);
-                e_shstrndx:=swapendian(e_shstrndx);
-              end;
-        end;
-
-
-      procedure MayBeSwapHeader(var h : telf32proghdr);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                p_align:=swapendian(p_align);
-                p_filesz:=swapendian(p_filesz);
-                p_flags:=swapendian(p_flags);
-                p_memsz:=swapendian(p_memsz);
-                p_offset:=swapendian(p_offset);
-                p_paddr:=swapendian(p_paddr);
-                p_type:=swapendian(p_type);
-                p_vaddr:=swapendian(p_vaddr);
-              end;
-        end;
-
-
-      procedure MayBeSwapHeader(var h : telf64proghdr);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                p_align:=swapendian(p_align);
-                p_filesz:=swapendian(p_filesz);
-                p_flags:=swapendian(p_flags);
-                p_memsz:=swapendian(p_memsz);
-                p_offset:=swapendian(p_offset);
-                p_paddr:=swapendian(p_paddr);
-                p_type:=swapendian(p_type);
-                p_vaddr:=swapendian(p_vaddr);
-              end;
-        end;
-
-
-      procedure MaybeSwapSecHeader(var h : telf32sechdr);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                sh_name:=swapendian(sh_name);
-                sh_type:=swapendian(sh_type);
-                sh_flags:=swapendian(sh_flags);
-                sh_addr:=swapendian(sh_addr);
-                sh_offset:=swapendian(sh_offset);
-                sh_size:=swapendian(sh_size);
-                sh_link:=swapendian(sh_link);
-                sh_info:=swapendian(sh_info);
-                sh_addralign:=swapendian(sh_addralign);
-                sh_entsize:=swapendian(sh_entsize);
-              end;
-        end;
-
-
-      procedure MaybeSwapSecHeader(var h : telf64sechdr);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                sh_name:=swapendian(sh_name);
-                sh_type:=swapendian(sh_type);
-                sh_flags:=swapendian(sh_flags);
-                sh_addr:=swapendian(sh_addr);
-                sh_offset:=swapendian(sh_offset);
-                sh_size:=swapendian(sh_size);
-                sh_link:=swapendian(sh_link);
-                sh_info:=swapendian(sh_info);
-                sh_addralign:=swapendian(sh_addralign);
-                sh_entsize:=swapendian(sh_entsize);
-              end;
-        end;
-
-
-      procedure MaybeSwapElfSymbol(var h : telf32symbol);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                st_name:=swapendian(st_name);
-                st_value:=swapendian(st_value);
-                st_size:=swapendian(st_size);
-                st_shndx:=swapendian(st_shndx);
-              end;
-        end;
-
-
-      procedure MaybeSwapElfSymbol(var h : telf64symbol);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                st_name:=swapendian(st_name);
-                st_value:=swapendian(st_value);
-                st_size:=swapendian(st_size);
-                st_shndx:=swapendian(st_shndx);
-              end;
-        end;
-
-
-      procedure MaybeSwapElfReloc(var h : telf32reloc);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                address:=swapendian(address);
-                info:=swapendian(info);
-                addend:=swapendian(addend);
-              end;
-        end;
-
-
-      procedure MaybeSwapElfReloc(var h : telf64reloc);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                address:=swapendian(address);
-                info:=swapendian(info);
-                addend:=swapendian(addend);
-              end;
-        end;
-
-
-      procedure MaybeSwapElfDyn(var h : telf32dyn);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                d_tag:=swapendian(d_tag);
-                d_val:=swapendian(d_val);
-              end;
-        end;
-
-
-      procedure MaybeSwapElfDyn(var h : telf64dyn);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                d_tag:=swapendian(d_tag);
-                d_val:=swapendian(d_val);
-              end;
-        end;
-
-
-      procedure MaybeSwapElfverdef(var h: TElfverdef);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                vd_version:=swapendian(vd_version);
-                vd_flags:=swapendian(vd_flags);
-                vd_ndx:=swapendian(vd_ndx);
-                vd_cnt:=swapendian(vd_cnt);
-                vd_hash:=swapendian(vd_hash);
-                vd_aux:=swapendian(vd_aux);
-                vd_next:=swapendian(vd_next);
-              end;
-        end;
-
-
-      procedure MaybeSwapElfverdaux(var h: TElfverdaux);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                vda_name:=swapendian(vda_name);
-                vda_next:=swapendian(vda_next);
-              end;
-        end;
-
-
-      procedure MaybeSwapElfverneed(var h: TElfverneed);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                vn_version:=swapendian(vn_version);
-                vn_cnt:=swapendian(vn_cnt);
-                vn_file:=swapendian(vn_file);
-                vn_aux:=swapendian(vn_aux);
-                vn_next:=swapendian(vn_next);
-              end;
-        end;
-
-
-      procedure MaybeSwapElfvernaux(var h: TElfvernaux);
-        begin
-          if source_info.endian<>target_info.endian then
-            with h do
-              begin
-                vna_hash:=swapendian(vna_hash);
-                vna_flags:=swapendian(vna_flags);
-                vna_other:=swapendian(vna_other);
-                vna_name:=swapendian(vna_name);
-                vna_next:=swapendian(vna_next);
-              end;
-        end;
 
 
 {****************************************************************************
@@ -664,7 +426,7 @@ implementation
                                TElfObjSection
 ****************************************************************************}
 
-    constructor TElfObjSection.create(AList:TFPHashObjectList;const Aname:string;Aalign:shortint;Aoptions:TObjSectionOptions);
+    constructor TElfObjSection.create(AList:TFPHashObjectList;const Aname:string;Aalign:longint;Aoptions:TObjSectionOptions);
       begin
         inherited create(AList,Aname,Aalign,aoptions);
         index:=0;
@@ -677,7 +439,7 @@ implementation
       end;
 
 
-    constructor TElfObjSection.create_ext(aobjdata:TObjData;const Aname:string;Ashtype,Ashflags:longint;Aalign:shortint;Aentsize:longint);
+    constructor TElfObjSection.create_ext(aobjdata:TObjData;const Aname:string;Ashtype,Ashflags:longint;Aalign:longint;Aentsize:longint);
       var
         aoptions : TObjSectionOptions;
       begin
@@ -755,7 +517,7 @@ implementation
           '.stab','.stabstr',
           '.idata$2','.idata$4','.idata$5','.idata$6','.idata$7','.edata',
           '.eh_frame',
-          '.debug_frame','.debug_info','.debug_line','.debug_abbrev',
+          '.debug_frame','.debug_info','.debug_line','.debug_abbrev','.debug_aranges','.debug_ranges',
           '.fpc',
           '.toc',
           '.init',
@@ -854,8 +616,16 @@ implementation
            symaddr:=p.address;
            { Local ObjSymbols can be resolved already or need a section reloc }
            if (p.bind=AB_LOCAL) and
-              (reltype in [RELOC_RELATIVE,RELOC_ABSOLUTE{$ifdef x86_64},RELOC_ABSOLUTE32{$endif x86_64}]) then
+              (reltype in [RELOC_RELATIVE,RELOC_ABSOLUTE{$ifdef x86_64},RELOC_ABSOLUTE32{$endif x86_64}{$ifdef arm},RELOC_RELATIVE_24,RELOC_RELATIVE_CALL{$endif arm}]) then
              begin
+{$ifdef ARM}
+               if (reltype in [RELOC_RELATIVE_24,RELOC_RELATIVE_CALL]) and
+                  (p.objsection=CurrObjSec) then
+                 begin
+                   data:=aint((data and $ff000000) or (((((data and $ffffff) shl 2)+(symaddr-CurrObjSec.Size)) shr 2) and $FFFFFF)); // TODO: Check overflow
+                 end
+               else
+{$endif ARM}
                { For a reltype relocation in the same section the
                  value can be calculated }
                if (p.objsection=CurrObjSec) and
@@ -966,6 +736,12 @@ implementation
           elfsym.st_name:=nameidx;
         elfsym.st_size:=objsym.size;
         elfsym.st_value:=objsym.address;
+
+{$ifdef ARM}
+        if objsym.ThumbFunc then
+          inc(elfsym.st_value);
+{$endif ARM}
+
         case objsym.bind of
           AB_LOCAL :
             begin
@@ -993,7 +769,8 @@ implementation
             case objsym.typ of
               AT_FUNCTION :
                 elfsym.st_info:=elfsym.st_info or STT_FUNC;
-              AT_DATA :
+              AT_DATA,
+              AT_METADATA:
                 elfsym.st_info:=elfsym.st_info or STT_OBJECT;
               AT_TLS:
                 elfsym.st_info:=elfsym.st_info or STT_TLS;
@@ -1241,7 +1018,7 @@ implementation
            { section data }
            layoutsections(datapos);
            { section headers }
-           shoffset:=datapos;
+           shoffset:=align(datapos,dword(Sizeof(AInt)));
            inc(datapos,(nsections+1)*sizeof(telfsechdr));
 
            { Write ELF Header }
@@ -1272,11 +1049,16 @@ implementation
            header.e_shnum:=nsections;
            header.e_ehsize:=sizeof(telfheader);
            header.e_shentsize:=sizeof(telfsechdr);
+           if assigned(ElfTarget.encodeflags) then
+             header.e_flags:=ElfTarget.encodeflags();
            MaybeSwapHeader(header);
            writer.write(header,sizeof(header));
            writer.writezeros($40-sizeof(header)); { align }
            { Sections }
            WriteSectionContent(data);
+
+           { Align header }
+           Writer.Writezeros(Align(Writer.Size,Sizeof(AInt))-Writer.Size);
            { section headers, start with an empty header for sh_undef }
            writer.writezeros(sizeof(telfsechdr));
            ObjSectionList.ForEachCall(@section_write_sechdr,nil);
@@ -1289,10 +1071,11 @@ implementation
                                TELFAssembler
 ****************************************************************************}
 
-    constructor TElfAssembler.Create(smart:boolean);
+    constructor TElfAssembler.Create(info: pasminfo; smart:boolean);
       begin
-        inherited Create(smart);
+        inherited;
         CObjOutput:=TElfObjectOutput;
+        CInternalAr:=tarobjectwriter;
       end;
 
 
@@ -2043,6 +1826,8 @@ implementation
         header.e_shnum:=ExeSectionList.Count+1;
         header.e_phnum:=segmentlist.count;
         header.e_ehsize:=sizeof(telfheader);
+        if assigned(ElfTarget.encodeflags) then
+          header.e_flags:=ElfTarget.encodeflags();
         if assigned(EntrySym) then
           header.e_entry:=EntrySym.Address;
         header.e_shentsize:=sizeof(telfsechdr);
@@ -2347,12 +2132,15 @@ implementation
 
     procedure TElfExeOutput.Order_end;
 
-      procedure set_oso_keep(const s:string);
+      procedure set_oso_keep(const s:string;out firstsec:TObjSection);
         var
           exesec:TExeSection;
           objsec:TObjSection;
           i:longint;
+          sz: aword;
         begin
+          firstsec:=nil;
+          sz:=0;
           exesec:=TExeSection(ExeSectionList.Find(s));
           if assigned(exesec) then
             begin
@@ -2361,23 +2149,33 @@ implementation
                   objsec:=TObjSection(exesec.ObjSectionList[i]);
                   { ignore sections used for symbol definition }
                   if oso_data in objsec.SecOptions then
-                    objsec.SecOptions:=[oso_keep];
+                    begin
+                      if firstsec=nil then
+                        firstsec:=objsec;
+                      objsec.SecOptions:=[oso_keep];
+                      inc(sz,objsec.size);
+                    end;
                 end;
+              exesec.size:=sz;
             end;
         end;
 
+      var
+        dummy: TObjSection;
       begin
         OrderOrphanSections;
         inherited Order_end;
-        set_oso_keep('.init');
-        set_oso_keep('.fini');
-        set_oso_keep('.jcr');
-        set_oso_keep('.ctors');
-        set_oso_keep('.dtors');
-        set_oso_keep('.preinit_array');
-        set_oso_keep('.init_array');
-        set_oso_keep('.fini_array');
-        set_oso_keep('.eh_frame');
+        set_oso_keep('.init',dummy);
+        set_oso_keep('.fini',dummy);
+        set_oso_keep('.jcr',dummy);
+        set_oso_keep('.ctors',dummy);
+        set_oso_keep('.dtors',dummy);
+        set_oso_keep('.preinit_array',preinitarraysec);
+        if assigned(preinitarraysec) and IsSharedLibrary then
+          Comment(v_error,'.preinit_array section is not allowed in shared libraries');
+        set_oso_keep('.init_array',initarraysec);
+        set_oso_keep('.fini_array',finiarraysec);
+        set_oso_keep('.eh_frame',dummy);
 
         { let .dynamic reference other dynamic sections so they aren't marked
           for removal as unused }
@@ -2394,7 +2192,7 @@ implementation
         exesec:TExeSection;
         opts:TObjSectionOptions;
         s:string;
-        newsections,tmp:TFPHashObjectList;
+        newsections:TFPHashObjectList;
         allsections:TFPList;
         inserts:array[0..6] of TExeSection;
         idx,inspos:longint;
@@ -3214,6 +3012,24 @@ implementation
               end;
           end;
 
+        if assigned(preinitarraysec) then
+          begin
+            WriteDynTag(DT_PREINIT_ARRAY,preinitarraysec,0);
+            WriteDynTag(DT_PREINIT_ARRAYSZ,preinitarraysec.exesection.size);
+          end;
+
+        if assigned(initarraysec) then
+          begin
+            WriteDynTag(DT_INIT_ARRAY,initarraysec,0);
+            WriteDynTag(DT_INIT_ARRAYSZ,initarraysec.exesection.size);
+          end;
+
+        if assigned(finiarraysec) then
+          begin
+            WriteDynTag(DT_FINI_ARRAY,finiarraysec,0);
+            WriteDynTag(DT_FINI_ARRAYSZ,finiarraysec.exesection.size);
+          end;
+
         writeDynTag(DT_HASH,hashobjsec);
         writeDynTag(DT_STRTAB,dynsymtable.fstrsec);
         writeDynTag(DT_SYMTAB,dynsymtable);
@@ -3229,7 +3045,9 @@ implementation
       pltreltags: array[boolean] of longword=(DT_REL,DT_RELA);
       relsztags:  array[boolean] of longword=(DT_RELSZ,DT_RELASZ);
       relenttags: array[boolean] of longword=(DT_RELENT,DT_RELAENT);
+      {$ifndef MIPS}
       relcnttags: array[boolean] of longword=(DT_RELCOUNT,DT_RELACOUNT);
+      {$endif MIPS}
 
     procedure TElfExeOutput.FinishDynamicTags;
       var

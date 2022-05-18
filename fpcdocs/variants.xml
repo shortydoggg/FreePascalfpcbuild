@@ -1,0 +1,3435 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<fpdoc-descriptions>
+<package name="rtl">
+
+<!--
+  ====================================================================
+    Variants
+  ====================================================================
+-->
+
+<module name="Variants">
+<short>Extended variants support</short>
+<descr>
+<p>
+The compiler has built-in support for variants, and for many operations, variants can be used without thinking about it.
+The system unit has built-in support for some of the basic operations on a variant, as well as some compiler helper routines.
+However, some operations and definitions are implemented in the <var>Variants</var> unit so as not to burden the
+system unit with routines that may not always be needed.
+</p>
+<p>
+There is a basic set of variants that are defined by the Windows OS, these are supported by the compiler and the routines in the <var>Variants</var> unit.
+Additional variant types can be registered using the  <link id="TCustomVariantType"/> type.
+</p>
+<p>
+The variants unit also registers a handler for setting published properties (using RTTI) using variant-typed values.
+Nothing needs to be done for this except including the variants unit in your program.
+</p>
+</descr>
+
+<!-- uses unit Visibility: default -->
+<element name="sysutils">
+<short>Exception support</short>
+</element>
+
+<!-- uses unit Visibility: default -->
+<element name="sysconst">
+<short>Error messages</short>
+</element>
+
+<!-- uses unit Visibility: default -->
+<element name="rtlconsts">
+<short>Error messages</short>
+</element>
+
+<!-- uses unit Visibility: default -->
+<element name="typinfo">
+<short>RTTI support </short>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantParamNotFoundError">
+<short>Error raised when a parameter is not found</short>
+<descr>
+<var>EVariantParamNotFoundError</var> is the exception raised when the <var>VAR_PARAMNOTFOUND</var> error is encountered in <link id="VarResultCheck"/>
+</descr>
+<seealso>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantInvalidOpError">
+<short>Error raised when an invalid operation is performed</short>
+<descr>
+<var>EVariantInvalidOpError</var> is the exception raised when the <var>VAR_EXCEPTION</var> error is encountered in <link id="VarResultCheck"/>
+</descr>
+<seealso>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantTypeCastError">
+<short>Error raised when an invalid typecast is performed</short>
+<descr>
+<var>EVariantTypeCastError</var> is the exception raised when the <var>VAR_TYPEMISMATCH</var> error is encountered in <link id="VarResultCheck"/>
+</descr>
+<seealso>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantOverflowError">
+<short>Error raised when an overflow error is detected</short>
+<descr>
+<var>EVariantOverflowError</var> is the exception raised when the <var>VAR_OVERFLOW</var> error is encountered in <link id="VarResultCheck"/>
+</descr>
+<seealso>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantInvalidArgError">
+<short>Error raised when an invalid argument is detected</short>
+<descr>
+<var>EVariantInvalidArgError</var> is the exception raised when the <var>VAR_INVALIDARG</var> error is encountered in <link id="VarResultCheck"/>
+</descr>
+<seealso>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantBadVarTypeError">
+<short>>Error raised when an invalid variant type is detected</short>
+<descr>
+<var>EVariantBadVarTypeError</var> is the exception raised when the <var>VAR_BADVARTYPE</var> error is encountered in <link id="VarResultCheck"/>
+</descr>
+<seealso>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantBadIndexError">
+<short>Error raised when an invalid array index is detected</short>
+<descr>
+<var>EVariantBadIndexError</var> is the exception raised when the <var>VAR_BADINDEX</var> error is encountered in <link id="VarResultCheck"/>
+</descr>
+<seealso>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantArrayLockedError">
+<short>Error raised when an operation on a locked array is performed</short>
+<descr>
+<var>EVariantArrayLockedError</var> is the exception raised when the <var>VAR_ARRAYISLOCKED</var> error is encountered in <link id="VarResultCheck"/>
+</descr>
+<seealso>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantNotAnArrayError">
+<short>Error raised when an array operation is performed on a non-array variant</short>
+<descr>
+<var>EVariantNotAnArrayError</var> is not used in FPC and is defined for Delphi compatibility.
+</descr>
+<seealso>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantArrayCreateError">
+<short>Error raised when a problem is detected during creation of an array</short>
+<descr>
+<var>EVariantArrayCreateError</var> is the exception raised  when a problem is detected during creation of an array.
+It can be raised manually by calling <link id="VarArrayCreateError"/>.
+</descr>
+<errors>
+</errors>
+<seealso>
+<link id="VarArrayCreateError"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantNotImplError">
+<short>Error raised when a variant operation not implemented</short>
+<descr>
+<var>EVariantNotImplError</var> is the exception raised when the <var>VAR_NOTIMPL</var> error is encountered in <link id="VarResultCheck"/>
+</descr>
+<seealso>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantOutOfMemoryError">
+<short>Error to signal an out-of-memory condition</short>
+<descr>
+<var>EVariantOutOfMemoryError</var> is the exception raised when the <var>VAR_OUTOFMEMORY</var> error is encountered in <link id="VarResultCheck"/>
+It can be raised manually by calling <link id="VarOutOfMemoryError"/>.
+</descr>
+<seealso>
+<link id="VarOutOfMemoryError"/>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantUnexpectedError">
+<short>Exception raised during unexpected error</short>
+<descr>
+<var>EVariantUnexpectedError</var> is the exception raised when the <var>VAR_UNEXPECTED</var> error is encountered in <link id="VarResultCheck"/>
+It can be raised manually by calling <link id="VarUnexpectedError"/>.
+</descr>
+<seealso>
+<link id="VarVarUnexpectedError"/>
+<link id="VarResultCheck"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantDispatchError">
+<short>Exception raised in case of variant dispatching errors</short>
+<descr>
+<var>EVariantDispatchError</var> is the exception raised when a dispatch call fails.
+</descr>
+<seealso>
+<link id="TCustomVariantType"/>
+</seealso>
+</element>
+
+<!-- class Visibility: default -->
+<element name="EVariantRangeCheckError">
+<short>Exception class to signal range checks</short>
+<descr>
+<var>EVariantRangeCheckError</var> is defined for Delphi compatibility, it is not used in FPC.
+</descr>
+</element>
+
+
+<!-- class Visibility: default -->
+<element name="EVariantInvalidNullOpError">
+<short>Variant invalid null operation error</short>
+<descr>
+<var>EVariantInvalidNullOpError</var> is defined for Delphi compatibility, but is not used in the FPC run time.
+</descr>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TVariantRelationship">
+<short>Enumerated type to describe comparison operations between variants</short>
+<descr>
+<p>
+<var>TVariantRelationship</var> is used by <link id="VarCompareValue"/> to indicate the type of comparison operation it must perform.
+It has the following values:
+</p>
+<dl>
+<dt>vrEqual</dt><dd><printshort id="TVariantRelationship.vrEqual"/></dd>
+<dt>vrLessThan</dt><dd><printshort id="TVariantRelationship.vrLessThan"/></dd>
+<dt>vrGreaterThan</dt><dd><printshort id="TVariantRelationship.vrGreaterThan"/></dd>
+<dt>vrEqual</dt><dd><printshort id="TVariantRelationship.vrEqual"/></dd>
+<dt>vrEqual</dt><dd><printshort id="TVariantRelationship.vrEqual"/></dd>
+</dl>
+</descr>
+<seealso>
+<link id="VarCompareValue"/>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TVariantRelationship.vrEqual">
+<short>Are the 2 variants equal</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TVariantRelationship.vrLessThan">
+<short>Is the first variant (strictly) less than the second</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TVariantRelationship.vrGreaterThan">
+<short>Is the first variant (strictly) greater than the second</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TVariantRelationship.vrNotEqual">
+<short>Are the 2 variants unequal</short>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TNullCompareRule">
+<short>Enumeration describing how to handle Null values when comparing variants.</short>
+<descr>
+<p>
+<var>TNullCompareRule</var> is the type for the <link id="NullEqualityRule"/> and <link id="NullMagnitudeRule"/> variables.
+It can have the following values:
+</p>
+<dl>
+<dt>ncrError</dt><dd><printshort id="TNullCompareRule.ncrError"/></dd>
+<dt>ncrStrict</dt><dd><printshort id="TNullCompareRule.ncrStrict"/></dd>
+<dt>ncrLoose</dt><dd><printshort id="TNullCompareRule.ncrLoose"/></dd>
+</dl>
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TNullCompareRule.ncrError">
+<short>Raise an error when one of the values is Null.</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TNullCompareRule.ncrStrict">
+<short>Act as if the comparison is false</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TNullCompareRule.ncrLoose">
+<short>Attempt to compare anyway</short>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TBooleanToStringRule">
+<short>Enumeration describing how to convert boolean values to string values.</short>
+<descr>
+<var>TBooleanToStringRule</var> describes how boolean values are converted to string values.
+It is defined for Delphi compatibility, but is not used in the FPC runtime.
+</descr>
+<seealso>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TBooleanToStringRule.bsrAsIs">
+<short>Leave casing as is</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TBooleanToStringRule.bsrLower">
+<short>Convert to lowercase</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TBooleanToStringRule.bsrUpper">
+<short>Convert to uppercase</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="OrdinalVarTypes">
+<short>Constant describing which variant types are considered ordinals</short>
+<descr>
+<var>OrdinalVarTypes</var> is used in <link id="VarIsOrdinal"/> to decide which variant types are considered ordinals.
+</descr>
+<seealso>
+<link id="VarIsOrdinal"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="FloatVarTypes">
+<short>Constant describing which variant types are considered floating point types</short>
+<descr>
+  <var>FloatlVarTypes</var> is used in <link id="VarIsFloat"/> to decide which variant types are considered ordinals.
+</descr>
+<seealso>
+<link id="VarIsFloat"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarType">
+<short>Return the type of a variant.</short>
+<descr>
+<var>VarType</var> returns the type of the variant <var>V</var>. (it returns the internal type field of the variant structure)
+</descr>
+<seealso>
+<link id="VarTypeDeRef"/>
+<link id="VarIsType"/>
+<link id="VarAsType"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarTypeDeRef">
+<short>Returns the resolved type of a variant.</short>
+<descr>
+<var>VarTypeDeRef</var> will resolve the final type of the variant <var>V</var>:
+if <var>V</var> is a reference to another variant, the function will return the type of the referenced variant, recursing as much as needed till a non-variant type is encountered.
+</descr>
+<seealso>
+<link id="VarType"/>
+<link id="VarIsType"/>
+<link id="VarAsType"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarAsType">
+<short>Attempt to cast a variant to another type</short>
+<descr>
+<var>VarAsType</var> attempts to cast the variant <var>V</var> to a new variant of type <var>aVarType</var> and returns the new variant.
+</descr>
+<errors>
+If the requested type cast is not supported or possible, an <link id="EVariantTypeCastError"/> exception may be raised.
+</errors>
+<seealso>
+<link id="EVariantTypeCastError"/>
+<link id="VarIsType"/>
+<link id="VarAsType"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsType">
+<short>Check if a variant is of certain type</short>
+<descr>
+<var>VarIsType</var> will return <var>True</var> if the variant <var>V</var> is of type <var>aVarType</var> or is in <var>aVarTypes</var>.
+</descr>
+<errors>
+</errors>
+<seealso>
+<link id="VarType"/>
+<link id="VarAsType"/>
+<link id="VarIsByRef"/>
+<link id="VarIsNull"/>
+<link id="VarIsEmpty"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsByRef">
+<short>Check if the variant is a reference to a value.</short>
+<descr>
+<var>VarIsByRef</var> checks whether the variant <var>V</var> is a reference to a value instead of an actual value.
+It returns <var>True</var> if this is the case, <var>False</var> if not.
+</descr>
+<errors>
+</errors>
+<seealso>
+<link id="VarType"/>
+<link id="VarAsType"/>
+<link id="VarIsType"/>
+<link id="VarIsEmpty"/>
+<link id="VarIsNull"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsEmpty">
+<short>Check if the variant is empty</short>
+<descr>
+<var>VarIsEmpty</var> checks whether the variant <var>V</var> is empty (i.e. the type is <var>varEmpty</var>).
+</descr>
+<seealso>
+<link id="VarType"/>
+<link id="VarAsType"/>
+<link id="VarIsType"/>
+<link id="VarIsEmpty"/>
+<link id="VarCheckEmpty"/>
+<link id="VarIsNull"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarCheckEmpty">
+<short>Raise exception if a variant is empty.</short>
+<descr>
+  <var>VarCheckEmpty</var> will raise an <link id="EVariantError"/> exception if the variant <var>V</var>
+  is empty (it uses <link id="VarIsEmpty"/> to check this.)
+</descr>
+<errors>
+if the variant is empty an <link id="EVariantError"/> exception is raised.
+</errors>
+<seealso>
+<link id="VarIsEmpty"/>
+<link id="VarType"/>
+<link id="VarIsNull"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsNull">
+<short>Check if a variant is null</short>
+<descr>
+<var>VarIsNull</var> returns <var>True</var> if the type of the variant
+  <var>V</var> is <var>varNull</var>. No dereferencing is done.
+</descr>
+<errors>
+</errors>
+<seealso>
+<link id="VarIsEmpty"/>
+<link id="VarType"/>
+<link id="VarIsNumeric"/>
+<link id="VarIsStr"/>
+
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsClear">
+<short>Check if a variant is clear</short>
+<descr>
+<var>VarIsClear</var> returns <var>True</var> if the variant <var>V</var> is empty, or it is a dispatch type with value Nil.
+For custom types, the decision is left to the custom type.
+</descr>
+<seealso>
+<link id="VarIsEmpty"/>
+<link id="VarIsNull"/>
+<link id="VarIsNumeric"/>
+<link id="VarIsStr"/>
+
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsCustom">
+<short>Check if the variant is a custom value.</short>
+<descr>
+<var>VarIsCustom</var> returns <var>True</var> if the variant <var>V</var> is a custom variant (type is larger than <link id="CFirstUserType"/>).
+</descr>
+<seealso>
+<link id="VarIsEmpty"/>
+<link id="VarIsNull"/>
+<link id="VarIsOrdinal"/>
+<link id="VarIsNumeric"/>
+<link id="VarIsStr"/>
+
+</seealso>
+</element>
+
+
+<!-- function Visibility: default -->
+<element name="VarIsOrdinal">
+<short>Check if the variant is an ordinal value.</short>
+<descr>
+<var>VarIsCustom</var> returns <var>True</var> if the variant <var>V</var> is of one of the ordinal types:
+<link id="OrdinalVarTypes"/>  (<var>varSmallInt</var>,<var>varInteger</var>,
+<var>varBoolean</var>,<var>varShortInt</var>,<var>varByte</var>,<var>varWord</var>, <var>varLongWord</var>,<var>varInt64</var>)
+</descr>
+<seealso>
+<link id="VarIsEmpty"/>
+<link id="VarIsNull"/>
+<link id="VarIsCustom"/>
+<link id="VarIsFloat"/>
+<link id="VarIsNumeric"/>
+<link id="VarIsStr"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarIsOrdinal.Result">
+<short><var>True</var> if the value is of the type <var>OrdinalVarTypes</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarIsOrdinal.V">
+<short>Variant to check</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsFloat">
+<short>Check if the variant is a floating-point value.</short>
+<descr>
+<var>VarIsCustom</var> returns <var>True</var> if the variant <var>V</var> is of one of the ordinal types:
+<link id="FloatVarTypes"/>  (<var>varSingle</var>,<var>varDouble</var>,<var> varCurrency</var>).
+</descr>
+<seealso>
+<link id="VarIsEmpty"/>
+<link id="VarIsNull"/>
+<link id="VarIsCustom"/>
+<link id="VarIsOrdinal"/>
+<link id="VarIsNumeric"/>
+<link id="VarIsStr"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarIsFloat.Result">
+<short><var>True</var> if the value is of the type <var>FloatVarTypes</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarIsFloat.V">
+<short>Variant to check</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsNumeric">
+<short>Check if the variant is a numerical value</short>
+<descr>
+<var>VarIsCustom</var> returns <var>True</var> if the variant <var>V</var> is of one of the ordinal or floating point types:
+<link id="FloatVarTypes"/>, <link id="OrdinalVarTypes"/>
+</descr>
+<seealso>
+<link id="VarIsEmpty"/>
+<link id="VarIsNull"/>
+<link id="VarIsCustom"/>
+<link id="VarIsOrdinal"/>
+<link id="VarIsFloat"/>
+<link id="VarIsStr"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarIsNumeric.Result">
+<short><var>True</var> if the value is of the type <var>FloatVarTypes</var><var>OrdinalVarTypes"</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarIsNumeric.V">
+<short>Variant to check</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsStr">
+<short>Check if the variant is a string</short>
+<descr>
+<var>VarIsCustom</var> returns <var>True</var> if the variant <var>V</var> is of one of the string types:
+<var>varOleStr</var>,    <var>varUString</var>, <var>varString</var>
+</descr>    
+<seealso>
+<link id="VarIsEmpty"/>
+<link id="VarIsNull"/>
+<link id="VarIsCustom"/>
+<link id="VarIsOrdinal"/>
+<link id="VarIsFloat"/>
+<link id="VarIsBool"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarIsStr.Result">
+<short><var>True</var> if the value is of string type</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarIsStr.V">
+<short>Variant to test</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsBool">
+<short>Check if the variant is a boolean</short>
+<descr>
+<var>VarIsCustom</var> returns <var>True</var> if the variant <var>V</var> is a boolean value.
+</descr>    
+<seealso>
+<link id="VarIsEmpty"/>
+<link id="VarIsNull"/>
+<link id="VarIsCustom"/>
+<link id="VarIsOrdinal"/>
+<link id="VarIsFloat"/>
+<link id="VarIsStr"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarIsBool.Result">
+<short><var>True</var> if the value <var>V</var> is of type <var>Boolean</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarIsBool.V">
+<short>Variant to test</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarToStr">
+<short>Convert a variant to string value</short>
+<descr>
+<var>VarToStr</var> attempts to convert the variant <var>V</var> to a string. 
+If the value is <var>Null</var>, the result is an empty string.
+</descr>
+<errors>
+</errors>
+<seealso>
+<link id="VarToStrDef"/>
+<link id="VarIsStr"/>
+<link id="VarToWideStr"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarToStr.Result">
+<short>The string representation of the variant value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarToStr.V">
+<short>Variant to convert</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarToStrDef">
+<short>Convert a variant to string value, specifying a default</short>
+<descr>
+<var>VarToStr</var> attempts to convert the variant <var>V</var> to a string. 
+If the value is <var>Null</var>, the result is the specified <var>aDefault</var> string.
+</descr>
+<seealso>
+<link id="VarToStrDef"/>
+<link id="VarIsStr"/>
+<link id="VarToStr"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarToStrDef.Result">
+<short>The String representation of the variant value </short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarToStrDef.V">
+<short>Variant to convert</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarToStrDef.ADefault">
+<short>Value to return if the variant equals <var>Null</var></short>
+</element>
+
+
+
+<!-- function Visibility: default -->
+<element name="VarToWideStr">
+<short>Convert a variant to string value</short>
+<descr>
+<var>VarToWideStr</var> attempts to convert the variant <var>V</var> to a string. 
+If the value is <var>Null</var>, the result is an empty string.
+</descr>
+<errors>
+</errors>
+<seealso>
+<link id="VarToWideStrDef"/>
+<link id="VarIsStr"/>
+<link id="VarToStr"/>
+<link id="VarToUnicodeStr"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarToWideStr.Result">
+<short>The string representation of the variant value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarToWideStr.V">
+<short>Variant to convert</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarToWideStrDef">
+<short>Convert a variant to string value, specifying a default</short>
+<descr>
+<var>VarToWideStr</var> attempts to convert the variant <var>V</var> to a string. 
+If the value is <var>Null</var>, the result is the specified <var>aDefault</var> string.
+</descr>
+<seealso>
+<link id="VarToWideStrDef"/>
+<link id="VarIsStr"/>
+<link id="VarToWideStr"/>
+<link id="VarToUnicodeStrDef"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarToWideStrDef.Result">
+<short>The String representation of the variant value </short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarToWideStrDef.V">
+<short>Variant to convert</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarToWideStrDef.ADefault">
+<short>Value to return if the variant equals <var>Null</var></short>
+</element>
+
+
+
+<!-- function Visibility: default -->
+<element name="VarToUnicodeStr">
+<short>Convert a variant to string value</short>
+<descr>
+<var>VarToUnicodeStr</var> attempts to convert the variant <var>V</var> to a string. 
+If the value is <var>Null</var>, the result is an empty string.
+</descr>
+<errors>
+</errors>
+<seealso>
+<link id="VarToWideStr"/>
+<link id="VarToUnicodeStrDef"/>
+<link id="VarIsStr"/>
+<link id="VarToStr"/>
+<link id="VarToUnicodeStr"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarToUnicodeStr.Result">
+<short>The string representation of the variant value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarToUnicodeStr.V">
+<short>Variant to convert</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarToUnicodeStrDef">
+<short>Convert a variant to string value, specifying a default</short>
+<descr>
+<var>VarToUnicodeStr</var> attempts to convert the variant <var>V</var> to a string. 
+If the value is <var>Null</var>, the result is the specified <var>aDefault</var> string.
+</descr>
+<seealso>
+<link id="VarToUnicodeStr"/>
+<link id="VarToStrDef"/>
+<link id="VarIsStr"/>
+<link id="VarToWideStr"/>
+<link id="VarToWideStrDef"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarToDateTime">
+<short>Convert a variant to datetime value</short>
+<descr>
+<var>VarToDateTime</var> attempts to convert the variant <var>V</var> to a <var>TDateTime</var> value.
+</descr>
+<errors>
+If the value is <var>Null</var>, an exception is raised.
+</errors>
+<seealso>
+<link id="VarToUnicodeStr"/>
+<link id="VarToStrDef"/>
+<link id="VarIsStr"/>
+<link id="VarToWideStr"/>
+<link id="VarToWideStrDef"/>
+<link id="VarFromDateTime"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarToDateTime.Result">
+<short>Variants as date/time value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarToDateTime.V">
+<short>Variant to convert</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarFromDateTime">
+<short>Create variant from <var>TDateTime</var> value.</short>
+<descr>
+<var>VarFromDateTime</var> creates a variant with type <var>varDate</var> and value <var>DateTime</var>.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="varToDateTime"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarFromDateTime.Result">
+<short>New variant with datetime value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarFromDateTime.DateTime">
+<short>TDateTime value to convert</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarInRange">
+<short>Check if a variant is in a range of values</short>
+<descr>
+<var>VarInRange</var> is an auxiliary function which checks whether <var>AValue</var> is in the range defined by <var>AMin</var> and <var>AMax</var>, borders included.
+</descr>
+<errors>
+If the variants are of different types and they cannot be converted, an exception will be raised.  
+</errors>
+<seealso>
+<link id="VarEnsureRange"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarInRange.Result">
+<short><var>True</var> if <var>AValue</var> is in range <var>[AMin..AMax]</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarInRange.AValue">
+<short>Value to check</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarInRange.AMin">
+<short>Lower bound of range</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarInRange.AMax">
+<short>Upper bound of range</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarEnsureRange">
+<short>Make sure the variant is within a specified range.</short>
+<descr>
+<var>VarEnsureRange</var> checks <var>AValue</var> and returns it if it is in the range specified by <var>AMin</var>, <var>AMax</var>. 
+If it is less than <var>AMin</var>, then <var>AMin</var> is returned.
+If it is larger than <var>AMax</var>, then <var>AMax</var> is returned.
+</descr>
+<errors>
+If the variants are of different types and they cannot be converted, an exception will be raised.  
+</errors>
+<seealso>
+<link id="VarInRange"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarEnsureRange.Result">
+<short>Value limited within specified range</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarEnsureRange.AValue">
+<short>Value to check</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarEnsureRange.AMin">
+<short>Lower bound of range</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarEnsureRange.AMax">
+<short>Upper bound of range</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarSameValue">
+<short>Check if 2 variants are the same</short>
+<descr>
+<var>varSameValue</var> checks whether <var>A</var> and <var>B</var> have the same value. 
+Here empty variants equal empty variants, and null variants equal null variants. 
+For all other cases, the actual values are compared.
+</descr>
+<errors>
+If the variants are of different types and they cannot be converted, an exception will be raised.  
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarSameValue.Result">
+<short>True of both variants are equal</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarSameValue.A">
+<short>First variant to compare</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarSameValue.B">
+<short>Second variant to compare</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarCompareValue">
+<short>Compare 2 variant values</short>
+<descr>
+<p>
+<var>VarCompareValue</var> compares 2 variants <var>A</var> and <var>B</var>.
+It returns one of the following values:
+</p>
+<dl>
+<dt><var>vrEqual</var></dt><dd>if the 2 variant values are equal.</dd>
+<dt><var>vrUnEqual</var></dt><dd>if one of the 2 variant is null or empty and the other is not.</dd>
+<dt><var>vrGreaterThan</var></dt><dd>if <var>A&gt;B</var></dd>
+<dt><var>vrLessThan</var></dt><dd>if <var>A&lt;B</var></dd>
+</dl>
+</descr>
+<seealso>
+<link id="VarSameValue"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarCompareValue.Result">
+<short>Result of the comparison</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarCompareValue.A">
+<short>First value to compare</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarCompareValue.B">
+<short>Second value to compare</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsEmptyParam">
+<short>Check if the variant is an error value for <var>VAR_PARAMNOTFOUND</var></short>
+<descr>
+<var>VarIsEmptyParam</var> returns <var>True</var> if the variant <var>V</var> is an error typed 
+variant with value <var>VAR_PARAMNOTFOUND</var>, or <var>False</var> otherwise.
+</descr>
+<seealso>
+<link id="VarIsError"/>
+<link id="SetClearVarToEmptyParam"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarIsEmptyParam.Result">
+<short>True if it is an error value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarIsEmptyParam.V">
+<short>Variant to check</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarClear">
+<short>Clear the variant value</short>
+<descr>
+<var>VarClear</var> clears the variant, possibly freeing any memory taken by the value
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="SetClearVarToEmptyParam"/>
+<link id="VarIsError"/>
+<link id="VarIsClear"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarClear.V">
+<short>Variant to clear</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="SetClearVarToEmptyParam">
+<short>Create an error variant with value <var>VAR_PARAMNOTFOUND</var></short>
+<descr>
+<var>SetClearVarToEmptyParam</var> clears the variant <var>V</var>var> and sets it's type to <var>varError</var> and value to <var>VAR_PARAMNOTFOUND</var>.
+<var>VarIsEmptyParam(SetClearVarToEmptyParam(V))</var> will return <var>True</var>.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="VarIsEmptyParam"/>
+<link id="VarIsError"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="SetClearVarToEmptyParam.V">
+<short>Variant to clear and convert</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsError">
+<short>Check if the variant has type <var>varError</var></short>
+<descr>
+<var>VarIsError</var> checks <var>V</var> and returns <var>True</var> if the type is <var>varError</var>.
+</descr>
+<seealso>
+<link id="VarIsNull"/>
+<link id="VarIsEmpty"/>
+<link id="VarIsOrdinal"/>
+<link id="VarIsEmptyParam"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarIsError.Result">
+<short><var>True</var> if the type is <var>varError</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarIsError.V">
+<short>Variant to check</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarIsError.AResult">
+<short></short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarAsError">
+<short>Create an error-typed variant</short>
+<descr>
+<var>VarAsError</var> creates an error-typed variant with value <var>aResult</var>.
+</descr>
+<errors>
+None.  
+</errors>
+<seealso>
+<link id="SetClearVarToEmptyParam"/>
+<link id="VarIsError"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarAsError.Result">
+<short>The new error-typed variant</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarAsError.AResult">
+<short>Error code to store in the variant/</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarSupports">
+<short>Check if a variant supports an interface.</short>
+<descr>
+<var>VarSupports</var> checks if the variant <var>V</var> contains an interface (types <var>Unknown, varDispatch</var>)
+and the interface supports the specified interface <var>IID</var>. If it does, <var>True</var> is returned, <var>False</var> otherwise.
+If <var>Intf</var> is specified, and the variant supports the requested interface, 
+the interface instance is returned in <var>Intf</var>.
+</descr>
+<seealso>
+<link id="#rtl.Sysutils.Supports"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarSupports.Result">
+<short><var>True</var> if <var>V</var> supports <var>IID</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarSupports.V">
+<short>Variant to check</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarSupports.IID">
+<short>Interface identifier</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarSupports.Intf">
+<short>Optional argument to receive an instance of the interface.</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarCopyNoInd">
+<short>Not supported</short>
+<descr>
+<var>VarCopyNoInd</var> is currently not supported.
+</descr>
+<errors>
+An <var>EVariantError</var> exception is always raised.
+</errors>
+<seealso>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarCopyNoInd.Dest">
+<short>Destination</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarCopyNoInd.Source">
+<short>Source</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarArrayCreate">
+<short>Create a variant array</short>
+<descr>
+<p>
+<var>VarArrayCreate</var> creates a (optionally multidimensional) array with upper,lower bounds specified in <var>Bounds</var>. 
+The number of bounds (in case of a single array) must be even: 2 bounds for every dimension of the array are required.
+All elements of the array are of the same type. The following examples create a one-dimensional array with 10 elements
+</p>
+<code>
+ VarArrayCreate([0,9],varInteger);
+ VarArrayCreate([1,10],varInteger);
+</code>
+<p>
+The first array is 0-based, the second is 1-based. The following creates a 2-dimensional array:
+</p>
+<code>
+ VarArrayCreate([0,9,0,1],varInteger);
+ VarArrayCreate([1,10,1,2],varInteger);
+</code>
+<p>
+The first array is 0-based, the second is 1-based. Each array consists of an array of 2 elements.
+</p>
+<p>
+The array can also be specified as a pointer to array of  <link id="system.tvararraybound"/> records, and a number of dimensions. 
+The above 1-dimensional arrays can be specified as:
+</p>
+<code>
+var
+  B : tvararraybound;
+begin
+  b.elementcount:=10;
+  B.lowbound:=0;
+  VarArrayCreate(@B,1,varInteger);
+  b.elementcount:=10;
+  B.lowbound:=1;
+  VarArrayCreate(@B,1,varInteger);
+</code>
+</descr>
+<errors>
+If an uneven amount of bounds is specified or the operating system failed to create the array, 
+an exception is raised using <link id="VarArrayCreateError"/>
+</errors>
+<seealso>
+<link id="VarArrayCreateError"/>  
+<link id="VarArrayOf"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarArrayCreate.Result">
+<short>The new variant array</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayCreate.Bounds">
+<short>Bounds for the array</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayCreate.aVarType">
+<short>Element type</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayCreate.Dims">
+<short>Number of dimensions in array.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarArrayOf">
+<short>Create a variants array of a series of values</short>
+<descr>
+<var>VarArrayOf</var> creates a variant array with elements of type <var>varVariant</var>. 
+The array has as many values as there are elements in <var>Values</var> and the element values are copied from <var>Values</var>.
+</descr>
+<errors>
+If the array cannot be created, an <var>EVariantError</var> exception may be raised.
+</errors>
+<seealso>
+<link id="VarArrayCreateError"/>  
+<link id="VarArrayCreate"/>
+<link id="DynArrayToVariant"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarArrayOf.Result">
+<short>The newly created variant array</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayOf.Values">
+<short>Initial values for the elements in the array.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarArrayAsPSafeArray">
+<short>Return internal array of variant value</short>
+<descr>
+<var>VarArrayAsPSafeArray</var> returns the internal array of the variant <var>A</var> if it is a variant array. 
+If not, an exception is raised.
+</descr>
+<errors>
+if the variant <var>A</var> is not an array, an <link id="EVariantInvalidArgError"/> exception is raised.
+</errors>
+<seealso>
+<link id="VarIsArray"/>
+<link id="EVariantInvalidArgError"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarArrayAsPSafeArray.Result">
+<short>The internal array pointer</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayAsPSafeArray.A">
+<short>Variant to check.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarArrayDimCount">
+<short>Return the number of dimensions of the array.</short>
+<descr>
+<var>VarArrayDimCount</var> returns the number of dimensions of the array <var>A</var>. 
+If <var>A</var> is not an array, zero is returned.
+</descr>
+<errors>
+  None.
+</errors>
+<seealso>
+<link id="VarArrayCreate"/>
+<link id="VarArrayLowBound"/>
+<link id="VarArrayHighBound"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarArrayDimCount.Result">
+<short>Number of array dimensions or zero if not array</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayDimCount.A">
+<short>The variant to check</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarArrayLowBound">
+<short>Return lower bound of an array</short>
+<descr>
+<var>VarArrayLowBound</var> returns the lower bound (min index) of dimension <var>Dim</var> of array <var>A</var>. 
+The dimension <var>Dim</var> is 1-based.
+</descr>
+<errors>
+If the dimension is out of range, or <var>A</var> is not a variant array, an exception will be raised.  
+</errors>
+<seealso>
+<link id="VarArrayCreate"/>
+<link id="VarArrayDimCount"/>
+<link id="VarArrayHighBound"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarArrayLowBound.Result">
+<short>The lower bound of dimension <var>Dim</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayLowBound.A">
+<short>Array to check</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayLowBound.Dim">
+<short>Dimension to check</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarArrayHighBound">
+<short>Return lower bound of an array</short>
+<descr>
+<var>VarArrayHighBound</var> returns the high bound (max index) of dimension <var>Dim</var> of array <var>A</var>. 
+The dimension <var>Dim</var> is 1-based.
+</descr>
+<errors>
+If the dimension is out of range, or <var>A</var> is not a variant array, an exception will be raised.  
+</errors>
+<seealso>
+<link id="VarArrayCreate"/>
+<link id="VarArrayDimCount"/>
+<link id="VarArrayLowBound"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarArrayHighBound.Result">
+<short>High bound of the dimension <var>Dim</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayHighBound.A">
+<short>Array to check</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayHighBound.Dim">
+<short>Dimension to check</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarArrayLock">
+<short>get a pointer to data of a variant array</short>
+<descr>
+<var>VarArrayLock</var> returns a pointer to the data of an array-typed variant <var>A</var> and locks the variant. 
+The pointer can then be used to manipulate the data of the array and be sure that the data is not modified by another process or thread. 
+While the data is not released using <link id="VarArrayUnlock"/> the variant cannot be changed or released, it is therefor impperative 
+that the variant is again released. Memory leaks will be the result if this is not done.
+</descr>
+<seealso>
+<link id="VarArrayUnlock"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarArrayLock.Result">
+<short>A pointer to the data of the variant</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayLock.A">
+<short>Variant array to get data from</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarArrayUnlock">
+<short>Release data captured by <var>VarArrayLock</var></short>
+<descr>
+<var>VarArrayUnlock</var> unlocks the variant array <var>A</var> that was previously locked using <link id="VarArrayLock"/>.
+</descr>
+<seealso>
+<link id="VarArrayLock"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayUnlock.A">
+<short>Variant to lock</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarArrayRef">
+<short>Get a reference to a variant array</short>
+<descr>
+<var>VarArrayRef</var> returns a reference to the variant array <var>A</var>. 
+</descr>
+<errors>
+An exception will be raised if the variant <var>A</var> is not an array.
+</errors>
+<seealso>
+<link id="VarArrayLock"/>
+<link id="VarArrayUnlock"/>
+<link id="VarIsArray"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarArrayRef.Result">
+<short>Variant with reference to variant array <var>A</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarArrayRef.A">
+<short>Variant array to get reference to</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarIsArray">
+<short>Check whether a variant is an array</short>
+<descr>
+<var>VarIsArray</var> returns <var>True</var> if <var>A</var> is an array. 
+If <var>AResolveByRef</var> is <var>True</var> (the default) then it will resolve all references first.
+</descr>
+<errors>
+None.
+</errors>
+<seealso>
+<link id="VarTypeIsValidArrayType"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarIsArray.Result">
+<short><var>True</var> if <var>A</var> is an array (or reference to an array)</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarIsArray.A">
+<short>Variant to test</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarIsArray.AResolveByRef">
+<short>When <var>True</var>, if the variant is a reference, it is dereferenced</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarTypeIsValidArrayType">
+<short>Check if a variant type can be used in an array</short>
+<descr>
+<var>VarTypeIsValidArrayType</var> checks if the variant type <var>aVarType</var> can be used as the type of a variant array. 
+It returns <var>True</var> if it is usable, false otherwise.
+Currently, the following types are valid: SmallInt, Integer,  Single, Double, Date, Currency, OleStr, Dispatch, Error, Boolean,
+ Variant, Unknown (interface IUnknown), ShortInt, Byte, Word, LongWord.
+</descr>
+<seealso>
+<link id="VarIsArray"/>
+<link id="VarTypeIsValidElementType"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarTypeIsValidArrayType.Result">
+<short><var>True</var> if the variant type can be used for an array element</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarTypeIsValidArrayType.aVarType">
+<short>Variant type to test</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarTypeIsValidElementType">
+<short>Check if a variant type can be used in an array</short>
+<descr>
+<p>
+<var>VarTypeIsValidElementType</var> checks if the variant type <var>aVarType</var> 
+can be used as the type of a variant array, similar to <link id="VarTypeIsValidArrayType"/>. 
+It returns <var>True</var> if it is usable, <var>False</var> otherwise.
+Currently, the following types are valid: SmallInt, Integer,  Single, Double, Date, Currency, OleStr, Dispatch, Error, Boolean,
+ Variant, Unknown (interface IUnknown), ShortInt, Byte, Word, LongWord int64. In addition, if the variant type is an known 
+custom variant type, <var>True</var> is also returned.
+</p>
+<p>
+Reference and array indicators are stripped before the test.
+</p>
+</descr>
+<seealso>
+<link id="VarIsArray"/>
+<link id="VarTypeIsValidArrayType"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarTypeIsValidElementType.Result">
+<short>True if the variant type <var>aVarType</var> can be used in an array</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarTypeIsValidElementType.aVarType">
+<short>Type to test</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="DynArrayToVariant">
+<short>Convert a Dynamic Array To a Variant</short>
+<descr>
+<p>
+<var>DynArrayToVariant</var> converts the dynamic array <var>DynArray</var> to a variant array <var>V</var>.
+It uses the type information in <var>TypeInfo</var> to calculate the number of dimensions, 
+array lengths and type of the element. The dynamic array can only contain basic types.
+</p>
+<p>
+If there is no data, an empty variant will be returned.
+</p>
+<p>
+The opposite transformation can be performed with <link id="DynArrayFromVariant"/>.
+</p>
+</descr>
+<seealso>
+<link id="VarArrayCreateError"/>  
+<link id="VarArrayCreate"/>
+<link id="VarArrayOf"/>
+<link id="DynArrayFromVariant"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="DynArrayToVariant.V">
+<short>Resulting variant array</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="DynArrayToVariant.DynArray">
+<short>Dynamic array to convert</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="DynArrayToVariant.TypeInfo">
+<short>Type information for the array</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="DynArrayFromVariant">
+<short>Convert a variant to a dynamic arrayt</short>
+<descr>
+<p>
+<var>DynArrayFromVariant</var> transforms a variant array to a dynamic array.
+It uses <var>TypInfo</var> to calculate the length, element type  and dimension of the array.
+</p>
+<p>
+The opposite transformation can be performed with <link id="DynArrayToVariant"/>.
+</p>
+</descr>
+<seealso>
+<link id="VarArrayCreateError"/>  
+<link id="VarArrayCreate"/>
+<link id="VarArrayOf"/>
+<link id="DynArrayToVariant"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="DynArrayFromVariant.DynArray">
+<short>Dynamic array to fill with data</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="DynArrayFromVariant.V">
+<short>Variant to get data from</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="DynArrayFromVariant.TypeInfo">
+<short>Type information for dynamic array</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="Unassigned">
+<short>Return an unassigned variant</short>
+<descr>
+<var>UnAssigned</var> returns an unassigned variant (<var>type = varEmpty</var>). 
+It can be used to test for equality with an empty variant.
+</descr>
+<seealso>
+<link id="Null"/>
+<link id="EmptyParam"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="Unassigned.Result">
+<short>An empty variant</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="Null">
+<short>Return a null variant</short>
+<descr>
+<var>UnAssigned</var> returns a Null variant (<var>type = varNull</var>). 
+It can be used to test for equality with a Null variant.
+</descr>
+<seealso>
+<link id="UnAssigned"/>
+<link id="EmptyParam"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="Null.Result">
+<short>A Null variant</short>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="EmptyParam">
+<short>Empty parameter variant</short>
+<descr>
+<var>EmptyParam</var> is an initialized variant with type <var>varError</var> and error value <var>VAR_PARAMNOTFOUND</var>.
+In difference with <link id="Null"/> and <link id="UnAssigned"/> it is a variable. You should take care never to write to it.
+</descr>
+<seealso>
+<link id="Null"/>
+<link id="UnAssigned"/>
+</seealso>
+</element>
+
+<!-- enumeration type Visibility: default -->
+<element name="TVarCompareResult">
+<short>Compare 2 variant values</short>
+<descr>
+<p>
+<var>TVarCompareResult</var> is used when comparing 2 custom variant values in <link id="TCustomVariantType.Compare"/>.
+The following values exist:</p>
+<dl>
+<dt>crLessThan</dt><dd><printshort id="TVarCompareResult.crLessThan"/></dd>
+<dt>crGreaterThan</dt><dd><printshort id="TVarCompareResult.crGreaterThan"/></dd>
+<dt>crEqual</dt><dd><printshort id="TVarCompareResult.crEqual"/></dd>
+</dl>
+</descr>
+<seealso>
+<link id="TCustomVariantType.Compare"/>
+</seealso>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TVarCompareResult.crLessThan">
+<short>The first value is less than the second value</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TVarCompareResult.crEqual">
+<short>Both values are equal</short>
+</element>
+
+<!-- enumeration value Visibility: default -->
+<element name="TVarCompareResult.crGreaterThan">
+<short>The first value is greater than the second value</short>
+</element>
+
+<!-- class Visibility: default -->
+<element name="TCustomVariantType">
+<short>Base class for a custom variant type</short>
+<descr>
+<p>
+<var>TCustomVariantType</var> is used as a base class to implement custom variants. 
+To define a custom variant type, a descendent of <var>TCustomVariant</var> must be made, 
+and the appropriate methods must be overridden and implemented according to the specifications 
+of the new type. Typically this means defining how your new type maps to another variant or a 
+basic type. 
+</p>
+<p>
+Note that the <var>TCustomVariantType</var> descendent does not hold the data of the variant: 
+it just describes how a variant record (<link id="#rtl.system.TVarRec">TVarRec</link>) 
+that contains the new type's data can be examined or manipulated.
+</p>
+</descr>
+<seealso>
+<link id="#rtl.system.TVarRec"/>
+</seealso>
+</element>
+
+<!-- constructor Visibility: public -->
+<element name="TCustomVariantType.Create">
+<short>Instantiate a new custom variant type</short>
+<descr>
+<var>Create</var> sets up the necessary reference counting mechanisms to act as an interface, 
+and assigns the new variant type identifier.
+If specified, the <var>RequestedVarType</var> is the variant type that is registered.
+if it is zero, a new identifier is assigned.
+</descr>
+<seealso>
+<link id="TCustomVariantType.Destroy"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.Create.RequestedVarType">
+<short>New custom variant type number</short>
+</element>
+
+<!-- destructor Visibility: public -->
+<element name="TCustomVariantType.Destroy">
+<short>Unregister variant type </short>
+<descr>
+<var>Destroy</var> unregisters the custom variant type and removes the instance from memory. 
+After this is called, variants with the (now unregistered) type can no longer be used.
+</descr>
+<seealso>
+<link id="TCustomVariantType.Create"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomVariantType.IsClear">
+<short>Is the custom value unassigned ?</short>
+<descr>
+<p>
+<var>IsClear</var> must be overridden to decide whether the custom variant <var>V</var> is equivalent to <var>varClear</var> (unassigned) value.
+The <link id="VarIsClear"/> function calls this method to decide whether a custom variant is unassigned.
+</p>
+<p>
+The <var>TCustomVariantType</var> implementation of <var>IsClear</var> always returns <var>False</var>.
+</p>
+</descr>
+<seealso>
+<link id="VarIsClear"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TCustomVariantType.IsClear.Result">
+<short><var>True</var> if the custom variant <var>V</var> is unassigned</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.IsClear.V">
+<short>Custom variant to test</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomVariantType.Cast">
+<short>Cast a custom variant to another type</short>
+<descr>
+<p>
+<var>Cast</var> is called when a variant value <var>Source</var> is cast to a custom variant <var>Dest</var>. 
+Descendents must override this method to provide the desired conversion behaviour.
+</p>
+<p>
+The  <var>TCustomVariantType</var> implementation of <var>Cast</var> calls <var>CastTo</var> on the source variant with as destination type the custom variant type.
+</p>
+</descr>
+<errors>
+If the variant type cannot be cast, an exception is raised.
+</errors>
+<seealso>
+<link id="TCustomVariantType.CastTo"/>
+<link id="TCustomVariantType.CastToOle"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.Cast.Dest">
+<short>Custom variant to copy value to</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.Cast.Source">
+<short>Variant to copy value from</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomVariantType.CastTo">
+<short>Cast a custom variant to another type</short>
+<descr>
+<p>
+<var>CastTo</var> is called when a custom variant value <var>Source</var> is cast 
+to a variant type <var>aVarType</var> and stores the result in <var>Dest</var>.
+Descendents must override this method to provide the desired conversion behaviour.
+</p>
+</descr>
+<seealso>
+<link id="TCustomVariantType.Cast"/>
+<link id="TCustomVariantType.CastToOle"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.CastTo.Dest">
+<short>Variant to store the cast value in</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.CastTo.Source">
+<short>Custom variant to cast to new type <var>aVarType</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.CastTo.aVarType">
+<short>Variant type to cast the custom variant to</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomVariantType.CastToOle">
+<short>Cast variant value to OLE value</short>
+<descr>
+<p>
+<var>CastToOle</var> is called when a variant must be cast to a value that can be used in OLE variants.
+Descendents must override this method to provide the desired conversion behaviour.
+</p>
+<p>
+The <var>TCustomVariantType</var> implementation of <var>CastToOle</var> raises an 'unsupported' exception.
+</p>
+</descr>
+<seealso>
+<link id="TCustomVariantType.Cast"/>
+<link id="TCustomVariantType.CastTo"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.CastToOle.Dest">
+<short>OLE variant to cast into</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.CastToOle.Source">
+<short>Custom variant value that must be cast</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomVariantType.Clear">
+<short>Clear a value</short>
+<descr>
+<p>
+<var>Clear</var> is called when a variant value must be cleared, by <var>VarClear</var>. 
+This is an abstract method that must be overridden and implemented in descendent classes.
+ When the method returns, the type of the variant record must be <var>varClear</var>
+</p>
+<p>
+If the custom variant value used some heap memory (for intance in an object) then this is the place to release that memory.
+</p>
+</descr>
+<errors>
+If this method is not overridden, an abstract error will be thrown.
+</errors>
+<seealso>
+<link id="TCustomVariantType.IsClear"/>
+<link id="TCustomVariantType.Copy"/>
+<link id="VarClear"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.Clear.V">
+<short>Custom variant value to clear</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomVariantType.Copy">
+<short>Copy a custom variant value</short>
+<descr>
+<p>
+<var>Copy</var> is used when a custom variant value is assigned to another variant. 
+This is an abstract method that must be overridden and implemented in descendent classes.
+When the method returns, the type of the <var>Dest</var> variant record must be equal to the <var>Source</var> 
+type (the custom varant type value).
+</p>
+<p>
+If <var>Indirect</var> is <var>True</var> source contains a reference to the custom variant. In that case, dest should also contain a reference.
+
+</p>
+</descr>
+<errors>
+If this method is not overridden, an abstract error will be thrown.
+</errors>
+<seealso>
+<link id="TCustomVariantType.Clear"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.Copy.Dest">
+<short>Destination custom variant</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.Copy.Source">
+<short>Source custom variant</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.Copy.Indirect">
+<short>Must the copy be indirect</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomVariantType.BinaryOp">
+<short>Perform a binary mathematical operation</short>
+<descr>
+<var>BinaryOp</var> performs <var>Operation</var> on <var>Left</var> and <var>Right</var> and stores the result of the result in <var>Left</var>.
+The <var>TCustomVariantType</var> implementation of this method raises an invalid operation error. Descendent classes must override this. 
+</descr>
+<errors>
+If a descendent does not override this, an invalid operation error is raised.
+</errors>
+<seealso>
+<link id="=TCustomVariantType.UnaryOp"/>
+<link id="=TCustomVariantType.CompareOp"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.BinaryOp.Left">
+<short>Left operand of binary operation, contains result on return</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.BinaryOp.Right">
+<short>Right operand of binary operation </short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.BinaryOp.Operation">
+<short>Binary operation to perform.</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomVariantType.UnaryOp">
+<short>Perform a unary mathematical operation</short>
+<descr>
+<var>BinaryOp</var> performs <var>Operation</var> on <var>Right</var> and stores the result of the result in <var>Right</var>.
+The <var>TCustomVariantType</var> implementation of this method raises an invalid operation error. 
+Descendent classes must override  this method.
+</descr>
+<errors>
+If a descendent does not override this, an invalid operation error is raised.
+</errors>
+<seealso>
+<link id="=TCustomVariantType.BinaryOp"/>
+<link id="=TCustomVariantType.CompareOp"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.UnaryOp.Right">
+<short>Operand and result</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.UnaryOp.Operation">
+<short>Unary operation to perform</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TCustomVariantType.CompareOp">
+<short>Check result of a comparison between 2 custom variant values</short>
+<descr>
+<var>CompareOp</var> performs the comparison specified in <var>Operation</var> on <var>left</var> and <var>Right</var> 
+and returns <var>True</var> if the values satisfy the requested operation.
+The <var>TCustomVariantType</var> implementation of this method raises an 'unsupported' error. 
+Descendent classes must override this method.
+</descr>
+<errors>
+If a descendent does not override this, an 'unsupported' error is raised.
+</errors>
+<seealso>
+<link id="TCustomVariantType.Compare"/>
+<link id="TCustomVariantType.UnaryOp"/>
+<link id="TCustomVariantType.binaryOp"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TCustomVariantType.CompareOp.Result">
+<short>Result of comparison operarion</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.CompareOp.Left">
+<short>Left operand</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.CompareOp.Right">
+<short>Right operand</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.CompareOp.Operation">
+<short>Compare operation to check</short>
+</element>
+
+<!-- procedure Visibility: public -->
+<element name="TCustomVariantType.Compare">
+<short>Comparison 2 custom variant values</short>
+<descr>
+<var>Compare</var> performs the comparison specified in <var>Operation</var> on <var>left</var> and <var>Right</var> 
+and returns the result of the comparison.
+The <var>TCustomVariantType</var> implementation of this method raises an 'unsupported' error. 
+Descendent classes must override this method.
+</descr>
+<errors>
+If a descendent does not override this, an 'unsupported' error is raised.
+</errors>
+<seealso>
+<link id="TCustomVariantType.CompareOp"/>
+<link id="TCustomVariantType.UnaryOp"/>
+<link id="TCustomVariantType.binaryOp"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.Compare.Left">
+<short>Left operand</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.Compare.Right">
+<short>Right operand</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TCustomVariantType.Compare.Relationship">
+<short>Relationship to test</short>
+</element>
+
+<!-- property Visibility: public -->
+<element name="TCustomVariantType.VarType">
+<short>Registered type</short>
+<descr>
+<var>VarType</var> is the custom variant type identifier for the custom variant values. 
+It is assigned by the system in the consutructor.
+</descr>
+<seealso>
+<link id="TCustomVariantType.Create"/>
+</seealso>
+</element>
+
+<!-- "class of" type Visibility: default -->
+<element name="TCustomVariantTypeClass">
+<short>Class of TCustomVariantType</short>
+<descr>
+<var>TCustomVariantTypeClass</var> is the class type of <var>TCustomVariantType</var>.
+</descr>
+<seealso>
+<link id="TCustomVariantType"/>
+</seealso>
+</element>
+
+<!-- array type Visibility: default -->
+<element name="TVarDataArray">
+<short>Dynamic array of vardata records.</short>
+<descr>
+<var>TVarDataArray</var> is a helper type for instance used in <link id="IVarInvokeable.DoFunction"/> to represent the arguments passed to a function.
+</descr>
+<seealso>
+<link id="IVarInvokeable.DoFunction"/>
+</seealso>
+</element>
+
+<!-- interface Visibility: default -->
+<element name="IVarInvokeable">
+<short>Interface needed for custom variants that need to implement dynamic properties and methods</short>
+<descr>
+<p>
+<var>IVarInvokeable</var> must be implemented by the <link id="TCustomVariantType"/> descendent if the custom variant
+needs to implement dynamic properties and methods.
+</p>
+<p>
+<var>IVarInvokeable</var> has four functions that must be implemented. 
+Any of these functions can be called whenever a custom variant's method is invoked or a property of the variant 
+is read or written using <var>DispInvoke</var>.
+</p>
+<p>
+The <var> TCustomVariantType</var> descendent <link id="TInvokeableVariantType"/> 
+implements the needed DispInvoke to call the <var>IVarInvokeable</var> interface, 
+so you can descend from that type instead when creating a new custom variant type 
+and override the needed functions.
+</p>
+</descr>
+<seealso>
+<link id="TInvokeableVariantType"/>
+<link id="TCustomVariantType"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="IVarInvokeable.DoFunction">
+<short>Called for methods that return a result (functions)</short>
+<descr>
+<p>
+<var>DoFunction</var> is called whenever a variant method that returns a result needs to be invoked.
+The <var>Dest</var> parameter points to the location where the result of the function must be placed; 
+the result must be a variant value.
+</p>
+<p>
+<var>V</var> is the variant on which the method is being executed. 
+The <var>Name</var> is the name of the function to execute, and 
+<var>Arguments</var> is an array of variant arguments that were passed to the function.
+</p>
+<p>
+The function must return <var>True</var> if the function was executed correctly, <var>False</var> otherwise.
+</p>
+</descr>
+<seealso>
+<link id="IVarInvokeable.DoProcedure"/>
+<link id="IVarInvokeable.GetProperty"/>
+<link id="IVarInvokeable.SetProperty"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="IVarInvokeable.DoFunction.Result">
+<short>Indicate whether the function was executed correctly</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.DoFunction.Dest">
+<short>On return, contains the result of the function</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.DoFunction.V">
+<short>Variant on which to operate</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.DoFunction.Name">
+<short>Name of the function to execute</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.DoFunction.Arguments">
+<short>Array with arguments passed to the function</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="IVarInvokeable.DoProcedure">
+<short>Called for methods that do not return a result (procedures)</short>
+<descr>
+<p>
+<var>DoProcedure</var> is called whenever a variant method that does not return a result needs to be invoked.
+<var>V</var> is the variant on which the method is being executed. 
+The <var>Name</var> is the name of the method to execute, and 
+<var>Arguments</var> is an array of variant arguments that were passed to the method.
+</p>
+<p>
+The function must return <var>True</var> if the procedure was executed correctly, <var>False</var> otherwise.
+</p>
+</descr>
+<seealso>
+<link id="IVarInvokeable.DoFunction"/>
+<link id="IVarInvokeable.GetProperty"/>
+<link id="IVarInvokeable.SetProperty"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="IVarInvokeable.DoProcedure.Result">
+<short>Indicate whether the function was executed correctly</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.DoProcedure.V">
+<short>Variant on which to operate</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.DoProcedure.Name">
+<short>Name of the procedure to execute</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.DoProcedure.Arguments">
+<short>Array with arguments passed to the procedure</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="IVarInvokeable.GetProperty">
+<short>Called when a property must be read</short>
+<descr>
+<p>
+<var>DoFunction</var> is called whenever a variant property is read. <var>Dest</var> must be filled with the value of the property on success.
+<var>V</var> is the variant on which the property is read.
+The <var>Name</var> is the name of the property to read.
+</p>
+<p>
+The function must return <var>True</var> if the property was read correctly, <var>False</var> otherwise.
+</p>
+</descr>
+<seealso>
+<link id="IVarInvokeable.DoFunction"/>
+<link id="IVarInvokeable.DoProcedure"/>
+<link id="IVarInvokeable.SetProperty"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="IVarInvokeable.GetProperty.Result">
+<short>Indicate whether the property was read correctly</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.GetProperty.Dest">
+<short>On success, contains the value of the property</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.GetProperty.V">
+<short>Variant to read property from</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.GetProperty.Name">
+<short>Name of property to read.</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="IVarInvokeable.SetProperty">
+<short>Called when a property must be set</short>
+<descr>
+<p>
+<var>DoFunction</var> is called whenever a variant property is written. <var>Value</var> is filled with the new value of the property.
+<var>V</var> is the variant on which the property is written.
+The <var>Name</var> is the name of the property to write.
+</p>
+<p>
+The function must return <var>True</var> if the property was written correctly, <var>False</var> otherwise.
+</p>
+</descr>
+<seealso>
+<link id="IVarInvokeable.DoFunction"/>
+<link id="IVarInvokeable.DoProcedure"/>
+<link id="IVarInvokeable.GetProperty"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="IVarInvokeable.SetProperty.Result">
+<short>Indicate whether the property was written correctly</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.SetProperty.V">
+<short>Variant to write property on</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.SetProperty.Name">
+<short>Name of property to write</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInvokeable.SetProperty.Value">
+<short>Value to set property to.</short>
+</element>
+
+<!-- class Visibility: default -->
+<element name="TInvokeableVariantType">
+<short><var>TCustomVariantType</var> descendent that implements <var>DispInvoke</var></short>
+<descr>
+<var>TInvokeableVariantType</var> is a <link id="TCustomVariantType"/> descendent which implements the <link id="TCustomVariantType.DispInvoke"/>  method.
+It translates the <var>DispInvoke"</var> method to calls to one or more of the four methods of <link id="IVarInvokeable"/>:
+<link id="IVarInvokeable.DoFunction">DoFunction</link> or 
+<link id="IVarInvokeable.DoProcedure">DoProcedure</link> for method calls (DISPATCH_METHOD) and
+<link id="IVarInvokeable.GetProperty">GetProperty</link> for property reading (DISPATCH_PROPERTYGET) or 
+<link id="IVarInvokeable.SetProperty">SetProperty</link> for property writing (DISPATCH_PROPERTYSET). Other combinations are possible.
+It has empty stubs for these methods, which must be implemented in a descendent that is used to describe a custom variant.
+</descr>
+<seealso>
+<link id="IVarInvokeable.DoFunction"/>
+<link id="IVarInvokeable.DoProcedure"/>
+<link id="IVarInvokeable.GetProperty"/>
+<link id="IVarInvokeable.SetProperty"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TInvokeableVariantType.DoFunction">
+<short>Empty stub for <var>IVarInvokeable.DoFunction</var>, to be implemented in descendents</short>
+<descr>
+<var>DoFunction</var> is the default implementation of <link id="IVarInvokeable.DoFunction"/>, 
+which always returns <var>False</var>. 
+It must be overridden in descendent classes to implement actual calling of a function.
+</descr>
+<seealso>
+<link id="IVarInvokeable.DoFunction"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TInvokeableVariantType.DoFunction.Result">
+<short>Always false</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.DoFunction.Dest">
+<short>Result of function call</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.DoFunction.V">
+<short>Variant on which to operate</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.DoFunction.Name">
+<short>Name of function to call</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.DoFunction.Arguments">
+<short>Arguments passed to function</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TInvokeableVariantType.DoProcedure">
+<short>Empty stub for <var>IVarInvokeable.DoProcedure</var>, to be implemented in descendents</short>
+<descr>
+<var>DoProcedure</var> is the default implementation of <link id="IVarInvokeable.DoProcedure"/>, 
+which always returns <var>False</var>. 
+It must be overridden in descendent classes to implement actual calling of a procedure.
+</descr>
+<seealso>
+<link id="IVarInvokeable.DoProcedure"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TInvokeableVariantType.DoProcedure.Result">
+<short>Always false</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.DoProcedure.V">
+<short>Variant on which to operate</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.DoProcedure.Name">
+<short>Name of procedure to call</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.DoProcedure.Arguments">
+<short>Arguments passed to procedure</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TInvokeableVariantType.GetProperty">
+<short>Empty stub for <var>IVarInvokeable.GetProperty</var>, to be implemented in descendents</short>
+<descr>
+<var>GetProperty</var> is the default implementation of <link id="IVarInvokeable.GetProperty"/>, 
+which always returns <var>False</var>. 
+It must be overridden in descendent classes to implement actual reading of a property.
+</descr>
+<seealso>
+<link id="IVarInvokeable.GetProperty"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TInvokeableVariantType.GetProperty.Result">
+<short>Always false</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.GetProperty.Dest">
+<short>Property value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.GetProperty.V">
+<short>Variant on which to operate</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.GetProperty.Name">
+<short>Name of property to read</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TInvokeableVariantType.SetProperty">
+<short>Empty stub for <var>IVarInvokeable.SetProperty</var>, to be implemented in descendents</short>
+<descr>
+<var>SetProperty</var> is the default implementation of <link id="IVarInvokeable.SetProperty"/>, 
+which always returns <var>False</var>. 
+It must be overridden in descendent classes to implement actual writing of a property.
+</descr>
+<seealso>
+<link id="IVarInvokeable.SetProperty"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TInvokeableVariantType.SetProperty.Result">
+<short>Always false</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.SetProperty.V">
+<short>Variant on which to operate</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.SetProperty.Name">
+<short>Name of property to read</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TInvokeableVariantType.SetProperty.Value">
+<short>Value to which property must be set</short>
+</element>
+
+<!-- interface Visibility: default -->
+<element name="IVarInstanceReference">
+<short>Interface for variants that refer to an object</short>
+<descr>
+<p>
+<var>IVarInstanceReference</var> is used to get the instance of an object
+from a custom variant.  It has only one method, <link
+id="IVarInstanceReference.GetInstance">GetInstance</link> which is used to
+retrieve the instance of a variant that contains an object.
+</p>
+<p>
+The <link id="TPublishableVariantType"/> descendent of <link id="TInvokeableVariantType"/> uses this interface to implement reading published properties from the instance.
+</p>
+</descr>
+<seealso>
+<link id="IVarInstanceReference.GetInstance"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="IVarInstanceReference.GetInstance">
+<short>Return the object instance referenced by the custom variant</short>
+<descr>
+<var>GetInstance</var> must return the object instance referenced by the custom variant <var>V</var>.
+</descr>
+<seealso>
+<link id="TPublishableVariantType"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="IVarInstanceReference.GetInstance.Result">
+<short>Instance referred to by <var>V</var></short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="IVarInstanceReference.GetInstance.V">
+<short>Custom variant to get instance from</short>
+</element>
+
+<!-- class Visibility: default -->
+<element name="TPublishableVariantType">
+<short><var>TInvokeableVariantType</var> descendent that implements reading published properties</short>
+<descr>
+<var>TPublishableVariantType</var> implements the <link id="IVarInvokeable.GetProperty"/> and <link id="IVarInvokeable.SetProperty"/>
+methods by getting or setting the published properties of the class instance returned by the <var>IVarInstanceReference</var> interface it implements.
+</descr>
+<seealso>
+<link id="TInvokeableVariantType"/>
+<link id="IVarInvokeable.GetProperty"/>
+<link id="IVarInvokeable.SetProperty"/>
+<link id="IVarInstanceReference"/>
+</seealso>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TPublishableVariantType.GetProperty">
+<short>Read the property</short>
+<descr>
+<var>GetProperty</var> implements reading the property by looking for the property in the published properties of the
+instance returned by the <link id="IVarInstanceReference"/> interface, and returning the value as a variant.
+</descr>
+<seealso>
+<link id="IVarInstanceReference"/>
+<link id="IVarInvokeable.GetProperty"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TPublishableVariantType.GetProperty.Result">
+<short>Always True.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TPublishableVariantType.GetProperty.Dest">
+<short>Value of the property</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TPublishableVariantType.GetProperty.V">
+<short>Variant to get property from.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TPublishableVariantType.GetProperty.Name">
+<short>Name of property to read</short>
+</element>
+
+<!-- function Visibility: public -->
+<element name="TPublishableVariantType.SetProperty">
+<short>Write the property</short>
+<descr>
+<var>SetProperty</var> implements writing the property by looking for the property in the published properties of the
+instance returned by the <link id="IVarInstanceReference"/> interface, and setting the value as a variant.
+</descr>
+<seealso>
+<link id="IVarInstanceReference"/>
+<link id="IVarInvokeable.SetProperty"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="TPublishableVariantType.SetProperty.Result">
+<short>Always true</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TPublishableVariantType.SetProperty.V">
+<short>Variant to set property on</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TPublishableVariantType.SetProperty.Name">
+<short>Name of property to set</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TPublishableVariantType.SetProperty.Value">
+<short>Value to set property to</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="FindCustomVariantType">
+<short>Find a custom variant class on vartype</short>
+<descr>
+<p>
+<var>FindCustomVariantType</var> searches the registry of known <link id="TCustomVariantType"/> 
+classes and returns the instance registered for the variant type <var>aVarType</var> or the class 
+name <var>TypeName</var>  in <var>CustomVariantType</var> if found. 
+</p>
+<p>
+It returns <var>True</var> if it found a matching definition, or <var>False</var> otherwise.
+</p>
+</descr>
+<seealso>
+<link id="TCustomVariantType"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="FindCustomVariantType.Result">
+<short><var>True</var> if a matching entry was found, <var>False</var> if not</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="FindCustomVariantType.aVarType">
+<short>Variant type to look for</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="FindCustomVariantType.CustomVariantType">
+<short>Instance of <var>TCustomVariantType</var> that handles <var>aVarType</var>.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="FindCustomVariantType.TypeName">
+<short>Type name to look for</short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TAnyProc">
+<short>Callback handler to clear variants of type <var>Any</var></short>
+<descr>
+<var>TAnyProc</var> is the type for the <link id="ClearAnyProc"/>,
+<link id="ChangeAnyProc"/>  
+and <link id="RefAnyProx"/> callbacks. It accepts a reference to a variant record. 
+The operation to be performed depends on the callback.
+</descr>
+<seealso>
+<link id="ClearAnyProc"/>
+<link id="ChangeAnyProc"/>
+<link id="RefAnyProx"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TAnyProc.V">
+<short>Variant on which to  perform operation</short>
+</element>
+
+<!-- procedure type Visibility: default -->
+<element name="TVarDispProc">
+<short>Callback to perform dispatch call on variant</short>
+<descr>
+<var>TVarDispProc</var> is the type for the <link id="VarDispProc"/> callback handler.
+It accepts a destination variant (<var>Dest</var>) for a result. <var>Source</var> 
+is the variant on which the operation was invoked, <var>CallDesc</var> 
+Describes the arguments to the call and <var>Params</var> points to the 
+parameters provided in the call.
+</descr>
+<seealso>
+<link id="VarDispProc"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TVarDispProc.Dest">
+<short>Result of the operation</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TVarDispProc.Source">
+<short>Variant the operation was invoked on</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TVarDispProc.CallDesc">
+<short>Call description</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="TVarDispProc.Params">
+<short>Parameters provided to call</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CMaxNumberOfCustomVarTypes">
+<short>Maximum amount of custom variant types</short>
+<descr>
+<var>CMaxNumberOfCustomVarTypes</var> is the amount of custom variant types that can be registered.
+The range of the variant type indicator (<var>vType</var>) only allows a limited amount of variants. 
+This constant is the maximum amount.
+</descr>
+<seealso>
+<link id="TVarData"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CMinVarType">
+<short>First allowed custom variant type index</short>
+<descr>
+<var>CMinVarType</var> is the first allowed value for <var>vType</var> when registering a variant 
+type by the OS, instantiating a <link id="TCustomVariantType"/> to register a variant type. 
+It is better not to specify a custom variant type value, but let the system allocate a custom variant type. 
+</descr>
+<seealso>
+<link id="TCustomVariantType.Create"/>
+<link id="TCustomVariantType"/>
+<link id="CFirstUserType"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CMaxVarType">
+<short>Maximum value for variant type</short>
+<descr>
+<var>CMaxVarType</var> is the maximum allowed value for <var>vType</var> when registering a variant 
+type, instantiating a <link id="TCustomVariantType"/> to register a variant type. 
+It is better not to specify a value, but let the system allocate a custom variant type. 
+</descr>
+<seealso>
+<link id="TCustomVariantType.Create"/>
+<link id="TCustomVariantType"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CIncVarType">
+<short>Increment above <var>CMinVarType</var>  </short>
+<descr>
+<var>CIncVarType</var> specifies the width of the gap after <link id="CMinVarType"/>. 
+No user types are registered between <var>CMinVarType</var> and <var>CMinVarType+CIncVarType</var>.
+</descr>
+<seealso>
+ <link id="CMinVarType"/>
+ <link id="CFirstUserType"/>
+</seealso>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="CFirstUserType">
+<short>First allocated user type</short>
+<descr>
+<var>CFirstUserType</var> is the first allocated value for <var>vType</var> when registering a variant 
+type by the RTL, when instantiating a <link id="TCustomVariantType"/> to register a variant type. 
+It is better not to specify a custom variant type value, but let the system allocate a custom variant type. 
+</descr>
+<seealso>
+<link id="TCustomVariantType.Create"/>
+<link id="TCustomVariantType"/>
+<link id="CFirstUserType"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="NullEqualityRule">
+<short>Variable describing what to do when checking for equality of <var>Null</var> values</short>
+<descr>
+<p>
+<var>NullEqualityRule</var> is checked when the system needs to compare the equality of variants with
+<var>Null</var> values (operations <var>opCmpEq</var>, <var>opCmpNe</var>). 
+Check <link id="TNullCompareRule"/> for a list of allowed values. The default is <var>ncrLoose</var>.
+</p>
+<p>
+For determining the order (less than, greater than etc.) see <link id="NullMagnitudeRule"/>.
+</p>
+</descr>
+<seealso>
+<link id="TNullCompareRule"/>
+<link id="NullMagnitudeRule"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="NullMagnitudeRule">
+<short>Variable describing what to do when checking for order of <var>Null</var> values</short>
+<descr>
+<p>
+<var>NullEqualityRule</var> is checked when the system needs to determine the ordering of variants with
+<var>Null</var> values (operations like <var>opCmpGe</var>, <var>opCmpLe</var>). 
+Check <link id="TNullCompareRule"/> for a list of allowed values. The default is <var>ncrLoose</var>.
+</p>
+<p>
+For determining equality (<var>opCmpEq</var>, <var>opCmpNe</var>) of Null values, see <link id="NullEqualityRule"/>.
+</p>
+</descr>
+<seealso>
+<link id="TNullCompareRule"/> 
+<link id="NullEqualityRule"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="NullStrictConvert">
+<short>What to do when converting <var>Null</var> to another type</short>
+<descr>
+<var>NullStrictConvert</var> determines what to do when typecasting a <var>Null</var> value to another type: 
+If it is <var>True</var> then an exception will be raised using <link id="VarCastError"/>. 
+If it is <var>False</var> then a sensible default is used: 0 or some variation on 0 based on the type of the variant.
+For string values the <link id="NullAsStringValue"/> is used.
+</descr>
+<seealso>
+<link id="VarCastError"/>
+<link id="NullAsStringValue"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="NullAsStringValue">
+<short>String value to use when converting a <var>Null</var> to a string.</short>
+<descr>
+<var>NullAsStringValue</var> is the value used when converting a <var>Null</var> to a string. 
+It is only used when <link id="NullStrictConvert"/> is <var>False</var>, 
+if <link id="NullStrictConvert"/> is <var>True</var>, the value of <var>NullAsStringValue</var> is ignored.
+</descr>
+<seealso>
+<link id="NullStrictConvert"/> 
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="PackVarCreation">
+<short>Size to use when creating an array of integers</short>
+<descr>
+<var>PackVarCreation</var> determines what to do when a variant array is created for elements with an integer type (varSmallint, varByte and the like).
+A value of <var>False</var> means the array will contain <var>varInteger</var> elements. This can result in better memory alignment.
+When <var>PackVarCreation</var> is <var>True</var> then the smallest possible size is selected for the elements.
+</descr>
+<seealso>
+<link id="VarArrayCreate"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="OleVariantInt64AsDouble">
+<short>How to convert Int64 variants</short>
+<descr>
+<var>OleVariantInt64AsDouble</var> describes what to do when a Int64 value must be converted to a OleVariant value.
+When <var>True</var> the Int64 variant is cast to a double. When <var>False</var>, it remains an int64 value.
+</descr>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="VarDispProc">
+<short>Handler called by <var>DispInvoke</var></short>
+<descr>
+<var>VarDispProc</var> is the handler invoked when a dispatch invoke is handled on a variant of type
+<var>varDispatch</var>, <var>varAny</var> or <var>varUnknown</var>.
+</descr>
+<seealso>
+<link id="ClearAnyProc"/>
+<link id="ChangeAnyProc"/>
+<link id="RefAnyProc"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="ClearAnyProc">
+<short>Procedure called to clear a variant</short>
+<descr>
+<var>ClearAnyProc</var> is called when the system needs to clear a variant of type <var>varAny</var>. 
+it must clear the variant.
+</descr>
+<seealso>
+<link id="VarDispProc"/>
+<link id="ChangeAnyProc"/>
+<link id="RefAnyProc"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="ChangeAnyProc">
+<short>Not used</short>
+<descr>
+<var>ChangeAnyProc</var> is currently not used in the <var>Variants</var> unit.
+</descr>
+<seealso>
+<link id="ClearAnyProc"/>
+<link id="VarDispProc"/>
+<link id="RefAnyProc"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="RefAnyProc">
+<short>Handler called to obtain a reference to a <var>varAny</var> typed variant</short>
+<descr>
+<var>RefAnyProc</var> is called when the system needs to obtain a reference to a variant 
+of type <var>varAny</var>. it must replace the variant with a reference to the variant.
+</descr>
+<seealso>
+<link id="VarDispProc"/>
+<link id="ChangeAnyProc"/>
+</seealso>
+</element>
+
+<!-- variable Visibility: default -->
+<element name="InvalidCustomVariantType">
+<short>Handler for invalid custom variants</short>
+<descr>
+<var>InvalidCustomVariantType</var> can be set to a <link id="TCustomVariantType"/> instance to indicate an 
+an unknown type. By default it is set to <var>Pointer(-1)</var>.
+</descr>
+<seealso>
+<link id="FindCustomVariantType"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarCastError">
+<short>Raise a variant type cast error <var>EVariantTypeCastError</var></short>
+<descr>
+<var>VarCastError</var> raises an <link id="EVariantTypeCastError"/> exception. 
+If the source and destination types are specified, then a description of the types is included in the error message.
+</descr>
+<seealso>
+<link id="EVariantTypeCastError"/>
+<link id="VarCastErrorOle"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarCastError.ASourceType">
+<short>Source variant type</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarCastError.ADestType">
+<short>Destination variant type</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarCastErrorOle">
+<short>Raise a variant type cast error <var>EVariantTypeCastError</var></short>
+<descr>
+<var>VarCastError</var> raises an <link id="EVariantTypeCastError"/> exception.
+a description of the source type (<var>aSourceType</var>) is included in the error message.
+</descr>
+<seealso>
+<link id="EVariantTypeCastError"/>
+<link id="VarCastError"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarCastErrorOle.ASourceType">
+<short>Source variant type</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarInvalidOp">
+<short>Raise a <var>EVariantInvalidOpError</var> error</short>
+<descr>
+<var>VarInvalidOp</var> raises an <link id="EVariantInvalidOpError"/> exception.
+when the left and/or right operand types (<var>aLeft</var>, <var>aRight</var> and the operation
+are specified, a description of the operand types and operation is included in the error message.
+</descr>
+<seealso>
+<link id="EVariantInvalidOpError"/>
+<link id="VarCastError"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarInvalidOp.aLeft">
+<short>Left operand variant type</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarInvalidOp.aRight">
+<short>Right operand variant type</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarInvalidOp.aOpCode">
+<short>Operation performed</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarInvalidNullOp">
+<short>Raise an <var>EVariantInvalidOpError</var> error</short>
+<descr>
+<var>VarInvalidNullOp</var> raises an <link id="EVariantInvalidOpError"/> exception including 
+null type description.
+</descr>
+<seealso>
+<link id="EVariantInvalidOpError"/>
+<link id="VarInvalidOp"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarBadTypeError">
+<short>Raise an <var>EVariantBadVarTypeError</var> error</short>
+<descr>
+<var>VarBadTypeError</var> raises an <link id="EVariantBadVarTypeError"/> exception.
+</descr>
+<seealso>
+<link id="EVariantBadVarTypeError"/>
+<link id="VarInvalidNullOp"/>
+<link id="VarInvalidOp"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarOverflowError">
+<short>Raise an <var>EVariantOverflowError</var> error.</short>
+<descr>
+<var>VarOverflowError</var> raises a <link id="EVariantOverflowError"/>
+exception with a description of the <var>ASourceType</var> and
+<var>ADestType</var> types in the message.
+</descr>
+<seealso>
+<link id="EVariantOverflowError"/>
+<link id="VarInvalidNullOp"/>
+<link id="VarInvalidOp"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarOverflowError.ASourceType">
+<short>Source variant type</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarOverflowError.ADestType">
+<short>Destination variant type</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarBadIndexError">
+<short>Raise an <var>EVariantBadIndexError</var> error</short>
+<descr>
+<var>VarBadIndexError</var> raises an <link id="EVariantBadIndexError"/> exception with a standard error message.
+</descr>
+<seealso>
+<link id="EVariantBadIndexError"/>
+<link id="VarInvalidNullOp"/>
+<link id="VarInvalidOp"/>
+<link id="VarArrayLockedError"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarArrayLockedError">
+<short>Raise an <var>EVariantArrayLockedError</var> error</short>
+<descr>
+<var>VarArrayLockedError</var> raises an <link id="EVariantArrayLockedError"/> exception with a standard error message.
+</descr>
+<seealso>
+<link id="EVariantArrayLockedError"/>
+<link id="VarInvalidNullOp"/>
+<link id="VarInvalidOp"/>
+<link id="VarBadIndexError"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarNotImplError">
+<short>Raise an <var>EVariantNotImplError</var> error</short>
+<descr>
+<var>VarNotImplError</var> raises an <link id="EVariantNotImplError"/> exception with a standard error message.
+</descr>
+<seealso>
+<link id="EVariantNotImplError"/>
+<link id="VarInvalidNullOp"/>
+<link id="VarInvalidOp"/>
+<link id="VarBadIndexError"/>
+<link id="VarArrayLockedError"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarOutOfMemoryError">
+<short>Raise an <var>EVariantOutOfMemoryError</var> error</short>
+<descr>
+<var>VarOutOfMemoryError</var> raises an <link id="EVariantOutOfMemoryError"/> exception with a standard error message.
+</descr>
+<seealso>
+<link id="EVariantOutOfMemoryError"/>
+<link id="VarInvalidNullOp"/>
+<link id="VarInvalidOp"/>
+<link id="VarBadIndexError"/>
+<link id="VarArrayLockedError"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarInvalidArgError">
+<short>Raise an <var>EVariantInvalidArgError</var> error</short>
+<descr>
+<var>VarInvalidArgError</var> raises an <link id="EVariantInvalidArgError"/> exception with a standard error message.
+If the <var>AType</var> argument is specified, a description of the argument type is included in the error message.
+</descr>
+<seealso>
+<link id="EVariantInvalidArgError"/>
+<link id="VarInvalidNullOp"/>
+<link id="VarInvalidOp"/>
+<link id="VarBadIndexError"/>
+<link id="VarArrayLockedError"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarInvalidArgError.AType">
+<short>Type of the argument</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarUnexpectedError">
+<short>Raise an <var>EVariantUnexpectedError</var> error</short>
+<descr>
+<var>VarUnexpectedError</var> raises an <link id="EVariantUnexpectedError"/> exception with a standard error message.
+</descr>
+<seealso>
+<link id="EVariantUnexpectedError"/>
+<link id="VarInvalidNullOp"/>
+<link id="VarInvalidOp"/>
+<link id="VarBadIndexError"/>
+<link id="VarArrayLockedError"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarRangeCheckError">
+<short>Raise an <var>EVariantOverflowError</var> error</short>
+<descr>
+<var>VarRangeCheckError</var> raises an <link id="EVariantOverflowError"/> exception with a standard error message.
+A description of the type <var>AType</var> is included in the error message, similarly if a <var>ASourceType</var>
+and <var>aDestType</var> source and destination types are provided. 
+</descr>
+<seealso>
+<link id="EVariantOverflowError"/>
+<link id="VarOverflowError"/>
+<link id="VarInvalidNullOp"/>
+<link id="VarInvalidOp"/>
+<link id="VarBadIndexError"/>
+<link id="VarArrayLockedError"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarRangeCheckError.AType">
+<short>Range type for which overflow occurs</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarRangeCheckError.ASourceType">
+<short>Source type</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarRangeCheckError.ADestType">
+<short>Destination type</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarArrayCreateError">
+<short>Raise an <var>EVariantArrayCreateError</var> error</short>
+<descr>
+<var>VarArrayCreateError</var> raises an <link id="EVariantArrayCreateError"/> exception with a standard error message.
+</descr>
+<seealso>
+<link id="EVariantArrayCreateError"/>
+<link id="VarOverflowError"/>
+<link id="VarInvalidNullOp"/>
+<link id="VarInvalidOp"/>
+<link id="VarBadIndexError"/>
+<link id="VarArrayLockedError"/>
+</seealso>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="VarResultCheck">
+<short>Check the result of an operation and raise exception if not OK.</short>
+<descr>
+<var>VarResultCheck</var> checks the result <var>aResult</var>. If it difers from <var>VAR_OK</var> then an appropriate exception is raised based on the error code.
+If a source and destination type <var>ASourceType</var> and <var>aDestType</var> are specified they are included in the error message.
+</descr>
+<seealso>
+<link id="VarOverflowError"/>
+<link id="VarInvalidNullOp"/>
+<link id="VarInvalidOp"/>
+<link id="VarBadIndexError"/>
+<link id="VarArrayLockedError"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarResultCheck.AResult">
+<short>Result code to check</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarResultCheck.ASourceType">
+<short>Source variant type</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarResultCheck.ADestType">
+<short>Destination variant type</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="HandleConversionException">
+<short>Convert an exception to a variant exception</short>
+<descr>
+<var>HandleConversionException</var> converts a RTL exception (<link id="EConvertError"/> or 
+<link id="ERangeError"/> or <link id="EOverFlow"/>) to an appropriate variant error
+(<link id="varCastError"/> and <link id="varOverFlowError"/>). Other exceptions are re-raised. 
+If a source and destination type <var>ASourceType</var> and <var>aDestType</var> are specified they are included in the error message.
+</descr>
+<seealso>
+<link id="EConvertError"/>
+<link id="ERangeError"/> 
+<link id="varCastError"/>
+<link id="varOverFlowError"/>
+<link id="EOverFlow"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="HandleConversionException.ASourceType">
+<short>Source variant type</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="HandleConversionException.ADestType">
+<short>Destination variant type</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="VarTypeAsText">
+<short>Return a textual description of the variant type</short>
+<descr>
+<var>VarTypeAsText</var> returns a textual description of the variant type <var>aType</var>.
+It is used in all exception raising routines to describe types, if a type is provided.
+For custom variant types, the name of the class is returned.
+</descr>
+<seealso>
+<link id="VarOpAsText"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="VarTypeAsText.Result">
+<short>Textual description of the type</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="VarTypeAsText.AType">
+<short>Type for which to get description</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="FindVarData">
+<short>Return a pointer to variant data</short>
+<descr>
+<var>FindVarData</var> returns a pointer to the argument <var>V</var> if it is not a reference.
+If it is a reference, then the reference pointer is returned.
+</descr>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="FindVarData.Result">
+<short>Pointer to actual data</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="FindVarData.V">
+<short>Variant data to get reference to</short>
+</element>
+
+<!-- constant Visibility: default -->
+<element name="VarOpAsText">
+<short>Names of operations</short>
+<descr>
+<var>VarOpAsText</var> is an array with the names of the various variant operations.
+</descr>
+<seealso>
+<link id="VarTypeAsText"/>
+</seealso>
+</element>
+
+<!-- function Visibility: default -->
+<element name="GetPropValue">
+<short>Return a property value as a variant</short>
+<descr>
+<p>
+<var>GetPropValue</var> returns the value of the property described by 
+<var>PropInfo</var> from the <var>Instance</var>. The property value 
+is returned as a variant type.
+</p>
+<p>
+when <var>PreferStrings</var> is true, the implementation will tend 
+to cast to a string-valued variant when a conversion must be done.
+</p>
+<p>
+This function is used as the value  for the <link id="TypInfo"/> 
+unit's <link id="TypInfo.OnGetPropValue">OnGetPropValue</link>  callback. 
+This callback is automatically initialized with the function when the variants unit is used.
+</p>
+</descr>
+<seealso>
+<link id="TypInfo"/>
+<link id="TypInfo.OnGetPropValue"/>
+<link id="SetPropValue"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="GetPropValue.Result">
+<short>Property value as variant</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="GetPropValue.Instance">
+<short>Instance from which to get property value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="GetPropValue.PropInfo">
+<short>Pointer to propety information (RTTI)</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="GetPropValue.PreferStrings">
+<short>Try to cast to string</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="SetPropValue">
+<short>Set a property value as a variant</short>
+<descr>
+<p>
+<var>SetPropValue</var> sets the value of the property described by 
+<var>PropInfo</var> from the <var>Instance</var>. The property value 
+is set from the variant-typed value <var>Value</var>.
+</p>
+<p>
+This function is used as the value  for the <link id="TypInfo"/> 
+unit's <link id="TypInfo.OnSetPropValue">OnSetPropValue</link>  callback. 
+This callback is automatically initialized with the function when the variants unit is used.
+</p>
+</descr>
+<seealso>
+<link id="TypInfo"/>
+<link id="TypInfo.OnSetPropValue"/>
+<link id="GetPropValue"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="SetPropValue.Instance">
+<short>Instance to set property value of</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="SetPropValue.PropInfo">
+<short>Pointer to propert information (RTTI)</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="SetPropValue.Value">
+<short>Value to set property to</short>
+</element>
+
+<!-- function Visibility: default -->
+<element name="GetVariantProp">
+<short>Get variant valued property</short>
+<descr>
+<p>
+<var>GetVariantProp</var> returns the value of the variant-types
+property described by <var>PropInfo</var> or <var>PropName</var> 
+from the <var>Instance</var>. 
+</p>
+<p>
+This function is used as the value  for the <link id="TypInfo"/> 
+unit's <link id="TypInfo.OnGetVariantProp">OnGetVariantProp</link>  callback. 
+This callback is automatically initialized with the function when the variants unit is used.
+</p>
+</descr>
+<seealso>
+<link id="TypInfo"/>
+<link id="TypInfo.OnGetVariantProp"/>
+<link id="SetVariantProp"/>
+<link id="GetPropValue"/>
+</seealso>
+</element>
+
+<!-- function result Visibility: default -->
+<element name="GetVariantProp.Result">
+<short>Property value</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="GetVariantProp.Instance">
+<short>Instance from which to get property</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="GetVariantProp.PropInfo">
+<short>Pointer to property description (RTTI)</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="GetVariantProp.PropName">
+<short>Property name</short>
+</element>
+
+<!-- procedure Visibility: default -->
+<element name="SetVariantProp">
+<short>Set variant valued property</short>
+<descr>
+<p>
+<var>SetVariantProp</var> sets the value of the variant-types
+property described by <var>PropInfo</var> or <var>PropName</var> 
+from the <var>Instance</var> to <var>Value</var>. 
+</p>
+<p>
+This function is used as the value  for the <link id="TypInfo"/> 
+unit's <link id="TypInfo.OnSetVariantProp">OnSetVariantProp</link>  callback. 
+This callback is automatically initialized with the function when the variants unit is used.
+</p>
+</descr>
+<seealso>
+<link id="TypInfo"/>
+<link id="TypInfo.OnSetVariantProp"/>
+<link id="GetVariantProp"/>
+<link id="GetPropValue"/>
+</seealso>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="SetVariantProp.Instance">
+<short>Instance on which to set the variant property</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="SetVariantProp.PropName">
+<short>Name of the property to set</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="SetVariantProp.Value">
+<short>Value to set property to.</short>
+</element>
+
+<!-- argument Visibility: default -->
+<element name="SetVariantProp.PropInfo">
+<short>Pointer to property description (RTTI)</short>
+</element>
+
+</module> <!-- Variants -->
+
+</package>
+</fpdoc-descriptions>

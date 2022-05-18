@@ -86,13 +86,14 @@ type
    { TTextReader }
 
    TTextReader = class(TObject)
+   Protected
+     function IsEof: Boolean; virtual; abstract;
    public
      constructor Create; virtual;
      procedure Reset; virtual; abstract;
      procedure Close; virtual; abstract;
-     function IsEof: Boolean; virtual; abstract;
      procedure ReadLine(out AString: string); virtual; abstract; overload;
-     function ReadLine: string; virtual; abstract; overload;
+     function ReadLine: string; overload;
      property Eof: Boolean read IsEof;
    end;
 
@@ -102,10 +103,13 @@ type
    private
      FBufferRead: Integer;
      FBufferPosition: Integer;
+     FClosed,
      FOwnsStream: Boolean;
      FStream: TStream;
      FBuffer: array of Byte;
      procedure FillBuffer;
+   Protected  
+     function IsEof: Boolean; override;
    public
      constructor Create(AStream: TStream; ABufferSize: Integer;
        AOwnsStream: Boolean); virtual;
@@ -113,9 +117,7 @@ type
      destructor Destroy; override;
      procedure Reset; override;
      procedure Close; override;
-     function IsEof: Boolean; override;
      procedure ReadLine(out AString: string); override; overload;
-     function ReadLine: string; override; overload;
      property BaseStream: TStream read FStream;
      property OwnsStream: Boolean read FOwnsStream write FOwnsStream;
    end;
@@ -125,15 +127,15 @@ type
    TStringReader = class(TTextReader)
    private
      FReader: TTextReader;
+   Protected  
+     function IsEof: Boolean; override;
    public
      constructor Create(const AString: string; ABufferSize: Integer); virtual;
      constructor Create(const AString: string); virtual;
      destructor Destroy; override;
      procedure Reset; override;
      procedure Close; override;
-     function IsEof: Boolean; override;
      procedure ReadLine(out AString: string); override; overload;
-     function ReadLine: string; override; overload;
    end;
 
    { TFileReader }
@@ -141,6 +143,8 @@ type
    TFileReader = class(TTextReader)
    private
      FReader: TTextReader;
+   Protected
+     function IsEof: Boolean; override;
    public
      constructor Create(const AFileName: TFileName; AMode: Word;
        ARights: Cardinal; ABufferSize: Integer); virtual;
@@ -151,9 +155,7 @@ type
      destructor Destroy; override;
      procedure Reset; override;
      procedure Close; override;
-     function IsEof: Boolean; override;
      procedure ReadLine(out AString: string); override; overload;
-     function ReadLine: string; override; overload;
    end;
 
   { allows you to represent just a small window of a bigger stream as a substream. 
@@ -179,35 +181,33 @@ type
 
 
   TStreamHelper = class helper for TStream
-
-                     function  ReadWordLE :word;
-                     function  ReadDWordLE:dword;
-                     function  ReadQWordLE:qword;
-                     procedure WriteWordLE (w:word);
-  		     procedure WriteDWordLE(dw:dword);
-	             procedure WriteQWordLE(dq:qword);
-                     function  ReadWordBE :word;
-                     function  ReadDWordBE:dword;
-                     function  ReadQWordBE:qword;
-                     procedure WriteWordBE (w:word);
-  		     procedure WriteDWordBE(dw:dword);
-	             procedure WriteQWordBE(dq:qword);
-                     function  ReadSingle:Single;
-                     function  ReadDouble:Double;
-                     procedure WriteSingle(s:Single);
-                     procedure WriteDouble(d:double);
-
-                     {$ifndef FPC}
-                      function ReadByte  : Byte;
-                      function ReadWord  : Word;
-                      function ReadDWord : DWord;
-                      function ReadQWord : QWord;
-                      procedure WriteByte  (b : Byte);
-                      procedure WriteWord  (b : word);
-                      procedure WriteDWord (b : DWord);
-                      procedure WriteQWord (b : QWord);
-                     {$endif}
-                     end;
+    function  ReadWordLE :word;
+    function  ReadDWordLE:dword;
+    function  ReadQWordLE:qword;
+    procedure WriteWordLE (w:word);
+    procedure WriteDWordLE(dw:dword);
+    procedure WriteQWordLE(dq:qword);
+    function  ReadWordBE :word;
+    function  ReadDWordBE:dword;
+    function  ReadQWordBE:qword;
+    procedure WriteWordBE (w:word);
+    procedure WriteDWordBE(dw:dword);
+    procedure WriteQWordBE(dq:qword);
+    function  ReadSingle:Single;
+    function  ReadDouble:Double;
+    procedure WriteSingle(s:Single);
+    procedure WriteDouble(d:double);
+    {$ifndef FPC}
+    function ReadByte  : Byte;
+    function ReadWord  : Word;
+    function ReadDWord : DWord;
+    function ReadQWord : QWord;
+    procedure WriteByte  (b : Byte);
+    procedure WriteWord  (b : word);
+    procedure WriteDWord (b : DWord);
+    procedure WriteQWord (b : QWord);
+    {$endif}
+  end;
 
 Implementation
 
@@ -331,6 +331,12 @@ begin
   inherited Create;
 end;
 
+function TTextReader.ReadLine: string;
+
+begin
+  ReadLine(Result);
+end;
+
 { TStreamReader }
 
 constructor TStreamReader.Create(AStream: TStream; ABufferSize: Integer;
@@ -341,6 +347,7 @@ begin
     raise EArgumentException.CreateFmt(SParamIsNil, ['AStream']);
   FStream := AStream;
   FOwnsStream := AOwnsStream;
+  FClosed:=False;
   if ABufferSize >= MIN_BUFFER_SIZE then
     SetLength(FBuffer, ABufferSize)
   else
@@ -360,9 +367,17 @@ end;
 
 procedure TStreamReader.FillBuffer;
 begin
-  FBufferRead := FStream.Read(FBuffer[0], Pred(Length(FBuffer)));
-  FBuffer[FBufferRead] := 0;
-  FBufferPosition := 0;
+  if FClosed then 
+    begin
+    FBufferRead:=0;
+    FBufferPosition:=0;
+    end
+  else  
+    begin
+    FBufferRead := FStream.Read(FBuffer[0], Pred(Length(FBuffer)));
+    FBuffer[FBufferRead] := 0;
+    FBufferPosition := 0;
+    end;
 end;
 
 procedure TStreamReader.Reset;
@@ -376,15 +391,13 @@ end;
 procedure TStreamReader.Close;
 begin
   if FOwnsStream then
-  begin
-    FStream.Free;
-    FStream := nil;
-  end;
+    FreeAndNil(FStream);
+  FClosed:=True;
 end;
 
 function TStreamReader.IsEof: Boolean;
 begin
-  if not Assigned(FStream) then
+  if FClosed or not Assigned(FStream) then
     Exit(True);
   Result := FBufferPosition >= FBufferRead;
   if Result then
@@ -401,6 +414,7 @@ var
 begin
   VPosition := FBufferPosition;
   SetLength(AString, 0);
+  if FClosed then exit;
   repeat
     VPByte := @FBuffer[FBufferPosition];
     while (FBufferPosition < FBufferRead) and not (VPByte^ in [10, 13]) do
@@ -441,10 +455,6 @@ begin
   end;
 end;
 
-function TStreamReader.ReadLine: string;
-begin
-  ReadLine(Result);
-end;
 
 { TStringReader }
 
@@ -483,11 +493,6 @@ end;
 procedure TStringReader.ReadLine(out AString: string);
 begin
   FReader.ReadLine(AString);
-end;
-
-function TStringReader.ReadLine: string;
-begin
-  ReadLine(Result);
 end;
 
 { TFileReader }
@@ -540,11 +545,6 @@ end;
 procedure TFileReader.ReadLine(out AString: string);
 begin
   FReader.ReadLine(AString);
-end;
-
-function TFileReader.ReadLine: string;
-begin
-  ReadLine(Result);
 end;
 
 { TStreamHelper }

@@ -28,21 +28,23 @@ interface
 
     uses
       cclasses,
-      symtable,symsym,symdef;
+      symtable,symsym,symdef,symtype;
 
     type
-      tvar_dec_option=(vd_record,vd_object,vd_threadvar,vd_class,vd_final,vd_canreorder);
+      tvar_dec_option=(vd_record,vd_object,vd_threadvar,vd_class,vd_final,vd_canreorder,vd_check_generic);
       tvar_dec_options=set of tvar_dec_option;
 
     function  read_property_dec(is_classproperty:boolean;astruct:tabstractrecorddef):tpropertysym;
 
-    procedure read_var_decls(options:Tvar_dec_options);
+    procedure read_var_decls(options:Tvar_dec_options;out had_generic:boolean);
 
-    procedure read_record_fields(options:Tvar_dec_options; reorderlist: TFPObjectList; variantdesc: ppvariantrecdesc);
+    procedure read_record_fields(options:Tvar_dec_options; reorderlist: TFPObjectList; variantdesc: ppvariantrecdesc;out had_generic:boolean);
 
     procedure read_public_and_external(vs: tabstractvarsym);
 
     procedure try_consume_sectiondirective(var asection: ansistring);
+
+    function check_allowed_for_var_or_const(def:tdef;allowdynarray:boolean):boolean;
 
 implementation
 
@@ -54,22 +56,19 @@ implementation
        globtype,globals,tokens,verbose,constexp,
        systems,
        { symtable }
-       symconst,symbase,symtype,defutil,defcmp,symcreat,
+       symconst,symbase,defutil,defcmp,symutil,symcreat,
 {$if defined(i386) or defined(i8086)}
        symcpu,
 {$endif}
        fmodule,htypechk,
        { pass 1 }
-       node,pass_1,aasmdata,
-       ncon,nmat,nadd,ncal,nset,ncnv,ninl,nld,nflw,nmem,nutils,
+       node,pass_1,aasmbase,aasmdata,
+       ncon,nset,ncnv,nld,nutils,
        { codegen }
-       ncgutil,ngenutil,
+       ngenutil,
        { parser }
        scanner,
-       pbase,pexpr,ptype,ptconst,pdecsub,
-       { link }
-       import
-       ;
+       pbase,pexpr,ptype,ptconst,pdecsub,pparautl;
 
 
     function read_property_dec(is_classproperty:boolean;astruct:tabstractrecorddef):tpropertysym;
@@ -133,6 +132,8 @@ implementation
                      end;
                    _POINT :
                      begin
+                       if not is_object(def) and not is_record(def) then
+                         message(sym_e_type_must_be_rec_or_object);
                        consume(_POINT);
                        if assigned(def) then
                         begin
@@ -178,10 +179,10 @@ implementation
                      begin
                        consume(_LECKKLAMMER);
                        repeat
-                         if def.typ=arraydef then
+                         if assigned(def) and (def.typ=arraydef) then
                           begin
                             idx:=0;
-                            p:=comp_expr(true,false);
+                            p:=comp_expr([ef_accept_equal]);
                             if (not codegenerror) then
                              begin
                                if (p.nodetype=ordconstn) then
@@ -225,6 +226,15 @@ implementation
              end;
           end;
 
+          function has_implicit_default(p : tpropertysym) : boolean;
+
+          begin
+             has_implicit_default:=
+               (is_string(p.propdef) or
+               is_real(p.propdef) or
+               is_pointer(p.propdef));
+          end;
+
           function allow_default_property(p : tpropertysym) : boolean;
 
           begin
@@ -250,7 +260,7 @@ implementation
             var
               sym: tprocsym;
             begin
-              handle_calling_convention(pd);
+              handle_calling_convention(pd,hcc_default_actions_intf);
               sym:=cprocsym.create(prefix+lower(p.realname));
               symtablestack.top.insert(sym);
               pd.procsym:=sym;
@@ -284,7 +294,7 @@ implementation
 
               if try_to_consume(_DISPID) then
                 begin
-                  pt:=comp_expr(true,false);
+                  pt:=comp_expr([ef_accept_equal]);
                   if is_constintnode(pt) then
                     if (Tordconstnode(pt).value<int64(low(longint))) or (Tordconstnode(pt).value>int64(high(longint))) then
                       message3(type_e_range_check_error_bounds,tostr(Tordconstnode(pt).value),tostr(low(longint)),tostr(high(longint)))
@@ -347,8 +357,8 @@ implementation
          { Generate temp procdefs to search for matching read/write
            procedures. the readprocdef will store all definitions }
          paranr:=0;
-         readprocdef:=cprocdef.create(normal_function_level);
-         writeprocdef:=cprocdef.create(normal_function_level);
+         readprocdef:=cprocdef.create(normal_function_level,true);
+         writeprocdef:=cprocdef.create(normal_function_level,true);
 
          readprocdef.struct:=astruct;
          writeprocdef.struct:=astruct;
@@ -408,7 +418,8 @@ implementation
                       begin
                         consume(_OF);
                         { define range and type of range }
-                        hdef:=carraydef.create(0,-1,s32inttype);
+                        hdef:=carraydef.create_openarray;
+                        hdef.owner:=astruct.symtable;
                         { define field type }
                         single_type(arraytype,[]);
                         tarraydef(hdef).elementdef:=arraytype;
@@ -448,7 +459,7 @@ implementation
               if (idtoken=_INDEX) then
                 begin
                    consume(_INDEX);
-                   pt:=comp_expr(true,false);
+                   pt:=comp_expr([ef_accept_equal]);
                    { Only allow enum and integer indexes. Convert all integer
                      values to objpas.integer (s32int on 32- and 64-bit targets,
                      s16int on 16- and 8-bit) to be compatible with delphi,
@@ -501,8 +512,12 @@ implementation
                   message(parser_e_no_property_found_to_override);
                 end;
            end;
+         { ignore is_publishable for interfaces (related to $M+ directive).
+           $M has effect on visibility of default section for classes. 
+           Interface has always only public section (fix for problem in tb0631.pp) }
          if ((p.visibility=vis_published) or is_dispinterface(astruct)) and
-            (not(p.propdef.is_publishable) or (sp_static in p.symoptions)) then
+            ((not(p.propdef.is_publishable) and not is_interface(astruct)) or
+             (sp_static in p.symoptions)) then
            begin
              Message(parser_e_cant_publish_that_property);
              p.visibility:=vis_public;
@@ -524,7 +539,7 @@ implementation
                       begin
                         readprocdef.returndef:=p.propdef;
                         { Insert hidden parameters }
-                        handle_calling_convention(readprocdef);
+                        handle_calling_convention(readprocdef,hcc_default_actions_intf);
                       end;
                     p.add_getter_or_setter_for_sym(palt_read,sym,def,readprocdef);
                   end;
@@ -547,7 +562,7 @@ implementation
                         hparavs:=cparavarsym.create('$value',10*paranr,vs_value,p.propdef,[]);
                         writeprocdef.parast.insert(hparavs);
                         { Insert hidden parameters }
-                        handle_calling_convention(writeprocdef);
+                        handle_calling_convention(writeprocdef,hcc_default_actions_intf);
                       end;
                     p.add_getter_or_setter_for_sym(palt_write,sym,def,writeprocdef);
                   end;
@@ -609,8 +624,11 @@ implementation
                               { same as for _FALSE }
                               exclude(p.propoptions,ppo_stored)
                             else
-                              { same as for _TRUE }
-                              p.default:=longint($80000000);
+                              begin
+                                { same as for _TRUE }
+                                { do nothing - ppo_stored is already set to p.propoptions in "include(p.propoptions,ppo_stored);" above }
+                                { especially do not reset the default value - the stored specifier is independent on the default value! }
+                              end;
                             consume(_ID);
                           end
                        else if parse_symlist(p.propaccesslist[palt_stored],def) then
@@ -623,7 +641,7 @@ implementation
                                  storedprocdef:=cprocvardef.create(normal_function_level);
                                  include(storedprocdef.procoptions,po_methodpointer);
                                  { Return type must be boolean }
-                                 storedprocdef.returndef:=pasbool8type;
+                                 storedprocdef.returndef:=pasbool1type;
                                  { Add index parameter if needed }
                                  if ppo_indexed in p.propoptions then
                                    begin
@@ -632,7 +650,7 @@ implementation
                                    end;
 
                                  { Insert hidden parameters }
-                                 handle_calling_convention(storedprocdef);
+                                 handle_calling_convention(storedprocdef,hcc_default_actions_intf);
                                  p.propaccesslist[palt_stored].procdef:=Tprocsym(sym).Find_procdef_bypara(storedprocdef.paras,storedprocdef.returndef,[cpo_allowdefaults,cpo_ignorehidden]);
                                  if not assigned(p.propaccesslist[palt_stored].procdef) then
                                    message(parser_e_ill_property_storage_sym);
@@ -655,20 +673,24 @@ implementation
                   end;
               end;
            end;
+         if has_implicit_default(p) and not assigned(p.overriddenpropsym) then
+           begin
+              p.default:=0;
+           end;
          if not is_record(astruct) and try_to_consume(_DEFAULT) then
            begin
               if not allow_default_property(p) then
                 begin
                   Message(parser_e_property_cant_have_a_default_value);
                   { Error recovery }
-                  pt:=comp_expr(true,false);
+                  pt:=comp_expr([ef_accept_equal]);
                   pt.free;
                 end
               else
                 begin
                   { Get the result of the default, the firstpass is
                     needed to support values like -1 }
-                  pt:=comp_expr(true,false);
+                  pt:=comp_expr([ef_accept_equal]);
                   if (p.propdef.typ=setdef) and
                      (pt.nodetype=arrayconstructorn) then
                     begin
@@ -870,6 +892,7 @@ implementation
     procedure read_public_and_external(vs: tabstractvarsym);
     var
       is_dll,
+      is_far,
       is_cdecl,
       is_external_var,
       is_weak_external,
@@ -886,6 +909,7 @@ implementation
         end;
       { defaults }
       is_dll:=false;
+      is_far:=false;
       is_cdecl:=false;
       is_external_var:=false;
       is_public_var:=false;
@@ -921,6 +945,14 @@ implementation
          try_to_consume(_EXTERNAL) then
         begin
           is_external_var:=true;
+          { near/far? }
+          if target_info.system in systems_allow_external_far_var then
+            begin
+              if try_to_consume(_FAR) then
+                is_far:=true
+              else if try_to_consume(_NEAR) then
+                is_far:=false;
+            end;
           if (idtoken<>_NAME) and (token<>_SEMICOLON) then
             begin
               is_dll:=true;
@@ -987,6 +1019,8 @@ implementation
           if vo_is_typed_const in vs.varoptions then
             Message(parser_e_initialized_not_for_external);
           include(vs.varoptions,vo_is_external);
+          if is_far then
+            include(vs.varoptions,vo_is_far);
           if (is_weak_external) then
             begin
               if not(target_info.system in systems_weak_linking) then
@@ -1050,12 +1084,13 @@ implementation
     end;
 
 
-    procedure read_var_decls(options:Tvar_dec_options);
+    procedure read_var_decls(options:Tvar_dec_options;out had_generic:boolean);
 
         procedure read_default_value(sc : TFPObjectList);
         var
           vs : tabstractnormalvarsym;
           tcsym : tstaticvarsym;
+          templist : tasmlist;
         begin
           vs:=tabstractnormalvarsym(sc[0]);
           if sc.count>1 then
@@ -1068,9 +1103,19 @@ implementation
               begin
                 tcsym:=cstaticvarsym.create('$default'+vs.realname,vs_const,vs.vardef,[]);
                 include(tcsym.symoptions,sp_internal);
-                vs.defaultconstsym:=tcsym;
                 symtablestack.top.insert(tcsym);
-                read_typed_const(current_asmdata.asmlists[al_typedconsts],tcsym,false);
+                templist:=tasmlist.create;
+                read_typed_const(templist,tcsym,false);
+                { in case of a generic routine, this initialisation value is not
+                  used, and will be re-parsed during specialisations (and the
+                  current version is not type-correct and hence breaks code
+                  generation for LLVM) }
+                if not parse_generic then
+                  begin
+                    vs.defaultconstsym:=tcsym;
+                    current_asmdata.asmlists[al_typedconsts].concatlist(templist);
+                  end;
+                templist.free;
               end;
             staticvarsym :
               begin
@@ -1154,7 +1199,7 @@ implementation
                 abssym.addroffset:=Tordconstnode(pt).value.svalue;
 {$if defined(i386) or defined(i8086)}
               tcpuabsolutevarsym(abssym).absseg:=false;
-              if (target_info.system in [system_i386_go32v2,system_i386_watcom,system_i8086_msdos]) and
+              if (target_info.system in [system_i386_go32v2,system_i386_watcom,system_i8086_msdos,system_i8086_win16,system_i8086_embedded]) and
                   try_to_consume(_COLON) then
                 begin
                   pt.free;
@@ -1228,7 +1273,7 @@ implementation
               if (hp.nodetype=loadn) then
                 begin
                   { we should check the result type of loadn }
-                  if not (tloadnode(hp).symtableentry.typ in [fieldvarsym,staticvarsym,localvarsym,paravarsym]) then
+                  if not (tloadnode(hp).symtableentry.typ in [fieldvarsym,staticvarsym,localvarsym,paravarsym,absolutevarsym]) then
                     Message(parser_e_absolute_only_to_var_or_const);
                   abssym:=cabsolutevarsym.create(vs.realname,vs.vardef);
                   abssym.fileinfo:=vs.fileinfo;
@@ -1266,6 +1311,8 @@ implementation
          vs   : tabstractvarsym;
          hdef : tdef;
          i    : longint;
+         first,
+         isgeneric,
          semicoloneaten,
          allowdefaultvalue,
          hasdefaultvalue : boolean;
@@ -1273,6 +1320,8 @@ implementation
          deprecatedmsg   : pshortstring;
          old_block_type  : tblock_type;
          sectionname : ansistring;
+         tmp_filepos,
+         old_current_filepos     : tfileposinfo;
       begin
          old_block_type:=block_type;
          block_type:=bt_var;
@@ -1281,6 +1330,10 @@ implementation
            consume(_ID);
          { read vars }
          sc:=TFPObjectList.create(false);
+         first:=true;
+         had_generic:=false;
+         vs:=nil;
+         fillchar(tmp_filepos,sizeof(tmp_filepos),0);
          while (token=_ID) do
            begin
              semicoloneaten:=false;
@@ -1290,6 +1343,9 @@ implementation
              repeat
                if (token = _ID) then
                  begin
+                   isgeneric:=(vd_check_generic in options) and
+                                not (m_delphi in current_settings.modeswitches) and
+                                (idtoken=_GENERIC);
                    case symtablestack.top.symtabletype of
                      localsymtable :
                        vs:=clocalvarsym.create(orgpattern,vs_value,generrordef,[]);
@@ -1304,10 +1360,43 @@ implementation
                        internalerror(200411064);
                    end;
                    sc.add(vs);
-                   symtablestack.top.insert(vs);
-                 end;
+                   if isgeneric then
+                     tmp_filepos:=current_filepos;
+                 end
+               else
+                 isgeneric:=false;
                consume(_ID);
+               { when the first variable had been read the next declaration could be
+                 a "generic procedure", "generic function" or
+                 "generic class (function/procedure)" }
+               if not first
+                   and isgeneric
+                   and (sc.count=1)
+                   and (token in [_PROCEDURE,_FUNCTION,_CLASS]) then
+                 begin
+                   vs.free;
+                   sc.clear;
+                   had_generic:=true;
+                   break;
+                 end
+               else
+                 begin
+                   vs.register_sym;
+                   if isgeneric then
+                     begin
+                       { ensure correct error position }
+                       old_current_filepos:=current_filepos;
+                       current_filepos:=tmp_filepos;
+                       symtablestack.top.insert(vs);
+                       current_filepos:=old_current_filepos;
+                     end
+                   else
+                     symtablestack.top.insert(vs);
+                 end;
              until not try_to_consume(_COMMA);
+
+             if had_generic then
+               break;
 
              { read variable type def }
              block_type:=bt_var_type;
@@ -1341,7 +1430,7 @@ implementation
                end;
 
              { Check for EXTERNAL etc directives before a semicolon }
-             if (idtoken in [_EXPORT,_EXTERNAL,_WEAKEXTERNAL,_PUBLIC,_CVAR]) then
+             if (idtoken in [_EXPORT,_EXTERNAL,_PUBLIC,_CVAR]) or (idtoken = _WEAKEXTERNAL) then
                begin
                  read_public_and_external_sc(sc);
                  allowdefaultvalue:=false;
@@ -1370,7 +1459,7 @@ implementation
                  { Add calling convention for procvar }
                  if (hdef.typ=procvardef) and
                     (hdef.typesym=nil) then
-                   handle_calling_convention(tprocvardef(hdef));
+                   handle_calling_convention(tprocvardef(hdef),hcc_default_actions_intf);
                  read_default_value(sc);
                  hasdefaultvalue:=true;
                end
@@ -1388,7 +1477,7 @@ implementation
                  { Parse procvar directives after ; }
                  maybe_parse_proc_directives(hdef);
                  { Add calling convention for procvar }
-                 handle_calling_convention(tprocvardef(hdef));
+                 handle_calling_convention(tprocvardef(hdef),hcc_default_actions_intf);
                  { Handling of Delphi typed const = initialized vars }
                  if (token=_EQ) and
                     not(m_tp7 in current_settings.modeswitches) and
@@ -1402,7 +1491,7 @@ implementation
              { Check for EXTERNAL etc directives or, in macpas, if cs_external_var is set}
              if (
                  (
-                  (idtoken in [_EXPORT,_EXTERNAL,_WEAKEXTERNAL,_PUBLIC,_CVAR]) and
+                  ((idtoken in [_EXPORT,_EXTERNAL,_PUBLIC,_CVAR]) or (idtoken = _WEAKEXTERNAL)) and
                   (m_cvar_support in current_settings.modeswitches)
                  ) or
                  (
@@ -1444,7 +1533,11 @@ implementation
                     not(vo_is_typed_const in vs.varoptions) and
                     not(vo_is_external in vs.varoptions) then
                    cnodeutils.insertbssdata(tstaticvarsym(vs));
+                 if vo_is_public in vs.varoptions then
+                   current_module.add_public_asmsym(vs.mangledname,AB_GLOBAL,AT_DATA);
                end;
+
+             first:=false;
            end;
          block_type:=old_block_type;
          { free the list }
@@ -1452,7 +1545,48 @@ implementation
       end;
 
 
-    procedure read_record_fields(options:Tvar_dec_options; reorderlist: TFPObjectList; variantdesc : ppvariantrecdesc);
+    function check_allowed_for_var_or_const(def:tdef;allowdynarray:boolean):boolean;
+      var
+        stowner,tmpdef : tdef;
+        st : tsymtable;
+      begin
+        result:=true;
+        st:=symtablestack.top;
+        if not (st.symtabletype in [recordsymtable,objectsymtable]) then
+          exit;
+        stowner:=tdef(st.defowner);
+        while assigned(stowner) and (stowner.typ in [objectdef,recorddef]) do
+          begin
+            if def.typ=arraydef then
+              begin
+                tmpdef:=def;
+                while (tmpdef.typ=arraydef) do
+                  begin
+                    { dynamic arrays are allowed in certain cases }
+                    if allowdynarray and (ado_IsDynamicArray in tarraydef(tmpdef).arrayoptions) then
+                      begin
+                        tmpdef:=nil;
+                        break;
+                      end;
+                    tmpdef:=tarraydef(tmpdef).elementdef;
+                  end;
+              end
+            else
+              tmpdef:=def;
+            if assigned(tmpdef) and
+                (is_object(tmpdef) or is_record(tmpdef)) and
+                is_owned_by(tabstractrecorddef(stowner),tabstractrecorddef(tmpdef)) then
+              begin
+                Message1(type_e_type_is_not_completly_defined,tabstractrecorddef(tmpdef).RttiName);
+                result:=false;
+                break;
+              end;
+            stowner:=tdef(stowner.owner.defowner);
+          end;
+      end;
+
+
+    procedure read_record_fields(options:Tvar_dec_options; reorderlist: TFPObjectList; variantdesc : ppvariantrecdesc;out had_generic:boolean);
       var
          sc : TFPObjectList;
          i  : longint;
@@ -1478,6 +1612,7 @@ implementation
          uniondef : trecorddef;
          hintsymoptions : tsymoptions;
          deprecatedmsg : pshortstring;
+         hadgendummy,
          semicoloneaten,
          removeclassoption: boolean;
 {$if defined(powerpc) or defined(powerpc64)}
@@ -1498,6 +1633,7 @@ implementation
          { read vars }
          sc:=TFPObjectList.create(false);
          removeclassoption:=false;
+         had_generic:=false;
          while (token=_ID) and
             not(((vd_object in options) or
                  ((vd_record in options) and (m_advanced_records in current_settings.modeswitches))) and
@@ -1519,15 +1655,32 @@ implementation
                      potentially mixed visibility, and then the individual
                      symbols need to have their visibility already set }
                    vs.visibility:=visibility;
+                   if (vd_check_generic in options) and (idtoken=_GENERIC) then
+                     had_generic:=true;
+                 end
+               else
+                 vs:=nil;
+               consume(_ID);
+               if assigned(vs) and
+                  (
+                    not had_generic or
+                    not (token in [_PROCEDURE,_FUNCTION,_CLASS])
+                  ) then
+                 begin
+                   vs.register_sym;
                    sc.add(vs);
                    recst.insert(vs);
-                 end;
-               consume(_ID);
+                   had_generic:=false;
+                 end
+               else
+                 vs.free;
              until not try_to_consume(_COMMA);
              if m_delphi in current_settings.modeswitches then
                block_type:=bt_var_type
              else
                block_type:=old_block_type;
+             if had_generic and (sc.count=0) then
+               break;
              consume(_COLON);
 
              read_anon_type(hdef,false);
@@ -1536,35 +1689,9 @@ implementation
              { allow only static fields reference to struct where they are declared }
              if not (vd_class in options) then
                begin
-                 stowner:=tdef(recst.defowner);
-                 while assigned(stowner) and (stowner.typ in [objectdef,recorddef]) do
-                   begin
-                     if hdef.typ=arraydef then
-                       begin
-                         tmpdef:=hdef;
-                         while (tmpdef.typ=arraydef) do
-                           begin
-                             { dynamic arrays are allowed }
-                             if ado_IsDynamicArray in tarraydef(tmpdef).arrayoptions then
-                               begin
-                                 tmpdef:=nil;
-                                 break;
-                               end;
-                             tmpdef:=tarraydef(tmpdef).elementdef;
-                           end;
-                       end
-                     else
-                       tmpdef:=hdef;
-                     if assigned(tmpdef) and
-                         (is_object(tmpdef) or is_record(tmpdef)) and
-                         is_owned_by(tabstractrecorddef(stowner),tabstractrecorddef(tmpdef)) then
-                       begin
-                         Message1(type_e_type_is_not_completly_defined, tabstractrecorddef(tmpdef).RttiName);
-                         { for error recovery or compiler will crash later }
-                         hdef:=generrordef;
-                       end;
-                     stowner:=tdef(stowner.owner.defowner);
-                   end;
+                 if not check_allowed_for_var_or_const(hdef,true) then
+                   { for error recovery or compiler will crash later }
+                   hdef:=generrordef;
                end;
 
              { Process procvar directives }
@@ -1582,7 +1709,8 @@ implementation
                  (32-bit) alignment, in which case the alignment is determined by
                  the alignment of the first field.  */
              }
-             if (target_info.abi=abi_powerpc_aix) and
+             { TODO: check whether this is also for AIX }
+             if (target_info.abi in [abi_powerpc_aix,abi_powerpc_darwin]) and
                 is_first_type and
                 (symtablestack.top.symtabletype=recordsymtable) and
                 (trecordsymtable(symtablestack.top).usefieldalignment=C_alignment) then
@@ -1640,7 +1768,7 @@ implementation
              { Add calling convention for procvar }
              if (hdef.typ=procvardef) and
                 (hdef.typesym=nil) then
-               handle_calling_convention(tprocvardef(hdef));
+               handle_calling_convention(tprocvardef(hdef),hcc_default_actions_intf);
 
              if (vd_object in options) then
                begin
@@ -1679,6 +1807,8 @@ implementation
                      fieldvs:=tfieldvarsym(sc[i]);
                      fieldvs.visibility:=visibility;
                      hstaticvs:=make_field_static(recst,fieldvs);
+                     if vd_threadvar in options then
+                       include(hstaticvs.varoptions,vo_is_thread_var);
                      if not parse_generic then
                        cnodeutils.insertbssdata(hstaticvs);
                      if vd_final in options then
@@ -1757,7 +1887,7 @@ implementation
                 Message(type_e_ordinal_expr_expected);
               consume(_OF);
 
-              UnionSymtable:=trecordsymtable.create('',current_settings.packrecords);
+              UnionSymtable:=trecordsymtable.create('',current_settings.packrecords,current_settings.alignment.recordalignmin,current_settings.alignment.maxCrecordalign);
               UnionDef:=crecorddef.create('',unionsymtable);
               uniondef.isunion:=true;
 
@@ -1772,12 +1902,12 @@ implementation
                 fillchar(variantdesc^^.branches[high(variantdesc^^.branches)],
                   sizeof(variantdesc^^.branches[high(variantdesc^^.branches)]),0);
                 repeat
-                  pt:=comp_expr(true,false);
+                  pt:=comp_expr([ef_accept_equal]);
                   if not(pt.nodetype=ordconstn) then
                     Message(parser_e_illegal_expression);
                   { iso pascal does not support ranges in variant record definitions }
-                  if not(m_iso in current_settings.modeswitches) and try_to_consume(_POINTPOINT) then
-                    pt:=crangenode.create(pt,comp_expr(true,false))
+                  if (([m_iso,m_extpas]*current_settings.modeswitches)=[]) and try_to_consume(_POINTPOINT) then
+                    pt:=crangenode.create(pt,comp_expr([ef_accept_equal]))
                   else
                     begin
                       with variantdesc^^.branches[high(variantdesc^^.branches)] do
@@ -1801,7 +1931,7 @@ implementation
                 consume(_LKLAMMER);
                 inc(variantrecordlevel);
                 if token<>_RKLAMMER then
-                  read_record_fields([vd_record],nil,@variantdesc^^.branches[high(variantdesc^^.branches)].nestedvariant);
+                  read_record_fields([vd_record],nil,@variantdesc^^.branches[high(variantdesc^^.branches)].nestedvariant,hadgendummy);
                 dec(variantrecordlevel);
                 consume(_RKLAMMER);
 

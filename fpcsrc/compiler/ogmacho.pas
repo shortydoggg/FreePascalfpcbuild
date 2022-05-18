@@ -63,7 +63,7 @@ type
         machoSec  : TMachoSectionType;
         function GetRelocCount: Integer;
         function FileSize: Integer;
-        constructor create(AList:TFPHashObjectList; const Aname:string; Aalign:shortint; Aoptions:TObjSectionOptions);override;
+        constructor create(AList:TFPHashObjectList; const Aname:string; Aalign:longint; Aoptions:TObjSectionOptions);override;
       end;
 
     { TmachoObjData }
@@ -74,7 +74,7 @@ type
         constructor create(const n:string); override;
         procedure CreateDebugSections; override;
         function sectionname(atype:TAsmSectiontype; const aname:string; aorder:TAsmSectionOrder):string;override;
-        function sectiontype2align(atype:TAsmSectiontype):shortint;override;
+        function sectiontype2align(atype:TAsmSectiontype):longint;override;
         function sectiontype2options(atype:TAsmSectiontype):TObjSectionOptions;override;
         procedure writereloc(data:aint; len:aword; p:TObjSymbol; reltype:TObjRelocationType);override;
       public
@@ -112,6 +112,7 @@ type
         relcount : integer;
       protected
         procedure TrailZeros;
+        function current_cpu_type: cpu_type_t;inline;
 
         {sections}
         procedure FixSectionRelocs(s: TMachoObjSection);
@@ -146,11 +147,14 @@ type
 
     TMachoAssembler=class(TInternalAssembler)
       public
-        constructor create(smart:boolean);override;
+        constructor create(info: pasminfo; smart:boolean);override;
       end;
 
 
 implementation
+
+uses
+  owar;
 
   { TmachoObjData }
 
@@ -176,8 +180,8 @@ implementation
 
   function TmachoObjData.sectionname(atype: TAsmSectiontype; const aname: string; aorder: TAsmSectionOrder): string;
     const
-      DwarfSect : array [sec_debug_frame..sec_debug_abbrev] of string
-        = ('sec_debug_frame','__debug_info','__debug_line','__debug_abbrev');
+      DwarfSect : array [sec_debug_frame..sec_debug_ranges] of string
+        = ('sec_debug_frame','__debug_info','__debug_line','__debug_abbrev','__debug_aranges','__debug_ranges');
     begin
       case atype of
         sec_user: Result:=aname;
@@ -239,7 +243,9 @@ implementation
         sec_debug_frame,
         sec_debug_info,
         sec_debug_line,
-        sec_debug_abbrev:
+        sec_debug_abbrev,
+        sec_debug_aranges,
+        sec_debug_ranges:
           Result:=MakeSectionName(seg_DWARF, DwarfSect[atype])
 
       else
@@ -323,7 +329,7 @@ implementation
     end;
 
 
-  function TmachoObjData.sectiontype2align(atype: TAsmSectiontype): shortint;
+  function TmachoObjData.sectiontype2align(atype: TAsmSectiontype): longint;
     begin
       case atype of
         sec_bss:
@@ -351,10 +357,11 @@ implementation
 
   { TMachoAssembler }
 
-  constructor TMachoAssembler.create(smart: boolean);
+  constructor TMachoAssembler.create(info: pasminfo; smart: boolean);
     begin
-      inherited create(smart);
+      inherited;
       CObjOutput:=TMachoObjectOutput;
+      CInternalAr:=tarobjectwriter;
     end;
 
 
@@ -551,7 +558,7 @@ implementation
               end
             else if Assigned(ro.symbol.objsection) and
                     (ro.symbol.bind=AB_LOCAL) and
-                    (ro.symbol.typ=AT_DATA) then
+                    (ro.symbol.typ in [AT_DATA,AT_METADATA]) then
               begin
                 relextern:=false;
                 symnum:=TMachoObjSection(ro.symbol.objsection).inSegIdx;
@@ -996,6 +1003,25 @@ implementation
     end;
 
 
+  function TMachoObjectOutput.current_cpu_type: cpu_type_t;
+    begin
+{$if defined(powerpc)}
+      result:=CPU_TYPE_POWERPC;
+{$elseif defined(powerpc64)}
+      result:=CPU_TYPE_POWERPC64;
+{$elseif defined(i386)}
+      result:=CPU_TYPE_I386;
+{$elseif defined(x86_64)}
+      result:=CPU_TYPE_X86_64;
+{$elseif defined(arm)}
+      result:=CPU_TYPE_ARM;
+{$elseif defined(aarch64)}
+      result:=CPU_TYPE_ARM64;
+{$else}
+      result:=CPU_TYPE_ANY;
+{$endif}
+    end;
+
   function TMachoObjectOutput.writedata(data: TObjData): boolean;
     var
       header  : TMachHeader;
@@ -1016,7 +1042,7 @@ implementation
       result:=false;
       machoData:=TMachoObjData(data);
 
-      cputarget:=CPU_TYPE_i386;
+      cputarget:=current_cpu_type;
       segSize:=sizeSegment(cputarget);
       sctSize:=sizeSection(cputarget);
 
@@ -1051,7 +1077,7 @@ implementation
       fileofs:=AlignAddr(cputarget, fileofs);
 
       {creating actual mach-o file writer}
-      mfile:=AllocMachoWriter(CPU_TYPE_I386, TMachoRawWriter.Create(writer), true);
+      mfile:=AllocMachoWriter(cputarget, TMachoRawWriter.Create(writer), true);
       {writing macho-o header}
       mfile.WriteHeader(header);
 
@@ -1184,7 +1210,7 @@ implementation
 
 
   constructor TmachoObjSection.create(AList: TFPHashObjectList;
-    const Aname: string; Aalign: shortint; Aoptions: TObjSectionOptions);
+    const Aname: string; Aalign: longint; Aoptions: TObjSectionOptions);
     begin
       if Aname = '__TEXT __textcoal_nt' then
         Aalign:=4;
@@ -1218,7 +1244,9 @@ implementation
       );
 
 initialization
+{$ifdef i386}
   RegisterAssembler(as_i386_darwin_info,TMachoAssembler);
+{$endif i386}
 
 end.
 

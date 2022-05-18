@@ -3,9 +3,11 @@ program testpassrc;
 {$mode objfpc}{$H+}
 
 uses
+  //MemCheck,
   Classes, consoletestrunner, tcscanner, tctypeparser, tcstatements,
   tcbaseparser, tcmoduleparser, tconstparser, tcvarparser, tcclasstype,
-  tcexprparser, tcprocfunc, tcpassrcutil;
+  tcexprparser, tcprocfunc, tcpassrcutil, tcresolver, tcgenerics,
+  tcuseanalyzer, pasresolveeval, tcresolvegenerics;
 
 type
 

@@ -67,10 +67,11 @@ interface
       parasupregs : tparasupregs = (RS_R4, RS_R5, RS_R6, RS_R7, RS_R8, RS_R9);
 
     type
-      TMIPSParaManager=class(TParaManager)
+      tcpuparamanager=class(TParaManager)
         function  push_addr_param(varspez:tvarspez;def : tdef;calloption : tproccalloption) : boolean;override;
         function  get_volatile_registers_int(calloption : tproccalloption):TCpuRegisterSet;override;
         function  get_volatile_registers_fpu(calloption : tproccalloption):TCpuRegisterSet;override;
+        function  get_saved_registers_int(calloption : tproccalloption):TCpuRegisterArray;override;
         function  create_paraloc_info(p : TAbstractProcDef; side: tcallercallee):longint;override;
         function  create_varargs_paraloc_info(p : TAbstractProcDef; varargspara:tvarargsparalist):longint;override;
         function  get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): tcgpara;override;
@@ -92,30 +93,39 @@ implementation
 
 
 
-    function TMIPSParaManager.get_volatile_registers_int(calloption : tproccalloption):TCpuRegisterSet;
+    function tcpuparamanager.get_volatile_registers_int(calloption : tproccalloption):TCpuRegisterSet;
       begin
         { O32 ABI values }
         result:=[RS_R1..RS_R15,RS_R24..RS_R25,RS_R31];
       end;
 
 
-    function TMIPSParaManager.get_volatile_registers_fpu(calloption : tproccalloption):TCpuRegisterSet;
+    function tcpuparamanager.get_volatile_registers_fpu(calloption : tproccalloption):TCpuRegisterSet;
       begin
         { O32 ABI values }
         result:=[RS_F0..RS_F19];
       end;
 
 
+    function tcpuparamanager.get_saved_registers_int(calloption : tproccalloption):TCpuRegisterArray;
+      const
+        saved_regs : array[0..0] of tsuperregister =
+          (RS_NO);
+      begin
+        result:=saved_regs;
+      end;
+
+
     { whether "def" must be treated as record when used as function result,
       i.e. its address passed in a0 }
-    function TMIPSParaManager.is_abi_record(def: tdef): boolean;
+    function tcpuparamanager.is_abi_record(def: tdef): boolean;
       begin
         result:=(def.typ=recorddef) or
           ((def.typ=procvardef) and not tprocvardef(def).is_addressonly);
       end;
 
 
-    function TMIPSParaManager.param_use_paraloc(const cgpara: tcgpara): boolean;
+    function tcpuparamanager.param_use_paraloc(const cgpara: tcgpara): boolean;
       var
         paraloc: pcgparalocation;
       begin
@@ -127,7 +137,7 @@ implementation
 
 
     { true if a parameter is too large to copy and only the address is pushed }
-    function TMIPSParaManager.push_addr_param(varspez:tvarspez;def : tdef;calloption : tproccalloption) : boolean;
+    function tcpuparamanager.push_addr_param(varspez:tvarspez;def : tdef;calloption : tproccalloption) : boolean;
       begin
         result:=false;
         { var,out,constref always require address }
@@ -161,7 +171,7 @@ implementation
       end;
 
 
-    function TMIPSParaManager.get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): tcgpara;
+    function tcpuparamanager.get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): tcgpara;
       var
         paraloc : pcgparalocation;
         retcgsize  : tcgsize;
@@ -234,7 +244,7 @@ implementation
       end;
 
 
-    procedure TMIPSParaManager.create_paraloc_info_intern(p : tabstractprocdef; side: tcallercallee;paras:tparalist);
+    procedure tcpuparamanager.create_paraloc_info_intern(p : tabstractprocdef; side: tcallercallee;paras:tparalist);
       var
         paraloc      : pcgparalocation;
         i,j          : integer;
@@ -273,7 +283,7 @@ implementation
               begin
                 paracgsize := OS_ADDR;
                 paralen := tcgsize2size[paracgsize];
-                paradef := getpointerdef(paradef);
+                paradef := cpointerdef.getreusable_no_free(paradef);
               end
             else
               begin
@@ -373,7 +383,7 @@ implementation
                   begin
                     { This should be the first parameter }
                     //if (intparareg<>1) then
-                    //  Comment(V_Warning,'intparareg should be one for funcret in TMipsParaManager.create_paraloc_info_intern');
+                    //  Comment(V_Warning,'intparareg should be one for funcret in tcpuparamanager.create_paraloc_info_intern');
                     paraloc^.loc:=LOC_REGISTER;
                     paraloc^.register:=newreg(R_INTREGISTER,parasupregs[0],R_SUBWHOLE);
                     inc(intparasize,align(tcgsize2size[paraloc^.size],sizeof(aint)));
@@ -434,7 +444,7 @@ implementation
                     if reg_and_stack then
                       begin
                         for j:=intparareg to mips_nb_used_registers-1 do
-                          tmipsprocinfo(current_procinfo).register_used[j]:=true;
+                          tcpuprocinfo(current_procinfo).register_used[j]:=true;
                         { all registers used now }
                         intparareg:=mips_nb_used_registers;
                       end;
@@ -480,7 +490,7 @@ implementation
       end;
 
 
-    function TMIPSParaManager.create_varargs_paraloc_info(p : tabstractprocdef; varargspara:tvarargsparalist):longint;
+    function tcpuparamanager.create_varargs_paraloc_info(p : tabstractprocdef; varargspara:tvarargsparalist):longint;
       begin
         intparareg:=0;
         intparasize:=0;
@@ -501,7 +511,7 @@ implementation
 
 
 
-    function TMIPSParaManager.create_paraloc_info(p : tabstractprocdef; side: tcallercallee):longint;
+    function tcpuparamanager.create_paraloc_info(p : tabstractprocdef; side: tcallercallee):longint;
       begin
         intparareg:=0;
         intparasize:=0;
@@ -515,5 +525,5 @@ implementation
 
 
 begin
-   ParaManager:=TMIPSParaManager.create;
+   ParaManager:=tcpuparamanager.create;
 end.

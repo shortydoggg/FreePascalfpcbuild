@@ -26,7 +26,7 @@ unit nx86set;
 interface
 
     uses
-      globtype,
+      globtype,constexp,
       node,nset,pass_1,ncgset;
 
     type
@@ -39,12 +39,13 @@ interface
          function  has_jumptable : boolean;override;
          procedure genjumptable(hp : pcaselabel;min_,max_ : aint);override;
          procedure genlinearlist(hp : pcaselabel);override;
+         procedure genjmptreeentry(p : pcaselabel;parentvalue : TConstExprInt);override;
       end;
 
 implementation
 
     uses
-      systems,constexp,
+      systems,
       verbose,globals,
       symconst,symdef,defutil,
       aasmbase,aasmtai,aasmdata,aasmcpu,
@@ -112,13 +113,15 @@ implementation
              { case expr greater than max_ => goto elselabel }
              cg.a_cmp_const_reg_label(current_asmdata.CurrAsmList,opcgsize,OC_A,aint(max_)-aint(min_),hregister,elselabel);
              min_:=0;
+             { do not sign extend when we load the index register, as we applied an offset above }
+             opcgsize:=tcgsize2unsigned[opcgsize];
           end;
-        current_asmdata.getdatalabel(table);
+        current_asmdata.getglobaldatalabel(table);
         { make it a 32bit register }
         indexreg:=cg.makeregsize(current_asmdata.CurrAsmList,hregister,OS_INT);
         cg.a_load_reg_reg(current_asmdata.CurrAsmList,opcgsize,OS_INT,hregister,indexreg);
         { create reference }
-        reference_reset_symbol(href,table,0,sizeof(pint));
+        reference_reset_symbol(href,table,0,sizeof(pint),[]);
         href.offset:=(-aint(min_))*sizeof(aint);
         href.index:=indexreg;
 {$ifdef i8086}
@@ -147,6 +150,7 @@ implementation
         jtlist.concat(Tai_label.Create(table));
         genitem(jtlist,hp);
       end;
+
 
     procedure tx86casenode.genlinearlist(hp : pcaselabel);
       var
@@ -252,6 +256,66 @@ implementation
                 cg.a_jmp_always(current_asmdata.CurrAsmList,elselabel);
              end;
         end;
+
+      procedure tx86casenode.genjmptreeentry(p : pcaselabel;parentvalue : TConstExprInt);
+        var
+          lesslabel,greaterlabel : tasmlabel;
+          less,greater : pcaselabel;
+          cond_gt: TResFlags;
+          cmplow : Boolean;
+        begin
+           if with_sign then
+             cond_gt:=F_G
+           else
+             cond_gt:=F_A;
+          current_asmdata.CurrAsmList.concat(cai_align.Create(current_settings.alignment.jumpalign));
+          cg.a_label(current_asmdata.CurrAsmList,p^.labellabel);
+
+          { calculate labels for left and right }
+          if p^.less=nil then
+            lesslabel:=elselabel
+          else
+            lesslabel:=p^.less^.labellabel;
+          if p^.greater=nil then
+            greaterlabel:=elselabel
+          else
+            greaterlabel:=p^.greater^.labellabel;
+
+          { calculate labels for left and right }
+          { no range label: }
+          if p^._low=p^._high then
+            begin
+              if greaterlabel=lesslabel then
+                hlcg.a_cmp_const_reg_label(current_asmdata.CurrAsmList,opsize,OC_NE,p^._low,hregister,lesslabel)
+              else
+                begin
+                  cmplow:=p^._low-1<>parentvalue;
+                  if cmplow then
+                    hlcg.a_cmp_const_reg_label(current_asmdata.CurrAsmList,opsize,jmp_lt,p^._low,hregister,lesslabel);
+                  if p^._high+1<>parentvalue then
+                    begin
+                      if cmplow then
+                        hlcg.a_jmp_flags(current_asmdata.CurrAsmList,cond_gt,greaterlabel)
+                      else
+                        hlcg.a_cmp_const_reg_label(current_asmdata.CurrAsmList,opsize,jmp_gt,p^._low,hregister,greaterlabel);
+                    end;
+                end;
+              hlcg.a_jmp_always(current_asmdata.CurrAsmList,blocklabel(p^.blockid));
+            end
+          else
+            begin
+              if p^._low-1<>parentvalue then
+                hlcg.a_cmp_const_reg_label(current_asmdata.CurrAsmList,opsize,jmp_lt,p^._low,hregister,lesslabel);
+              if p^._high+1<>parentvalue then
+                hlcg.a_cmp_const_reg_label(current_asmdata.CurrAsmList,opsize,jmp_gt,p^._high,hregister,greaterlabel);
+              hlcg.a_jmp_always(current_asmdata.CurrAsmList,blocklabel(p^.blockid));
+            end;
+           if assigned(p^.less) then
+             genjmptreeentry(p^.less,p^._low);
+           if assigned(p^.greater) then
+             genjmptreeentry(p^.greater,p^._high);
+        end;
+
 
 {*****************************************************************************
                               TX86INNODE
@@ -540,12 +604,12 @@ implementation
                else
                 begin
 {$ifdef i8086}
+                  register_maybe_adjust_setbase(current_asmdata.CurrAsmList,left.resultdef,left.location,setbase);
                   cg.getcpuregister(current_asmdata.CurrAsmList,NR_CX);
                   if TCGSize2Size[left.location.size] > 2 then
                     left.location.size := OS_16;
                   cg.a_load_loc_reg(current_asmdata.CurrAsmList,OS_16,left.location,NR_CX);
 
-                  register_maybe_adjust_setbase(current_asmdata.CurrAsmList,left.location,setbase);
                   if (tcgsize2size[right.location.size] < 2) or
                      (right.location.loc = LOC_CONSTANT) then
                     hlcg.location_force_reg(current_asmdata.CurrAsmList,right.location,right.resultdef,u16inttype,true);
@@ -572,7 +636,7 @@ implementation
                   location.resflags:=F_NE;
 {$else i8086}
                   hlcg.location_force_reg(current_asmdata.CurrAsmList,left.location,left.resultdef,u32inttype,true);
-                  register_maybe_adjust_setbase(current_asmdata.CurrAsmList,left.location,setbase);
+                  register_maybe_adjust_setbase(current_asmdata.CurrAsmList,u32inttype,left.location,setbase);
                   if (tcgsize2size[right.location.size] < 4) or
                      (right.location.loc = LOC_CONSTANT) then
                     hlcg.location_force_reg(current_asmdata.CurrAsmList,right.location,right.resultdef,u32inttype,true);
@@ -610,7 +674,7 @@ implementation
                      (setbase<>0) then
                     begin
                       hlcg.location_force_reg(current_asmdata.CurrAsmList,left.location,left.resultdef,opdef,true);
-                      register_maybe_adjust_setbase(current_asmdata.CurrAsmList,left.location,setbase);
+                      register_maybe_adjust_setbase(current_asmdata.CurrAsmList,opdef,left.location,setbase);
                     end;
 
                   cg.getcpuregister(current_asmdata.CurrAsmList,NR_CX);
@@ -640,7 +704,7 @@ implementation
                      (setbase<>0) then
                     begin
                       hlcg.location_force_reg(current_asmdata.CurrAsmList,left.location,left.resultdef,opdef,true);
-                      register_maybe_adjust_setbase(current_asmdata.CurrAsmList,left.location,setbase);
+                      register_maybe_adjust_setbase(current_asmdata.CurrAsmList,opdef,left.location,setbase);
                     end;
 
                   case left.location.loc of
@@ -707,7 +771,7 @@ implementation
                 begin
 {$ifdef i8086}
                   hlcg.location_force_reg(current_asmdata.CurrAsmList,left.location,left.resultdef,opdef,false);
-                  register_maybe_adjust_setbase(current_asmdata.CurrAsmList,left.location,setbase);
+                  register_maybe_adjust_setbase(current_asmdata.CurrAsmList,opdef,left.location,setbase);
 
                   if TCGSize2Size[left.location.size] > 2 then
                     left.location.size := OS_16;
@@ -796,7 +860,7 @@ implementation
                    end;
 {$else i8086}
                   hlcg.location_force_reg(current_asmdata.CurrAsmList,left.location,left.resultdef,opdef,false);
-                  register_maybe_adjust_setbase(current_asmdata.CurrAsmList,left.location,setbase);
+                  register_maybe_adjust_setbase(current_asmdata.CurrAsmList,opdef,left.location,setbase);
                   if (right.location.loc in [LOC_REGISTER,LOC_CREGISTER]) then
                     hlcg.location_force_reg(current_asmdata.CurrAsmList,right.location,right.resultdef,opdef,true);
                   pleftreg:=left.location.register;

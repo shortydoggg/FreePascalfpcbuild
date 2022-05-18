@@ -17,18 +17,24 @@ unit Types;
   interface
 {$modeswitch advancedrecords}
 {$modeswitch class}
-{$ifdef Windows}
+{$if defined(win32) or defined(win64) or defined(wince)}
     uses
        Windows;
-{$endif Windows}
+{$elseif defined(win16)}
+    uses
+       WinTypes;
+{$endif}
 
-{$ifdef mswindows}
+{$if defined(win32) or defined(win64)}
 const
   RT_RCDATA = Windows.RT_RCDATA deprecated 'Use Windows.RT_RCDATA instead';
-{$endif mswindows}
+{$elseif defined(win16)}
+const
+  RT_RCDATA = WinTypes.RT_RCDATA deprecated 'Use WinTypes.RT_RCDATA instead';
+{$endif}
 
 type
-  TEndian = (Big,Little);
+  TEndian =  Objpas.TEndian;
   TDirection = (FromBeginning, FromEnd);
   TValueRelationship = -1..1;
   
@@ -58,6 +64,7 @@ type
   TShortIntDynArray = array of ShortInt;
   TSmallIntDynArray = array of SmallInt;
   TStringDynArray = array of AnsiString;
+  TObjectDynArray = array of TObject;
   TWideStringDynArray   = array of WideString;
   TWordDynArray = array of Word;
   TCurrencyArray = Array of currency;
@@ -68,7 +75,8 @@ type
   TCompDynArray = array of Comp;
 {$endif}
 
-{$ifdef Windows}
+{$if defined(win32) or defined(win64) or defined(wince)}
+  TArray4IntegerType = Windows.TArray4IntegerType;
   TSmallPoint = Windows.TSmallPoint;
   PSmallPoint = Windows.PSmallPoint;
 
@@ -82,6 +90,13 @@ type
 
   TRect  = Windows.TRect;
   PRect  = Windows.PRect;
+  TSplitRectType = Windows.TSplitRectType;
+const
+  srLeft = TSplitRectType.srLeft;
+  srRight = TSplitRectType.srRight;
+  srTop = TSplitRectType.srTop;
+  srBottom = TSplitRectType.srBottom;
+type
 {$else}
   {$i typshrdh.inc}
    TagSize = tSize deprecated;
@@ -116,6 +131,8 @@ type
           function  Floor   : TPoint;
           function  Round   : TPoint;
           function  Length  : Single;
+          class function Create(const ax, ay: Single): TPointF; overload; static; inline;
+          class function Create(const apt: TPoint): TPointF; overload; static; inline;
           class operator = (const apt1, apt2 : TPointF) : Boolean;
           class operator <> (const apt1, apt2 : TPointF): Boolean;
           class operator + (const apt1, apt2 : TPointF): TPointF;
@@ -228,7 +245,7 @@ const
   STG_S_MONITORING            = $00030203;
 {$endif}
 
-{$ifndef Windows}
+{$if (not defined(win32)) and (not defined(win64)) and (not defined(wince))}
 type
   PCLSID = PGUID;
   TCLSID = TGUID;
@@ -299,20 +316,20 @@ type
   end;
 
   IStream = interface(ISequentialStream) ['{0000000C-0000-0000-C000-000000000046}']
-     function Seek(dlibMove : LargeUInt; dwOrigin : Longint; out libNewPosition : LargeUInt) : HResult;stdcall;
+     function Seek(dlibMove : LargeInt; dwOrigin : DWORD; out libNewPosition : LargeUInt) : HResult;stdcall;
      function SetSize(libNewSize : LargeUInt) : HRESULT;stdcall;
      function CopyTo(stm: IStream;cb : LargeUInt;out cbRead : LargeUInt; out cbWritten : LargeUInt) : HRESULT;stdcall;
-     function Commit(grfCommitFlags : Longint) : HRESULT;stdcall;
+     function Commit(grfCommitFlags : DWORD) : HRESULT;stdcall;
      function Revert : HRESULT;stdcall;
-     function LockRegion(libOffset : LargeUInt;cb : LargeUInt; dwLockType : Longint) : HRESULT;stdcall;
-     function UnlockRegion(libOffset : LargeUInt;cb : LargeUInt; dwLockType : Longint) : HRESULT;stdcall;
-     Function Stat(out statstg : TStatStg;grfStatFlag : Longint) : HRESULT;stdcall;
+     function LockRegion(libOffset : LargeUInt;cb : LargeUInt; dwLockType : DWORD) : HRESULT;stdcall;
+     function UnlockRegion(libOffset : LargeUInt;cb : LargeUInt; dwLockType : DWORD) : HRESULT;stdcall;
+     Function Stat(out statstg : TStatStg;grfStatFlag : DWORD) : HRESULT;stdcall;
      function Clone(out stm : IStream) : HRESULT;stdcall;
   end;
 
 function EqualRect(const r1,r2 : TRect) : Boolean;
-function Rect(Left,Top,Right,Bottom : Integer) : TRect;
-function Bounds(ALeft,ATop,AWidth,AHeight : Integer) : TRect;
+function Rect(Left,Top,Right,Bottom : Integer) : TRect; inline;
+function Bounds(ALeft,ATop,AWidth,AHeight : Integer) : TRect; inline;
 function Point(x,y : Integer) : TPoint; inline;
 function PtInRect(const Rect : TRect; const p : TPoint) : Boolean;
 function IntersectRect(var Rect : TRect; const R1,R2 : TRect) : Boolean;
@@ -321,14 +338,14 @@ function IsRectEmpty(const Rect : TRect) : Boolean;
 function OffsetRect(var Rect : TRect;DX : Integer;DY : Integer) : Boolean;
 function CenterPoint(const Rect: TRect): TPoint;
 function InflateRect(var Rect: TRect; dx: Integer; dy: Integer): Boolean;
-function Size(AWidth, AHeight: Integer): TSize;
+function Size(AWidth, AHeight: Integer): TSize; inline;
 function Size(const ARect: TRect): TSize;
 
 implementation
 
 Uses Math;
 
-{$ifndef Windows}
+{$if (not defined(win32)) and (not defined(win64)) and (not defined(wince))}
   {$i typshrd.inc}
 {$endif}
 
@@ -338,7 +355,7 @@ begin
   EqualRect:=(r1.left=r2.left) and (r1.right=r2.right) and (r1.top=r2.top) and (r1.bottom=r2.bottom);
 end;
 
-function Rect(Left,Top,Right,Bottom : Integer) : TRect;
+function Rect(Left,Top,Right,Bottom : Integer) : TRect; inline;
 
 begin
   Rect.Left:=Left;
@@ -347,7 +364,7 @@ begin
   Rect.Bottom:=Bottom;
 end;
 
-function Bounds(ALeft,ATop,AWidth,AHeight : Integer) : TRect;
+function Bounds(ALeft,ATop,AWidth,AHeight : Integer) : TRect; inline;
 
 begin
   Bounds.Left:=ALeft;
@@ -483,13 +500,13 @@ begin
     Result := False;
 end;
 
-function Size(AWidth, AHeight: Integer): TSize;
+function Size(AWidth, AHeight: Integer): TSize; inline;
 begin
   Result.cx := AWidth;
   Result.cy := AHeight;
 end;
 
-function Size(const ARect: TRect): TSize;
+function Size(const ARect: TRect): TSize; inline;
 begin
   Result.cx := ARect.Right - ARect.Left;
   Result.cy := ARect.Bottom - ARect.Top;
@@ -648,6 +665,17 @@ begin
   x:=ax; y:=ay;
 end;
 
+class function TPointF.Create(const ax, ay: Single): TPointF;
+begin
+  Result.x := ax;
+  Result.y := ay;
+end;
+
+class function TPointF.Create(const apt: TPoint): TPointF;
+begin
+  Result.x := apt.X;
+  Result.y := apt.Y;
+end;
 { TRectF }
 
 function TRectF.GetHeight: Single;

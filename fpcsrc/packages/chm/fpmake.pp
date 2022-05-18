@@ -17,7 +17,7 @@ begin
 {$ifdef ALLPACKAGES}
     P.Directory:=ADirectory;
 {$endif ALLPACKAGES}
-    P.Version:='3.0.2';
+    P.Version:='3.2.0';
 
     P.Author := 'Andrew Haines';
     P.License := 'LGPL with modification, ';
@@ -25,11 +25,14 @@ begin
     P.Email := '';
     P.Description := 'Standalone CHM reader and writer library';
     P.NeedLibC:= false;
-    P.OSes := P.OSes - [embedded,nativent,msdos];
+    P.OSes := P.OSes - [embedded,nativent,msdos,win16,macos,palmos,atari];
+    if Defaults.CPU=jvm then
+      P.OSes := P.OSes - [java,android];
 
     D:=P.Dependencies.Add('fcl-xml');
     D:=P.Dependencies.Add('fcl-base');
-    D.Version:='3.0.2';
+    D.Version:='3.2.0';
+    D:=P.Dependencies.Add('rtl-generics');
 
     P.SourcePath.Add('src');
     P.IncludePath.Add('src');

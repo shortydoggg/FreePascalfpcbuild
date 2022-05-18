@@ -29,14 +29,13 @@ unit procinfo;
       { common }
       cclasses,
       { global }
-      globtype,globals,verbose,
+      globtype,
       { symtable }
       symconst,symtype,symdef,symsym,
+      node,
       { aasm }
-      cpubase,cpuinfo,cgbase,cgutils,
-      aasmbase,aasmtai,aasmdata,
-      optutils
-      ;
+      cpubase,cgbase,cgutils,
+      aasmbase,aasmdata;
 
     const
       inherited_inlining_flags : tprocinfoflags =
@@ -108,9 +107,7 @@ unit procinfo;
 
           { Labels for TRUE/FALSE condition, BREAK and CONTINUE }
           CurrBreakLabel,
-          CurrContinueLabel,
-          CurrTrueLabel,
-          CurrFalseLabel : tasmlabel;
+          CurrContinueLabel : tasmlabel;
 
           { label to leave the sub routine }
           CurrExitLabel : tasmlabel;
@@ -142,7 +139,7 @@ unit procinfo;
 
           procedure allocate_push_parasize(size:longint);
 
-          function calc_stackframe_size:longint;virtual;
+          function calc_stackframe_size:longint;virtual;abstract;
 
           { Set the address of the first temp, can be used to allocate
             space for pushing parameters }
@@ -160,15 +157,11 @@ unit procinfo;
           { Destroy the entire procinfo tree, starting from the outermost parent }
           procedure destroy_tree;
 
-          { Store CurrTrueLabel and CurrFalseLabel to saved and generate new ones }
-          procedure save_jump_labels(out saved: tsavedlabels);
-
-          { Restore CurrTrueLabel and CurrFalseLabel from saved }
-          procedure restore_jump_labels(const saved: tsavedlabels);
-
           function get_first_nestedproc: tprocinfo;
           function has_nestedprocs: boolean;
           function get_normal_proc: tprocinfo;
+
+          function create_for_outlining(const basesymname: string; astruct: tabstractrecorddef; potype: tproctypeoption; resultdef: tdef; entrynodeinfo: tnode): tprocinfo;
 
           { Add to parent's list of nested procedures even if parent is a 'main' procedure }
           procedure force_nested;
@@ -190,12 +183,9 @@ unit procinfo;
 
 implementation
 
-     uses
-        cutils,systems,
-        tgobj,cgobj,
-        paramgr
-        ;
-
+    uses
+      globals,cutils,systems,
+      procdefutil;
 
 {****************************************************************************
                                  TProcInfo
@@ -214,14 +204,12 @@ implementation
         { asmlists }
         aktproccode:=TAsmList.Create;
         aktlocaldata:=TAsmList.Create;
-        reference_reset(save_regs_ref,sizeof(aint));
+        reference_reset(save_regs_ref,sizeof(aint),[]);
         { labels }
         current_asmdata.getjumplabel(CurrExitLabel);
         current_asmdata.getjumplabel(CurrGOTLabel);
         CurrBreakLabel:=nil;
         CurrContinueLabel:=nil;
-        CurrTrueLabel:=nil;
-        CurrFalseLabel:=nil;
         if Assigned(parent) and (parent.procdef.parast.symtablelevel>=normal_function_level) then
           parent.addnestedproc(Self);
       end;
@@ -277,22 +265,19 @@ implementation
     function tprocinfo.get_normal_proc: tprocinfo;
       begin
         result:=self;
-        while assigned(result.parent)and(result.procdef.parast.symtablelevel>normal_function_level) do
+        while assigned(result.parent) and (result.procdef.parast.symtablelevel>normal_function_level) do
           result:=result.parent;
       end;
 
-    procedure tprocinfo.save_jump_labels(out saved: tsavedlabels);
+    function tprocinfo.create_for_outlining(const basesymname: string; astruct: tabstractrecorddef; potype: tproctypeoption; resultdef: tdef; entrynodeinfo: tnode): tprocinfo;
       begin
-        saved[false]:=CurrFalseLabel;
-        saved[true]:=CurrTrueLabel;
-        current_asmdata.getjumplabel(CurrTrueLabel);
-        current_asmdata.getjumplabel(CurrFalseLabel);
-      end;
-
-    procedure tprocinfo.restore_jump_labels(const saved: tsavedlabels);
-      begin
-        CurrFalseLabel:=saved[false];
-        CurrTrueLabel:=saved[true];
+        result:=cprocinfo.create(self);
+        result.force_nested;
+        result.procdef:=create_outline_procdef(basesymname,astruct,potype,resultdef);
+        result.entrypos:=entrynodeinfo.fileinfo;
+        result.entryswitches:=entrynodeinfo.localswitches;
+        result.exitpos:=current_filepos; // filepos of last node?
+        result.exitswitches:=current_settings.localswitches; // localswitches of last node?
       end;
 
     procedure tprocinfo.allocate_push_parasize(size:longint);
@@ -301,17 +286,9 @@ implementation
           maxpushedparasize:=size;
       end;
 
-
-    function tprocinfo.calc_stackframe_size:longint;
-      begin
-        result:=Align(tg.direction*tg.lasttemp,current_settings.alignment.localalignmin);
-      end;
-
-
     procedure tprocinfo.set_first_temp_offset;
       begin
       end;
-
 
     procedure tprocinfo.generate_parameter_info;
       begin
@@ -321,19 +298,16 @@ implementation
         para_stack_size:=procdef.calleeargareasize;
       end;
 
-
     procedure tprocinfo.allocate_got_register(list: TAsmList);
       begin
         { most os/cpu combo's don't use this yet, so not yet abstract }
       end;
-
 
     procedure tprocinfo.init_framepointer;
       begin
         { most targets use a constant, but some have a typed constant that must
           be initialized }
       end;
-
 
     procedure tprocinfo.postprocess_code;
       begin

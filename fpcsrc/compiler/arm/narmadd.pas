@@ -34,6 +34,7 @@ interface
           function  GetResFlags(unsigned:Boolean):TResFlags;
           function  GetFpuResFlags:TResFlags;
        public
+          function use_fma : boolean;override;
           function pass_1 : tnode;override;
           function use_generic_mul32to64: boolean; override;
           function use_generic_mul64bit: boolean; override;
@@ -158,10 +159,17 @@ interface
       end;
 
 
+    function tarmaddnode.use_fma : boolean;
+      begin
+       Result:=current_settings.fputype in [fpu_vfpv4];
+      end;
+
+
     procedure tarmaddnode.second_addfloat;
       var
         op : TAsmOp;
         singleprec: boolean;
+        pf: TOpPostfix;
       begin
         pass_left_right;
         if (nf_swapped in flags) then
@@ -199,6 +207,7 @@ interface
             end;
           fpu_vfpv2,
           fpu_vfpv3,
+          fpu_vfpv4,
           fpu_vfpv3_d16:
             begin
               { force mmreg as location, left right doesn't matter
@@ -210,33 +219,25 @@ interface
               location.register:=cg.getmmregister(current_asmdata.CurrAsmList,location.size);
 
               singleprec:=tfloatdef(left.resultdef).floattype=s32real;
+              if singleprec then
+                pf:=PF_F32
+              else
+                pf:=PF_F64;
               case nodetype of
                 addn :
-                  if singleprec then
-                    op:=A_FADDS
-                  else
-                    op:=A_FADDD;
+                  op:=A_VADD;
                 muln :
-                  if singleprec then
-                    op:=A_FMULS
-                  else
-                    op:=A_FMULD;
+                  op:=A_VMUL;
                 subn :
-                  if singleprec then
-                    op:=A_FSUBS
-                  else
-                    op:=A_FSUBD;
+                  op:=A_VSUB;
                 slashn :
-                  if singleprec then
-                    op:=A_FDIVS
-                  else
-                    op:=A_FDIVD;
+                  op:=A_VDIV;
                 else
                   internalerror(2009111401);
               end;
 
-              current_asmdata.CurrAsmList.concat(taicpu.op_reg_reg_reg(op,
-                 location.register,left.location.register,right.location.register));
+              current_asmdata.CurrAsmList.concat(setoppostfix(taicpu.op_reg_reg_reg(op,
+                 location.register,left.location.register,right.location.register),pf));
             end;
           fpu_fpv4_s16:
             begin
@@ -275,6 +276,7 @@ interface
     procedure tarmaddnode.second_cmpfloat;
       var
         op: TAsmOp;
+        pf: TOpPostfix;
       begin
         pass_left_right;
         if (nf_swapped in flags) then
@@ -305,24 +307,26 @@ interface
             end;
           fpu_vfpv2,
           fpu_vfpv3,
+          fpu_vfpv4,
           fpu_vfpv3_d16:
             begin
               hlcg.location_force_mmregscalar(current_asmdata.CurrAsmList,left.location,left.resultdef,true);
               hlcg.location_force_mmregscalar(current_asmdata.CurrAsmList,right.location,right.resultdef,true);
 
-              if (tfloatdef(left.resultdef).floattype=s32real) then
-                if nodetype in [equaln,unequaln] then
-                  op:=A_FCMPS
-                 else
-                   op:=A_FCMPES
-              else if nodetype in [equaln,unequaln] then
-                op:=A_FCMPD
+              if nodetype in [equaln,unequaln] then
+                op:=A_VCMP
               else
-                op:=A_FCMPED;
-              current_asmdata.CurrAsmList.concat(taicpu.op_reg_reg(op,
-                left.location.register,right.location.register));
+                op:=A_VCMPE;
+
+              if (tfloatdef(left.resultdef).floattype=s32real) then
+                pf:=PF_F32
+              else
+                pf:=PF_F64;
+
+              current_asmdata.CurrAsmList.concat(setoppostfix(taicpu.op_reg_reg(op,
+                left.location.register,right.location.register), pf));
               cg.a_reg_alloc(current_asmdata.CurrAsmList,NR_DEFAULTFLAGS);
-              current_asmdata.CurrAsmList.concat(taicpu.op_none(A_FMSTAT));
+              current_asmdata.CurrAsmList.concat(taicpu.op_reg_reg(A_VMRS,NR_APSR_nzcv,NR_FPSCR));
               location.resflags:=GetFpuResFlags;
             end;
           fpu_fpv4_s16:
@@ -335,8 +339,8 @@ interface
               else
                 op:=A_VCMPE;
 
-              current_asmdata.CurrAsmList.concat(taicpu.op_reg_reg(op,
-                left.location.register,right.location.register));
+              current_asmdata.CurrAsmList.concat(setoppostfix(taicpu.op_reg_reg(op,
+                left.location.register,right.location.register),PF_F32));
               cg.a_reg_alloc(current_asmdata.CurrAsmList,NR_DEFAULTFLAGS);
               current_asmdata.CurrAsmList.Concat(taicpu.op_reg_reg(A_VMRS, NR_APSR_nzcv, NR_FPSCR));
             end;
@@ -412,10 +416,13 @@ interface
         unsigned : boolean;
         oldnodetype : tnodetype;
         dummyreg : tregister;
+        truelabel, falselabel: tasmlabel;
         l: tasmlabel;
       const
         lt_zero_swapped: array[boolean] of tnodetype = (ltn, gtn);
       begin
+        truelabel:=nil;
+        falselabel:=nil;
         unsigned:=not(is_signed(left.resultdef)) or
                   not(is_signed(right.resultdef));
 
@@ -477,17 +484,19 @@ interface
             else
             { operation requiring proper N, Z and V flags ? }
               begin
-                location_reset(location,LOC_JUMP,OS_NO);
+                current_asmdata.getjumplabel(truelabel);
+                current_asmdata.getjumplabel(falselabel);
+                location_reset_jump(location,truelabel,falselabel);
                 cg.a_reg_alloc(current_asmdata.CurrAsmList,NR_DEFAULTFLAGS);
                 current_asmdata.CurrAsmList.concat(taicpu.op_reg_reg(A_CMP,left.location.register64.reghi,right.location.register64.reghi));
                 { the jump the sequence is a little bit hairy }
                 case nodetype of
                    ltn,gtn:
                      begin
-                        cg.a_jmp_flags(current_asmdata.CurrAsmList,getresflags(false),current_procinfo.CurrTrueLabel);
+                        cg.a_jmp_flags(current_asmdata.CurrAsmList,getresflags(false),location.truelabel);
                         { cheat a little bit for the negative test }
                         toggleflag(nf_swapped);
-                        cg.a_jmp_flags(current_asmdata.CurrAsmList,getresflags(false),current_procinfo.CurrFalseLabel);
+                        cg.a_jmp_flags(current_asmdata.CurrAsmList,getresflags(false),location.falselabel);
                         cg.a_reg_dealloc(current_asmdata.CurrAsmList,NR_DEFAULTFLAGS);
                         toggleflag(nf_swapped);
                      end;
@@ -498,13 +507,13 @@ interface
                           nodetype:=ltn
                         else
                           nodetype:=gtn;
-                        cg.a_jmp_flags(current_asmdata.CurrAsmList,getresflags(unsigned),current_procinfo.CurrTrueLabel);
+                        cg.a_jmp_flags(current_asmdata.CurrAsmList,getresflags(unsigned),location.truelabel);
                         { cheat for the negative test }
                         if nodetype=ltn then
                           nodetype:=gtn
                         else
                           nodetype:=ltn;
-                        cg.a_jmp_flags(current_asmdata.CurrAsmList,getresflags(unsigned),current_procinfo.CurrFalseLabel);
+                        cg.a_jmp_flags(current_asmdata.CurrAsmList,getresflags(unsigned),location.falselabel);
                         cg.a_reg_dealloc(current_asmdata.CurrAsmList,NR_DEFAULTFLAGS);
                         nodetype:=oldnodetype;
                      end;
@@ -513,8 +522,8 @@ interface
                 current_asmdata.CurrAsmList.concat(taicpu.op_reg_reg(A_CMP,left.location.register64.reglo,right.location.register64.reglo));
                 { the comparisaion of the low dword have to be
                    always unsigned!                            }
-                cg.a_jmp_flags(current_asmdata.CurrAsmList,getresflags(true),current_procinfo.CurrTrueLabel);
-                cg.a_jmp_always(current_asmdata.CurrAsmList,current_procinfo.CurrFalseLabel);
+                cg.a_jmp_flags(current_asmdata.CurrAsmList,getresflags(true),location.truelabel);
+                cg.a_jmp_always(current_asmdata.CurrAsmList,location.falselabel);
                 cg.a_reg_dealloc(current_asmdata.CurrAsmList,NR_DEFAULTFLAGS);
               end;
           end;
@@ -625,7 +634,7 @@ interface
                   end;
 
                   if nodetype in [ltn,lten,gtn,gten,equaln,unequaln] then
-                    resultdef:=pasbool8type;
+                    resultdef:=pasbool1type;
                   result:=ctypeconvnode.create_internal(ccallnode.createintern(procname,ccallparanode.create(
                       ctypeconvnode.create_internal(right,fdef),
                       ccallparanode.create(

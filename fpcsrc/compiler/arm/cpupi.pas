@@ -33,7 +33,7 @@ unit cpupi;
        aasmdata;
 
     type
-       tarmprocinfo = class(tcgprocinfo)
+       tcpuprocinfo = class(tcgprocinfo)
           { for arm thumb, we need to know the stackframe size before
             starting procedure compilation, so this contains the stack frame size, the compiler
             should assume
@@ -64,7 +64,7 @@ unit cpupi;
        defutil,
        aasmcpu;
 
-    procedure tarmprocinfo.set_first_temp_offset;
+    procedure tcpuprocinfo.set_first_temp_offset;
       var
         localsize : aint;
         i : longint;
@@ -140,7 +140,7 @@ unit cpupi;
       end;
 
 
-    function tarmprocinfo.calc_stackframe_size:longint;
+    function tcpuprocinfo.calc_stackframe_size:longint;
       var
          firstfloatreg,lastfloatreg,
          r : byte;
@@ -174,6 +174,7 @@ unit cpupi;
                 end;
               fpu_vfpv2,
               fpu_vfpv3,
+              fpu_vfpv4,
               fpu_vfpv3_d16:
                 begin
                   floatsavesize:=0;
@@ -239,7 +240,7 @@ unit cpupi;
       end;
 
 
-    procedure tarmprocinfo.init_framepointer;
+    procedure tcpuprocinfo.init_framepointer;
       begin
         if (target_info.system in systems_darwin) or GenerateThumbCode then
           begin
@@ -254,14 +255,14 @@ unit cpupi;
       end;
 
 
-    procedure tarmprocinfo.generate_parameter_info;
+    procedure tcpuprocinfo.generate_parameter_info;
       begin
        tcpuprocdef(procdef).total_stackframe_size:=stackframesize;
        inherited generate_parameter_info;
       end;
 
 
-    procedure tarmprocinfo.allocate_got_register(list: TAsmList);
+    procedure tcpuprocinfo.allocate_got_register(list: TAsmList);
       begin
         { darwin doesn't use a got }
         if tf_pic_uses_got in target_info.flags then
@@ -269,12 +270,12 @@ unit cpupi;
       end;
 
 
-    procedure tarmprocinfo.postprocess_code;
+    procedure tcpuprocinfo.postprocess_code;
       begin
         { because of the limited constant size of the arm, all data access is done pc relative }
         finalizearmcode(aktproccode,aktlocaldata);
       end;
 
 begin
-   cprocinfo:=tarmprocinfo;
+   cprocinfo:=tcpuprocinfo;
 end.

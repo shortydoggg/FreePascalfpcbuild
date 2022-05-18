@@ -49,7 +49,7 @@ end;
 
 {$ifndef FPC_HAS_SHORTSTR_DELETE}
 {$define FPC_HAS_SHORTSTR_DELETE}
-procedure delete(var s : shortstring;index : SizeInt;count : SizeInt);
+procedure {$ifdef VER3_0}delete{$else}fpc_shortstr_delete{$endif}(var s : shortstring;index : SizeInt;count : SizeInt);
 begin
   if index<=0 then
      exit;
@@ -67,7 +67,7 @@ end;
 
 {$ifndef FPC_HAS_SHORTSTR_INSERT}
 {$define FPC_HAS_SHORTSTR_INSERT}
-procedure insert(const source : shortstring;var s : shortstring;index : SizeInt);
+procedure {$ifdef ver3_0}insert{$else}fpc_shortstr_insert{$endif}(const source : shortstring;var s : shortstring;index : SizeInt);
 var
   cut,srclen,indexlen : SizeInt;
 begin
@@ -101,7 +101,7 @@ end;
 
 {$ifndef FPC_HAS_SHORTSTR_INSERT_CHAR}
 {$define FPC_HAS_SHORTSTR_INSERT_CHAR}
-procedure insert(source : Char;var s : shortstring;index : SizeInt);
+procedure {$ifdef ver3_0}insert{$else}fpc_shortstr_insert_char{$endif}(source : Char;var s : shortstring;index : SizeInt);
 var
   indexlen : SizeInt;
 begin
@@ -125,17 +125,17 @@ end;
 
 {$ifndef FPC_HAS_SHORTSTR_POS_SHORTSTR}
 {$define FPC_HAS_SHORTSTR_POS_SHORTSTR}
-function pos(const substr : shortstring;const s : shortstring):SizeInt;
+function pos(const substr : shortstring;const s : shortstring; Offset : Sizeint = 1):SizeInt;
 var
   i,MaxLen : SizeInt;
   pc : pchar;
 begin
   Pos:=0;
-  if Length(SubStr)>0 then
+  if (Length(SubStr)>0) and (Offset>0) and (Offset<=Length(S)) then
    begin
      MaxLen:=sizeint(Length(s))-Length(SubStr);
-     i:=0;
-     pc:=@s[1];
+     i:=Offset-1;
+     pc:=@s[Offset];
      while (i<=MaxLen) do
       begin
         inc(i);
@@ -155,13 +155,16 @@ end;
 {$ifndef FPC_HAS_SHORTSTR_POS_CHAR}
 {$define FPC_HAS_SHORTSTR_POS_CHAR}
 {Faster when looking for a single char...}
-function pos(c:char;const s:shortstring):SizeInt;
+function pos(c:char;const s:shortstring; Offset : Sizeint = 1 ):SizeInt;
 var
   i : SizeInt;
   pc : pchar;
 begin
-  pc:=@s[1];
-  for i:=1 to length(s) do
+  Pos:=0;
+  if (Offset<1) or (Offset>Length(S)) then
+    exit;
+  pc:=@s[Offset];
+  for i:=Offset to length(s) do
    begin
      if pc^=c then
       begin
@@ -183,9 +186,9 @@ begin
    fpc_char_Copy:='';
 end;
 
-function pos(const substr : shortstring;c:char): SizeInt;
+function pos(const substr : shortstring;c:char;  Offset : Sizeint = 1): SizeInt;
 begin
-  if (length(substr)=1) and (substr[1]=c) then
+  if (length(substr)=1) and (substr[1]=c) and (Offset=1) then
    Pos:=1
   else
    Pos:=0;
@@ -511,21 +514,32 @@ type
 
   Penum_typeinfo=^Tenum_typeinfo;
   Tenum_typeinfo={$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}packed{$endif}record
-    kind:byte; { always tkEnumeration }
+    kind:TTypeKind; { always tkEnumeration }
     num_chars:byte;
     chars:array[0..0] of char; { variable length with size of num_chars }
   end;
 
+{$push}
+{$packrecords c}
   Penum_typedata=^Tenum_typedata;
   Tenum_typedata={$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}packed{$endif}record
     ordtype:byte;
-    { this seemingly extraneous inner record is here for alignment purposes, so
-      that its data gets aligned properly (if FPC_REQUIRES_PROPER_ALIGNMENT is
-      set }
-    inner: {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT}packed{$endif}record
-      minvalue,maxvalue:longint;
-      basetype:pointer; { required for alignment }
-    end;
+    case TTypeKind of
+      tkInteger,tkChar,tkEnumeration,tkBool,tkWChar,tkSet: (
+        MinValue,MaxValue : Longint;
+        case byte of
+          tkEnumeration: (
+            BaseTypeRef : pointer
+            );
+{$ifndef VER3_0}
+        {tkBool with OrdType=otSQWord }
+        tkInt64:
+          (MinInt64Value, MaxInt64Value: Int64);
+        {tkBool with OrdType=otUQWord }
+        tkQWord:
+          (MinQWordValue, MaxQWordValue: QWord);
+{$endif VER3_0}
+    );
     { more data here, but not needed }
   end;
 
@@ -548,7 +562,7 @@ type
       1: (num_entries:longint;
           search_data:array[0..0] of Tsearch_data);
   end;
-
+{$pop}
 var
   enum_o2s : Penum_ord_to_string;
   header:Penum_typeinfo;
@@ -572,9 +586,14 @@ begin
         enum_rtti_header, and then align. Use an alignment of 1 (which
         does nothing) in case FPC_REQUIRES_PROPER_ALIGNMENT is not set
         to avoid the need for an if in this situation }
-      body:=Penum_typedata(align(ptruint(header) + 2 * sizeof(byte) { kind, num_chars } + header^.num_chars,
-        {$ifndef FPC_REQUIRES_PROPER_ALIGNMENT} 1 {$else} sizeof(pointer) {$endif}));
-      with (body^.inner) do
+
+{$ifdef VER3_0}
+      body:=Penum_typedata(aligntoptr(pointer(header) + 2 * sizeof(byte) { kind, num_chars } + header^.num_chars));
+{$else VER3_0}
+      body:=Penum_typedata(aligntoqword(pointer(header) + 2 * sizeof(byte) { kind, num_chars } + header^.num_chars));
+{$endif VER3_0}
+
+      with body^ do
         begin
           { Bounds check for the ordinal value for this enum }
           if (ordinal<minvalue) or (ordinal>maxvalue) then
@@ -660,7 +679,7 @@ const
   MinLen = 8; { Minimal string length in scientific format }
 var
   buf : array[1..19] of char;
-  i,j,k,reslen,tlen,sign,r,point : longint;
+  i,j,k,reslen,tlen,sign,r,point : ObjpasInt;
   ic : qword;
 begin
   fillchar(buf,length(buf),'0');
@@ -873,6 +892,11 @@ end;
 {$ifndef CPU64}
 
 procedure fpc_chararray_qword(v : qword;len : SizeInt;out a : array of char);compilerproc;
+{$ifdef EXCLUDE_COMPLEX_PROCS}
+begin
+  runerror(219);
+end;
+{$else EXCLUDE_COMPLEX_PROCS}
 var
   ss : shortstring;
   maxlen : SizeInt;
@@ -886,9 +910,15 @@ begin
     maxlen:=high(a)+1;
   fpc_shortstr_chararray_intern_charmove(ss,a,maxlen);
 end;
+{$endif EXCLUDE_COMPLEX_PROCS}
 
 
 procedure fpc_chararray_int64(v : int64;len : SizeInt;out a : array of char);compilerproc;
+{$ifdef EXCLUDE_COMPLEX_PROCS}
+begin
+  runerror(219);
+end;
+{$else EXCLUDE_COMPLEX_PROCS}
 var
   ss : shortstring;
   maxlen : SizeInt;
@@ -902,6 +932,7 @@ begin
     maxlen:=high(a)+1;
   fpc_shortstr_chararray_intern_charmove(ss,a,maxlen);
 end;
+{$endif EXCLUDE_COMPLEX_PROCS}
 
 {$endif CPU64}
 
@@ -990,17 +1021,25 @@ end;
 {$endif}
 
 {$ifndef FPC_STR_ENUM_INTERN}
+{ currently, the avr code generator fails on this procedure, so we disable it,
+  this is not a good solution but fixing compilation of this procedure for
+  avr is hard, requires significant changes to the register allocator to take
+  care of different register classes }
 procedure fpc_chararray_enum(ordinal,len:sizeint;typinfo,ord2strindex:pointer;out a : array of char);compilerproc;
 var
   ss : shortstring;
   maxlen : SizeInt;
 begin
+{$ifdef EXCLUDE_COMPLEX_PROCS}
+  runerror(219);
+{$else EXCLUDE_COMPLEX_PROCS}
   fpc_shortstr_enum(ordinal,len,typinfo,ord2strindex,ss);
   if length(ss)<high(a)+1 then
     maxlen:=length(ss)
   else
     maxlen:=high(a)+1;
   fpc_shortstr_chararray_intern_charmove(ss,a,maxlen);
+{$endif EXCLUDE_COMPLEX_PROCS}
 end;
 {$endif not FPC_STR_ENUM_INTERN}
 
@@ -1021,6 +1060,11 @@ end;
 {$ifndef FPC_HAS_CHARARRAY_CURRENCY}
 {$define FPC_HAS_CHARARRAY_CURRENCY}
 procedure fpc_chararray_Currency(c : Currency;len,fr : SizeInt;out a : array of char);compilerproc;
+{$ifdef EXCLUDE_COMPLEX_PROCS}
+begin
+  runerror(217);
+end;
+{$else EXCLUDE_COMPLEX_PROCS}
 var
   ss : shortstring;
   maxlen : SizeInt;
@@ -1032,7 +1076,8 @@ begin
     maxlen:=high(a)+1;
   fpc_shortstr_chararray_intern_charmove(ss,a,maxlen);
 end;
-{$endif FPC_HAS_STR_CURRENCY}
+{$endif EXCLUDE_COMPLEX_PROCS}
+{$endif FPC_HAS_CHARARRAY_CURRENCY}
 
 {*****************************************************************************
                            Val() Functions
@@ -1214,6 +1259,9 @@ end;
         maxqword=qword($ffffffffffffffff);
 
   begin
+{$ifdef EXCLUDE_COMPLEX_PROCS}
+    runerror(219);
+{$else EXCLUDE_COMPLEX_PROCS}
     fpc_val_int64_shortstr := 0;
     Temp:=0;
     Code:=InitVal(s,negative,base);
@@ -1257,6 +1305,7 @@ end;
     fpc_val_int64_shortstr:=int64(Temp);
     If Negative Then
       fpc_val_int64_shortstr:=-fpc_val_int64_shortstr;
+{$endif EXCLUDE_COMPLEX_PROCS}
   end;
 
 
@@ -1944,6 +1993,11 @@ function fpc_val_enum_shortstr(str2ordindex:pointer;const s:shortstring;out code
 {$endif FPC_STR_ENUM_INTERN}
 
 function fpc_Val_Currency_ShortStr(const s : shortstring; out Code : ValSInt): currency; [public, alias:'FPC_VAL_CURRENCY_SHORTSTR']; compilerproc;
+{$ifdef EXCLUDE_COMPLEX_PROCS}
+begin
+  runerror(217);
+end;
+{$else EXCLUDE_COMPLEX_PROCS}
 const
   MinInt64 : Int64  =-$8000000000000000;
   MinInt64Edge : Int64 = (-$8000000000000000 + 10) div 10;
@@ -2083,6 +2137,7 @@ begin
   fpc_Val_Currency_ShortStr:=PCurrency(@res[0])^;
   Code:=0;
 end;
+{$endif EXCLUDE_COMPLEX_PROCS}
 
 
 {$ifndef FPC_HAS_SETSTRING_SHORTSTR}

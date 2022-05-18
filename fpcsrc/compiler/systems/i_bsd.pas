@@ -30,7 +30,7 @@ unit i_bsd;
   interface
 
     uses
-       systems, rescmn;
+       systems;
 
     const
        res_macho_info : tresinfo =
@@ -63,7 +63,7 @@ unit i_bsd;
 {$ifdef segment_threadvars}
                             tf_section_threadvars,
 {$endif segment_threadvars}
-                            tf_needs_symbol_type,tf_needs_symbol_size,tf_smartlink_library
+                            tf_needs_symbol_type,tf_needs_symbol_size
                             ,tf_smartlink_sections,tf_has_winlike_resources];
             cpu          : cpu_i386;
             unit_env     : 'BSDUNITS';
@@ -119,6 +119,8 @@ unit i_bsd;
             stacksize   : 262144;
             stackalign   : 4;
             abi          : abi_default;
+            { note: default LLVM stack alignment is 16 bytes for this target }
+            llvmdatalayout : 'e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-a0:0:64-f80:32:32-n8:16:32-S32';
           );
 
 
@@ -128,7 +130,7 @@ unit i_bsd;
             name         : 'FreeBSD for x86-64';
             shortname    : 'FreeBSD';
             flags        : [tf_needs_symbol_size,tf_needs_dwarf_cfi,tf_library_needs_pic,tf_needs_symbol_type,
-                            tf_files_case_sensitive,tf_smartlink_library,
+                            tf_files_case_sensitive,
                             tf_dwarf_only_local_labels,
                             {tf_pic_uses_got,}tf_smartlink_sections,tf_has_winlike_resources];
             cpu          : cpu_x86_64;
@@ -172,7 +174,7 @@ unit i_bsd;
                 loopalign       : 4;
                 jumpalign       : 0;
                 constalignmin   : 0;
-                constalignmax   : 8;
+                constalignmax   : 16;
                 varalignmin     : 0;
                 varalignmax     : 16;
                 localalignmin   : 4;
@@ -185,6 +187,7 @@ unit i_bsd;
             stacksize    : 256*1024;
             stackalign   : 16;
             abi          : abi_default;
+            llvmdatalayout : 'e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128';
           );
 
 
@@ -194,7 +197,7 @@ unit i_bsd;
             name         : 'DragonFly for x86-64';
             shortname    : 'DragonFly';
             flags        : [tf_needs_symbol_size,tf_needs_dwarf_cfi,tf_library_needs_pic,tf_needs_symbol_type,
-                            tf_files_case_sensitive,tf_smartlink_library,
+                            tf_files_case_sensitive,
                             tf_dwarf_only_local_labels,
                             {tf_pic_uses_got,}tf_smartlink_sections,tf_has_winlike_resources];
             cpu          : cpu_x86_64;
@@ -238,7 +241,7 @@ unit i_bsd;
                 loopalign       : 4;
                 jumpalign       : 0;
                 constalignmin   : 0;
-                constalignmax   : 8;
+                constalignmax   : 16;
                 varalignmin     : 0;
                 varalignmax     : 16;
                 localalignmin   : 4;
@@ -251,6 +254,7 @@ unit i_bsd;
             stacksize    : 256*1024;
             stackalign   : 16;
             abi          : abi_default;
+            llvmdatalayout : 'e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128';
           );
 
 
@@ -301,7 +305,7 @@ unit i_bsd;
                 loopalign       : 4;
                 jumpalign       : 0;
                 constalignmin   : 0;
-                constalignmax   : 8;
+                constalignmax   : 16;
                 varalignmin     : 0;
                 varalignmax     : 16;
                 localalignmin   : 4;
@@ -314,6 +318,7 @@ unit i_bsd;
             stacksize   : 262144;
             stackalign   : 4;
             abi          : abi_default;
+            llvmdatalayout : 'e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-a0:0:64-f80:32:32-n8:16:32-S32';
           );
 
        system_i386_openbsd_info : tsysteminfo =
@@ -321,7 +326,7 @@ unit i_bsd;
             system       : system_i386_OpenBSD;
             name         : 'OpenBSD for i386';
             shortname    : 'OpenBSD';
-            flags        : [tf_pic_uses_got,tf_under_development,tf_files_case_sensitive,tf_smartlink_library,tf_smartlink_sections,tf_has_winlike_resources];
+            flags        : [tf_pic_default,tf_pic_uses_got,tf_under_development,tf_files_case_sensitive,tf_smartlink_sections,tf_has_winlike_resources];
             cpu          : cpu_i386;
             unit_env     : 'BSDUNITS';
             extradefines : 'UNIX;BSD;HASUNIX';
@@ -363,7 +368,7 @@ unit i_bsd;
                 loopalign       : 4;
                 jumpalign       : 0;
                 constalignmin   : 0;
-                constalignmax   : 8;
+                constalignmax   : 16;
                 varalignmin     : 0;
                 varalignmax     : 16;
                 localalignmin   : 4;
@@ -376,6 +381,8 @@ unit i_bsd;
             stacksize   : 262144;
             stackalign   : 4;
             abi          : abi_default;
+            { note: default LLVM stack alignment is 16 bytes for this target }
+            llvmdatalayout : 'e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-a0:0:64-f80:32:32-n8:16:32-S32';
           );
 
        system_x86_64_openbsd_info : tsysteminfo =
@@ -384,7 +391,7 @@ unit i_bsd;
             name         : 'OpenBSD for x86-64';
             shortname    : 'OpenBSD';
             flags        : [tf_needs_symbol_size,tf_needs_dwarf_cfi,tf_library_needs_pic,tf_needs_symbol_type,
-                            tf_files_case_sensitive,tf_smartlink_library, tf_under_development,
+                            tf_files_case_sensitive, tf_under_development,
                             tf_dwarf_only_local_labels, tf_pic_default,
                             { tf_pic_uses_got,}tf_smartlink_sections,tf_has_winlike_resources];
             cpu          : cpu_x86_64;
@@ -428,7 +435,7 @@ unit i_bsd;
                 loopalign       : 4;
                 jumpalign       : 0;
                 constalignmin   : 0;
-                constalignmax   : 8;
+                constalignmax   : 16;
                 varalignmin     : 0;
                 varalignmax     : 16;
                 localalignmin   : 4;
@@ -441,6 +448,7 @@ unit i_bsd;
             stacksize    : 256*1024;
             stackalign   : 16;
             abi          : abi_default;
+            llvmdatalayout : 'e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128';
           );
 
        system_m68k_netbsd_info : tsysteminfo =
@@ -448,7 +456,8 @@ unit i_bsd;
             system       : system_m68k_NetBSD;
             name         : 'NetBSD for m68k';
             shortname    : 'NetBSD';
-            flags        : [tf_under_development,tf_files_case_sensitive,tf_smartlink_library,tf_has_winlike_resources];
+            flags        : [tf_under_development,tf_needs_symbol_size,tf_needs_symbol_type,tf_requires_proper_alignment,
+                            tf_files_case_sensitive,tf_smartlink_sections,tf_has_winlike_resources];
             cpu          : cpu_m68k;
             unit_env     : 'BSDUNITS';
             extradefines : 'UNIX;BSD;HASUNIX';
@@ -496,13 +505,14 @@ unit i_bsd;
                 localalignmin   : 0;
                 localalignmax   : 1;
                 recordalignmin  : 0;
-                recordalignmax  : 2;
-                maxCrecordalign : 4
+                recordalignmax  : 4;
+                maxCrecordalign : 8
               );
             first_parm_offset : 8;
             stacksize   : 262144;
             stackalign   : 4;
             abi          : abi_default;
+            llvmdatalayout : 'todo';
           );
 
        system_powerpc_netbsd_info : tsysteminfo =
@@ -566,6 +576,7 @@ unit i_bsd;
             stackalign   : 16;
             { abi_powerpc_sysv doesn't work yet }
             abi : abi_powerpc_aix;
+            llvmdatalayout : 'E-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v128:128:128-n32';
           );
 
        system_x86_64_netbsd_info : tsysteminfo =
@@ -574,7 +585,7 @@ unit i_bsd;
             name         : 'NetBSD for x86-64';
             shortname    : 'NetBSD';
             flags        : [tf_needs_symbol_size,tf_needs_dwarf_cfi,tf_library_needs_pic,tf_needs_symbol_type,
-                            tf_files_case_sensitive,tf_smartlink_library, tf_under_development,
+                            tf_files_case_sensitive, tf_under_development,
                             tf_dwarf_only_local_labels,
                             { tf_pic_uses_got,}tf_smartlink_sections,tf_has_winlike_resources];
             cpu          : cpu_x86_64;
@@ -618,7 +629,7 @@ unit i_bsd;
                 loopalign       : 4;
                 jumpalign       : 0;
                 constalignmin   : 0;
-                constalignmax   : 8;
+                constalignmax   : 16;
                 varalignmin     : 0;
                 varalignmax     : 16;
                 localalignmin   : 4;
@@ -631,6 +642,70 @@ unit i_bsd;
             stacksize    : 256*1024;
             stackalign   : 16;
             abi          : abi_default;
+            llvmdatalayout : 'e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128';
+          );
+
+       system_arm_netbsd_info : tsysteminfo =
+          (
+            system       : system_arm_netbsd;
+            name         : 'NetBSD for ARMHF';
+            shortname    : 'NetBSD';
+            flags        : [tf_under_development,tf_requires_proper_alignment,tf_files_case_sensitive,tf_smartlink_sections,tf_has_winlike_resources];
+            cpu          : cpu_arm;
+            unit_env     : '';
+            extradefines : 'UNIX;BSD;HASUNIX';
+            exeext       : '';
+            defext       : '.def';
+            scriptext    : '.sh';
+            smartext     : '.sl';
+            unitext      : '.ppu';
+            unitlibext   : '.ppl';
+            asmext       : '.s';
+            objext       : '.o';
+            resext       : '.res';
+            resobjext    : '.or';
+            sharedlibext : '.so';
+            staticlibext : '.s';
+            staticlibprefix : 'libp';
+            sharedlibprefix : 'lib';
+            sharedClibext : '.so';
+            staticClibext : '.a';
+            staticClibprefix : 'lib';
+            sharedClibprefix : 'lib';
+            importlibprefix : 'libimp';
+            importlibext : '.a';
+            Cprefix      : '';
+            newline      : #10;
+            dirsep       : '/';
+            assem        : as_gas; {as_arm_elf32;}
+            assemextern  : as_gas;
+            link         : ld_none;
+            linkextern   : ld_bsd;
+            ar           : ar_gnu_ar;
+            res          : res_elf;
+            dbg          : dbg_dwarf2;
+            script       : script_unix;
+            endian       : endian_big;
+            alignment    :
+              (
+                procalign       : 4;
+                loopalign       : 4;
+                jumpalign       : 0;
+                constalignmin   : 0;
+                constalignmax   : 4;
+                varalignmin     : 0;
+                varalignmax     : 4;
+                localalignmin   : 0;
+                localalignmax   : 4;
+                recordalignmin  : 0;
+                recordalignmax  : 2;
+                maxCrecordalign : 4     // should be 8 probably
+              );
+            first_parm_offset : 8;
+            stacksize    : 32*1024*1024;
+            stackalign   : 16;
+            abi : abi_eabihf;
+            llvmdatalayout : 'todo';
           );
 
        system_powerpc_darwin_info  : tsysteminfo =
@@ -692,7 +767,8 @@ unit i_bsd;
             first_parm_offset : 24;
             stacksize   : 262144;
             stackalign   : 16;
-            abi : abi_powerpc_aix;
+            abi : abi_powerpc_darwin;
+            llvmdatalayout : 'E-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:64:64-v128:128:128-n32';
           );
 
 
@@ -744,7 +820,7 @@ unit i_bsd;
                 loopalign       : 4;
                 jumpalign       : 0;
                 constalignmin   : 0;
-                constalignmax   : 8;
+                constalignmax   : 16;
                 varalignmin     : 0;
                 varalignmax     : 16;
                 localalignmin   : 0;
@@ -756,7 +832,8 @@ unit i_bsd;
             first_parm_offset : 8;
             stacksize   : 262144;
             stackalign   : 16;
-            abi         : abi_default;
+            abi         : abi_i386_dynalignedstack;
+            llvmdatalayout : 'e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-a0:0:64-f80:128:128-n8:16:32-S128';
           );
 
 
@@ -808,11 +885,11 @@ unit i_bsd;
                 loopalign       : 4;
                 jumpalign       : 0;
                 constalignmin   : 0;
-                constalignmax   : 8;
+                constalignmax   : 16;
                 varalignmin     : 0;
                 varalignmax     : 16;
                 localalignmin   : 0;
-                localalignmax   : 8;
+                localalignmax   : 16;
                 recordalignmin  : 0;
                 recordalignmax  : 16;
                 maxCrecordalign : 16
@@ -820,7 +897,8 @@ unit i_bsd;
             first_parm_offset : 8;
             stacksize   : 262144;
             stackalign   : 16;
-            abi         : abi_default;
+            abi         : abi_i386_dynalignedstack;
+            llvmdatalayout : 'e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:32:64-f32:32:32-f64:32:64-v64:64:64-v128:128:128-a0:0:64-f80:128:128-n8:16:32-S128';
           );
 
 
@@ -884,7 +962,8 @@ unit i_bsd;
             first_parm_offset : 48;
             stacksize   : 262144;
             stackalign   : 16;
-            abi : abi_powerpc_aix;
+            abi : abi_powerpc_darwin;
+            llvmdatalayout : 'E-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v128:128:128-n32:64';
           );
 
 
@@ -936,7 +1015,7 @@ unit i_bsd;
                 loopalign       : 4;
                 jumpalign       : 0;
                 constalignmin   : 0;
-                constalignmax   : 8;
+                constalignmax   : 16;
                 varalignmin     : 0;
                 varalignmax     : 16;
                 localalignmin   : 4;
@@ -949,6 +1028,71 @@ unit i_bsd;
             stacksize   : 262144;
             stackalign   : 16;
             abi : abi_default;
+            llvmdatalayout : 'e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128';
+          );
+
+
+       system_x86_64_iphonesim_info  : tsysteminfo =
+          (
+            system       : system_x86_64_iphonesim;
+            name         : 'Darwin/iPhoneSim for x86_64';
+            shortname    : 'iPhoneSim';
+            flags        : [tf_p_ext_support,tf_files_case_sensitive,tf_smartlink_sections,tf_dwarf_relative_addresses,tf_dwarf_only_local_labels,tf_pic_default,tf_has_winlike_resources];
+            cpu          : cpu_x86_64;
+            unit_env     : 'BSDUNITS';
+            extradefines : 'UNIX;BSD;HASUNIX;DARWIN'; // also define darwin for code compatibility
+            exeext       : '';
+            defext       : '.def';
+            scriptext    : '.sh';
+            smartext     : '.sl';
+            unitext      : '.ppu';
+            unitlibext   : '.ppl';
+            asmext       : '.s';
+            objext       : '.o';
+            resext       : '.res';
+            resobjext    : '.or';
+            sharedlibext : '.dylib';
+            staticlibext : '.a';
+            staticlibprefix : 'libp';
+            sharedlibprefix : 'lib';
+            sharedClibext : '.dylib';
+            staticClibext : '.a';
+            staticClibprefix : 'lib';
+            sharedClibprefix : 'lib';
+            importlibprefix : 'libimp';
+            importlibext : '.a';
+            Cprefix      : '_';
+            newline      : #10;
+            dirsep       : '/';
+            assem        : as_clang;
+            assemextern  : as_clang;
+            link         : ld_none;
+            linkextern   : ld_bsd;
+            ar           : ar_gnu_ar;
+            res          : res_macho;
+            dbg          : dbg_dwarf2;
+            script       : script_unix;
+            endian       : endian_little;
+            alignment    :
+              (
+                procalign       : 8;
+                loopalign       : 4;
+                jumpalign       : 0;
+                constalignmin   : 0;
+                constalignmax   : 16;
+                varalignmin     : 0;
+                varalignmax     : 16;
+                localalignmin   : 4;
+                localalignmax   : 16;
+                recordalignmin  : 0;
+                recordalignmax  : 16;
+                maxCrecordalign : 16
+              );
+            first_parm_offset : 16;
+            stacksize   : 262144;
+            stackalign   : 16;
+            abi : abi_default;
+            llvmdatalayout : 'e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-s0:64:64-f80:128:128-n8:16:32:64-S128';
           );
 
 
@@ -984,8 +1128,8 @@ unit i_bsd;
             Cprefix      : '_';
             newline      : #10;
             dirsep       : '/';
-            assem        : as_darwin;
-            assemextern  : as_darwin;
+            assem        : as_clang;
+            assemextern  : as_clang;
             link         : ld_none;
             linkextern   : ld_bsd;
             ar           : ar_gnu_ar;
@@ -1011,8 +1155,76 @@ unit i_bsd;
             first_parm_offset : 8;
             stacksize    : 262144;
             stackalign   : 4;
-            abi : abi_default
+            abi : abi_default;
+            { note: default LLVM stack alignment is 8 bytes for this target }
+            llvmdatalayout : 'e-p:32:32:32-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:64:128-a0:0:64-n32-S32';
           );
+
+
+       system_aarch64_darwin_info  : tsysteminfo =
+          (
+            system       : system_aarch64_darwin;
+            name         : 'Darwin for AArch64';
+            shortname    : 'Darwin';
+            flags        : [tf_p_ext_support,tf_requires_proper_alignment,tf_files_case_sensitive,tf_smartlink_sections,tf_dwarf_relative_addresses,tf_dwarf_only_local_labels,tf_pic_default,tf_has_winlike_resources];
+            cpu          : cpu_aarch64;
+            unit_env     : 'BSDUNITS';
+            extradefines : 'UNIX;BSD;HASUNIX';
+            exeext       : '';
+            defext       : '.def';
+            scriptext    : '.sh';
+            smartext     : '.sl';
+            unitext      : '.ppu';
+            unitlibext   : '.ppl';
+            asmext       : '.s';
+            objext       : '.o';
+            resext       : '.res';
+            resobjext    : '.or';
+            sharedlibext : '.dylib';
+            staticlibext : '.a';
+            staticlibprefix : 'libp';
+            sharedlibprefix : 'lib';
+            sharedClibext : '.dylib';
+            staticClibext : '.a';
+            staticClibprefix : 'lib';
+            sharedClibprefix : 'lib';
+            importlibprefix : 'libimp';
+            importlibext : '.a';
+            Cprefix      : '_';
+            newline      : #10;
+            dirsep       : '/';
+            assem        : as_clang;
+            assemextern  : as_clang;
+            link         : ld_none;
+            linkextern   : ld_bsd;
+            ar           : ar_gnu_ar;
+            res          : res_macho;
+            dbg          : dbg_dwarf2;
+            script       : script_unix;
+            endian       : endian_little;
+            alignment    :
+              (
+                procalign       : 8;
+                loopalign       : 4;
+                jumpalign       : 0;
+                constalignmin   : 0;
+                constalignmax   : 16;
+                varalignmin     : 0;
+                varalignmax     : 16;
+                localalignmin   : 4;
+                localalignmax   : 16;
+                recordalignmin  : 0;
+                recordalignmax  : 16;
+                maxCrecordalign : 16
+              );
+            first_parm_offset : 16;
+            stacksize   : 8*1024*1024;
+            stackalign   : 16;
+            abi : abi_aarch64_darwin;
+            llvmdatalayout : 'e-p:64:64:64-i1:8:8-i8:8:8-i16:16:16-i32:32:32-i64:64:64-f32:32:32-f64:64:64-v64:64:64-v128:128:128-a0:0:64-n32:64-S128'
+          );
+
+
 
   implementation
 
@@ -1070,5 +1282,13 @@ initialization
   {$ifdef Darwin}
      set_source_info(system_arm_darwin_info);
   {$endif Darwin}
+  {$ifdef NetBSD}
+     set_source_info(system_arm_netbsd_info);
+  {$endif}
 {$endif cpuarm}
+{$ifdef cpuaarch64}
+  {$ifdef Darwin}
+     set_source_info(system_aarch64_darwin_info);
+  {$endif Darwin}
+{$endif cpuaarch64}
 end.

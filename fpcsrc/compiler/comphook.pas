@@ -72,6 +72,8 @@ type
   TCompilerStatus = record
   { Current status }
     currentmodule,
+    currentsourceppufilename, { the name of the ppu where the source file
+                                comes from where the error location is given }
     currentsourcepath,
     currentsource : string;   { filename }
     currentline,
@@ -104,6 +106,7 @@ type
     use_redir,
     use_bugreport,
     use_gccoutput,
+    sources_avail,
     print_source_path : boolean;
   { Redirection support }
     redirfile : text;
@@ -302,15 +305,17 @@ begin
      if status.currentcolumn>0 then
       begin
         if status.use_gccoutput then
-          hs:=gccfilename(status.currentsource)+':'+tostr(status.currentline)+': '+hs+' '+
-              tostr(status.currentcolumn)+': '+s
+          hs:=gccfilename(status.currentsource)+':'+tostr(status.currentline)+':'+tostr(status.currentcolumn)+': '+hs+' '+s
         else
           begin
             hs:=status.currentsource+'('+tostr(status.currentline)+
               ','+tostr(status.currentcolumn)+') '+hs+' '+s;
           end;
         if status.print_source_path then
-          hs:=status.currentsourcepath+hs;
+          if status.sources_avail then
+            hs:=status.currentsourcepath+hs
+          else
+            hs:=status.currentsourceppufilename+':'+hs;
       end
      else
       begin

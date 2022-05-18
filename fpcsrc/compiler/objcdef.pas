@@ -28,7 +28,6 @@ unit objcdef;
 interface
 
     uses
-      node,
       symtype;
 
     { The internals of Objective-C's @encode() functionality: encode a
@@ -55,7 +54,7 @@ implementation
   uses
     globtype,
     cutils,cclasses,
-    verbose,systems,
+    verbose,
     symtable,symconst,symsym,symdef,
     defutil,paramgr;
 
@@ -371,7 +370,10 @@ implementation
                 end;
             end;
           procvardef :
-            encodedstr:=encodedstr+'^?';
+            if not(po_is_block in tprocvardef(def).procoptions) then
+              encodedstr:=encodedstr+'^?'
+            else
+              encodedstr:=encodedstr+'@?';
           objectdef :
             case tobjectdef(def).objecttype of
               odt_helper,

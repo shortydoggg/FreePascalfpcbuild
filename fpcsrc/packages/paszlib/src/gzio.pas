@@ -529,6 +529,7 @@ begin
   if Assigned (s^.outbuf) then
     FreeMem(s^.outbuf, Z_BUFSIZE);
   FreeMem(s, sizeof(gz_stream));
+  s := nil;
 
 end;
 
@@ -1190,9 +1191,9 @@ end;
 
 { GZERROR ===================================================================
 
-  Returns the error message for the last error which occured on the
+  Returns the error message for the last error which occurred on the
    given compressed file. errnum is set to zlib error number. If an
-   error occured in the file system and not in the compression library,
+   error occurred in the file system and not in the compression library,
    errnum is set to Z_ERRNO and the application may consult errno
    to get the exact error code.
 

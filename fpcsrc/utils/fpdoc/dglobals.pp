@@ -23,7 +23,7 @@ unit dGlobals;
 
 interface
 
-uses Classes, DOM, PasTree, PParser, StrUtils,uriparser;
+uses Classes, DOM, PasTree, PParser, uriparser;
 
 Const
   CacheSize = 20;
@@ -144,6 +144,8 @@ resourcestring
   SCopyright2      = '(c) 2005 - 2012 various FPC contributors';
 
   SCmdLineHelp     = 'Usage: %s [options]';
+  SUsageOption008  = '--base-descr-dir=DIR prefix all description files with this directory';
+  SUsageOption009  = '--base-input-dir=DIR prefix all input files with this directory';
   SUsageOption010  = '--content         Create content file for package cross-references';
   SUsageOption020  = '--cputarget=value Set the target CPU for the scanner.';
   SUsageOption030  = '--descr=file      use file as description file, e.g.: ';
@@ -159,6 +161,7 @@ resourcestring
   SUsageOption120  = '                  At least one input option is required.';
   SUsageOption130  = '--input-dir=Dir   Add All *.pp and *.pas files in Dir to list of input files';
   SUsageOption140  = '--lang=lng        Select output language.';
+  SUsageOption145  = '--macro=name=value Define a macro to preprocess the project file with.';
   SUsageOption150  = '--ostarget=value  Set the target OS for the scanner.';
   SUsageOption160  = '--output=name     use name as the output name.';
   SUsageOption170  = '                  Each backend interprets this as needed.';
@@ -166,6 +169,8 @@ resourcestring
   SUsageOption190  = '                  e.g. --package=fcl';
   SUsageOption200  = '--project=file    Use file as project file';
   SUsageOption210  = '--show-private    Show private methods.';
+  SUsageOption215  = '--stop-on-parser-error';
+  SUsageOption215A = '                  Stop when a parser error occurs. Default is to ignore parser errors.';
   SUsageOption220  = '--warn-no-node    Warn if no documentation node was found.';
   SUsageOption230  = '--mo-dir=dir      Set directory where language files reside to dir';
   SUsageOption240  = '--parse-impl      (Experimental) try to parse implementation too';
@@ -181,6 +186,7 @@ resourcestring
   SUsageFormats        = 'The following output formats are supported by this fpdoc:';
   SUsageBackendHelp    = 'Specify an output format, combined with --help to get more help for this backend.';
   SUsageFormatSpecific = 'Output format "%s" supports the following options:';
+  SCmdLineErrInvalidMacro     = 'Macro needs to be in the form name=value';
 
   SCmdLineInvalidOption       = 'Ignoring unknown option "%s"';
   SCmdLineInvalidFormat       = 'Invalid format "%s" specified';
@@ -200,6 +206,7 @@ Const
        'Published', 'Automated','Strict Private','Strict Protected');
 
 type
+  TBufType = Array[1..ContentBufSize-1] of byte;
 
   // Assumes a list of TObject instances and frees them on destruction
 
@@ -633,6 +640,7 @@ begin
   FreeAndNil(DescrDocNames);
   FreeAndNil(DescrDocs);
   FreeAndNil(FAlwaysVisible);
+  FreeAndNil(FPackages);
   inherited Destroy;
 end;
 
@@ -710,9 +718,9 @@ var
     end;
   end;
 
-  function ResolvePackageModule(AName:String;var pkg:TPasPackage;var module:TPasModule;createnew:boolean):String;
+  function ResolvePackageModule(AName:String;out pkg:TPasPackage;out module:TPasModule;createnew:boolean):String;
     var
-      DotPos, DotPos2, i,j: Integer;
+      DotPos, DotPos2, i: Integer;
       s: String;
       HPackage: TPasPackage;
 
@@ -808,7 +816,6 @@ var
 
     function CreateClass(const AName: String;InheritanceStr:String): TPasClassType;
     var
-      DotPos, DotPos2, i,j: Integer;
       s: String;
       HPackage: TPasPackage;
       Module: TPasModule;
@@ -992,9 +999,10 @@ end;
 
 var
   s: String;
-  buf : Array[1..ContentBufSize-1] of byte;
+  buf : TBufType;
 
 begin
+  buf:=Default(TBufType);
   if not FileExists(AFileName) then
     raise EInOutError.Create('File not found: ' + AFileName);
   Assign(f, AFilename);
@@ -1049,8 +1057,10 @@ var
   ClassDecl: TPasClassType;
   Member: TPasElement;
   s: String;
-  Buf : Array[0..ContentBufSize-1] of byte;
+  Buf : TBufType;
+
 begin
+  Buf:=Default(TBufType);
   Assign(ContentFile, AFilename);
   Rewrite(ContentFile);
   SetTextBuf(ContentFile,Buf,SizeOf(Buf));
@@ -1113,7 +1123,7 @@ begin
         begin
           Member := TPasElement(ClassDecl.Members[k]);
           Write(ContentFile, Chr(Ord(Member.Visibility) + Ord('0')));
-          SetLength(s, 0);
+          S:='';
           if Member.ClassType = TPasVariable then
             Write(ContentFile, 'V')
           else if Member.ClassType = TPasProperty then
@@ -1259,7 +1269,7 @@ begin
   M:=CurModule;
   CurModule:=Nil;
   try
-    ParseSource(Self,AInputLine,AOSTarget,ACPUTarget,True);
+    ParseSource(Self,AInputLine,AOSTarget,ACPUTarget,[poUseStreams,poSkipDefaultDefs]);
     Result:=CurModule;
   finally
     CurModule:=M;
@@ -1367,7 +1377,7 @@ begin
     Parser := TDOMParser.Create; // create a parser object
     try
       Src := TXMLInputSource.Create(FileStream); // and the input source
-      src.SystemId:=FileNameToUri(AFileName);
+      src.SystemId:=UTF8Decode(FileNameToUri(AFileName));
       try
         Parser.Options.PreserveWhitespace := True;
         Parser.Parse(Src, ADoc);
@@ -1392,13 +1402,13 @@ Var
     Subnode: TDOMNode;
   begin
     if OwnerDocNode = RootDocNode then
-      Result := OwnerDocNode.CreateChildren('#' + Element['name'])
+      Result := OwnerDocNode.CreateChildren('#' + UTF8Encode(Element['name']))
     else
-      Result := OwnerDocNode.CreateChildren(Element['name']);
+      Result := OwnerDocNode.CreateChildren(UTF8Encode(Element['name']));
     Result.FNode := Element;
-    Result.FLink := Element['link'];
+    Result.FLink := UTF8Encode(Element['link']);
     if (Element['alwaysvisible'] = '1') and (Element.NodeName='element') then
-      FAlwaysVisible.Add(LowerCase(PN+'.'+TDocNode(OwnerDocNode).Name+'.'+Element['name']));
+      FAlwaysVisible.Add(LowerCase(PN+'.'+TDocNode(OwnerDocNode).Name+'.'+UTF8Encode(Element['name'])));
     Result.FIsSkipped := Element['skip'] = '1';
     Subnode := Element.FirstChild;
     while Assigned(Subnode) do
@@ -1445,9 +1455,7 @@ Var
   end;
 
 var
-  i: Integer;
   Node, Subnode, Subsubnode: TDOMNode;
-  Element: TDOMElement;
   Doc: TXMLDocument;
   PackageDocNode, TopicNode,ModuleDocNode: TDocNode;
 
@@ -1600,9 +1608,6 @@ end;
 
 function TFPDocEngine.FindLinkedNode(ANode : TDocNode) : TDocNode;
 
-Var
-  S: String;
-
 begin
   If (ANode.Link='') then
     Result:=Nil
@@ -1661,7 +1666,7 @@ begin
   Result:='';
   for i := 0 to DescrDocs.Count - 1 do
     begin
-    Fn:=ExElement['file'];
+    Fn:=UTF8Encode(ExElement['file']);
     if (FN<>'') and (TDOMDocument(DescrDocs[i]) = ExElement.OwnerDocument) then
       begin
       Result := ExtractFilePath(DescrDocNames[i]) + FN;

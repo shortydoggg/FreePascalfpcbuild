@@ -56,6 +56,7 @@ Type
     Function Install : Boolean; virtual;
     Function UnInstall: boolean; virtual;
     Function HandleCustomCode(ACode : DWord) : Boolean; Virtual;
+    procedure DoThreadTerminate(Sender: TObject);virtual;
   Public
     Procedure CheckControlMessages(Wait : Boolean);
     Procedure LogMessage(const Msg : String);
@@ -450,7 +451,7 @@ Var
 Procedure StartLog;
 
 begin
-{$ifdef win32}
+{$if defined(win32) or defined(win64)}
   Assign(FL,'c:\service.log');
 {$else}
   Assign(FL,'/tmp/service.log');
@@ -694,7 +695,12 @@ begin
   Result:=False
 end;
 
-Procedure TCustomDaemon.CheckControlMessages(Wait : Boolean);
+procedure TCustomDaemon.DoThreadTerminate(Sender: TObject);
+begin
+  Self.FThread := NIL;
+end;
+
+procedure TCustomDaemon.CheckControlMessages(Wait: Boolean);
 
 begin
   If Assigned(FThread) then
@@ -1030,7 +1036,18 @@ begin
       If Components[i] is TDaemonController then
         L.Add(Components[i]);
     For I:=L.Count-1 downto 0 do
-      TDaemonController(L[i]).Controller(ControlCodes[Force],0,Nil);
+      TDaemonController(L[i]).Controller(SERVICE_CONTROL_STOP,0,Nil);
+    if Force then
+      begin
+      Sleep(50); // Give the daemons some chance to actually stop
+      L.Clear;
+      For I:=0 to ComponentCount-1 do
+        If (Components[i] is TDaemonController) and 
+           (TDaemonController(Components[i]).LastStatus<>csStopped)  then
+          L.Add(Components[i]);
+      For I:=L.Count-1 downto 0 do
+        TDaemonController(L[i]).Controller(SERVICE_CONTROL_SHUTDOWN,0,Nil);
+      end;  
   finally
     L.Free;
   end;

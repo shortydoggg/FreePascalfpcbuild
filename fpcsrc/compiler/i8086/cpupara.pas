@@ -32,14 +32,16 @@ unit cpupara;
        parabase,paramgr;
 
     type
-       ti8086paramanager = class(tparamanager)
+       tcpuparamanager = class(tparamanager)
           function param_use_paraloc(const cgpara:tcgpara):boolean;override;
           function ret_in_param(def:tdef;pd:tabstractprocdef):boolean;override;
+          function asm_result_var(def:tdef;pd:tabstractprocdef):boolean;override;
           function push_addr_param(varspez:tvarspez;def : tdef;calloption : tproccalloption) : boolean;override;
           function get_para_align(calloption : tproccalloption):byte;override;
           function get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;override;
           function get_volatile_registers_fpu(calloption : tproccalloption):tcpuregisterset;override;
           function get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;override;
+          function get_saved_registers_int(calloption : tproccalloption):tcpuregisterarray;override;
           { Returns the location for the nr-st 16 Bit int parameter
             if every parameter before is an 16 Bit int parameter as well
             and if the calling conventions for the helper routines of the
@@ -51,7 +53,7 @@ unit cpupara;
             other memory models, this mechanism has to be extended somehow to
             support 32-bit addresses on a 16-bit CPU.
           }
-          procedure getintparaloc(pd : tabstractprocdef; nr : longint; var cgpara : tcgpara);override;
+          procedure getintparaloc(list: TAsmList; pd : tabstractprocdef; nr : longint; var cgpara : tcgpara);override;
           function create_paraloc_info(p : tabstractprocdef; side: tcallercallee):longint;override;
           function create_varargs_paraloc_info(p : tabstractprocdef; varargspara:tvarargsparalist):longint;override;
           procedure createtempparaloc(list: TAsmList;calloption : tproccalloption;parasym : tparavarsym;can_use_final_stack_loc : boolean;var cgpara:TCGPara);override;
@@ -71,13 +73,13 @@ unit cpupara;
        defutil;
 
       const
-        parasupregs : array[0..2] of tsuperregister = (RS_AX,RS_DX,RS_CX);
+        parasupregs : array[0..2] of tsuperregister = (RS_AX,RS_DX,RS_BX);
 
 {****************************************************************************
-                                ti8086paramanager
+                                tcpuparamanager
 ****************************************************************************}
 
-    function ti8086paramanager.param_use_paraloc(const cgpara:tcgpara):boolean;
+    function tcpuparamanager.param_use_paraloc(const cgpara:tcgpara):boolean;
       var
         paraloc : pcgparalocation;
       begin
@@ -98,7 +100,7 @@ unit cpupara;
       end;
 
 
-    function ti8086paramanager.ret_in_param(def:tdef;pd:tabstractprocdef):boolean;
+    function tcpuparamanager.ret_in_param(def:tdef;pd:tabstractprocdef):boolean;
       var
         size: longint;
       begin
@@ -115,7 +117,15 @@ unit cpupara;
       end;
 
 
-    function ti8086paramanager.push_addr_param(varspez:tvarspez;def : tdef;calloption : tproccalloption) : boolean;
+    function tcpuparamanager.asm_result_var(def:tdef;pd:tabstractprocdef):boolean;
+      begin
+        if not(po_assembler in pd.procoptions) then
+          internalerror(2018021501);
+        result:=ret_in_param(def,pd);
+      end;
+
+
+    function tcpuparamanager.push_addr_param(varspez:tvarspez;def : tdef;calloption : tproccalloption) : boolean;
       begin
         result:=false;
         { var,out,constref always require address }
@@ -154,9 +164,7 @@ unit cpupara;
               else
                 result:=
                   (not(calloption in (cdecl_pocalls)) and
-                   (def.size>sizeof(aint))) or
-                  (((calloption = pocall_mwpascal) or (target_info.system=system_i386_wince)) and
-                   (varspez=vs_const));
+                   (def.size>sizeof(aint)));
             end;
           arraydef :
             begin
@@ -188,26 +196,24 @@ unit cpupara;
       end;
 
 
-    function ti8086paramanager.get_para_align(calloption : tproccalloption):byte;
+    function tcpuparamanager.get_para_align(calloption : tproccalloption):byte;
       begin
         result:=std_param_align;
       end;
 
 
-    function ti8086paramanager.get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;
+    function tcpuparamanager.get_volatile_registers_int(calloption : tproccalloption):tcpuregisterset;
       begin
         case calloption of
           pocall_internproc :
             result:=[];
           pocall_register,
+          pocall_cdecl:
+            result:=[RS_AX,RS_DX,RS_CX,RS_BX];
           pocall_safecall,
           pocall_stdcall,
-          pocall_cdecl,
           pocall_cppdecl,
-          pocall_mwpascal,
-          pocall_far16,
-          pocall_pascal,
-          pocall_oldfpccall :
+          pocall_pascal :
             result:=[RS_AX,RS_DX,RS_CX,RS_SI,RS_DI,RS_BX];
           else
             internalerror(200309071);
@@ -215,19 +221,40 @@ unit cpupara;
       end;
 
 
-    function ti8086paramanager.get_volatile_registers_fpu(calloption : tproccalloption):tcpuregisterset;
+    function tcpuparamanager.get_volatile_registers_fpu(calloption : tproccalloption):tcpuregisterset;
       begin
         result:=[0..first_fpu_imreg-1];
       end;
 
 
-    function ti8086paramanager.get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;
+    function tcpuparamanager.get_volatile_registers_mm(calloption : tproccalloption):tcpuregisterset;
       begin
         result:=[0..first_mm_imreg-1];
       end;
 
 
-    procedure ti8086paramanager.getintparaloc(pd : tabstractprocdef; nr : longint; var cgpara : tcgpara);
+    function tcpuparamanager.get_saved_registers_int(calloption : tproccalloption):tcpuregisterarray;
+      const
+        saveregs_cdecl: array [0..2] of tsuperregister = (RS_BP,RS_SI,RS_DI);
+        saveregs_pascal: array [0..0] of tsuperregister = (RS_BP);
+      begin
+        case calloption of
+          pocall_register,
+          pocall_cdecl:
+            result:=saveregs_cdecl;
+          pocall_internproc,
+          pocall_safecall,
+          pocall_stdcall,
+          pocall_cppdecl,
+          pocall_pascal :
+            result:=saveregs_pascal;
+          else
+            internalerror(2018042301);
+        end;
+      end;
+
+
+    procedure tcpuparamanager.getintparaloc(list: TAsmList; pd : tabstractprocdef; nr : longint; var cgpara : tcgpara);
       var
         paraloc : pcgparalocation;
         psym: tparavarsym;
@@ -236,7 +263,7 @@ unit cpupara;
         psym:=tparavarsym(pd.paras[nr-1]);
         pdef:=psym.vardef;
         if push_addr_param(psym.varspez,pdef,pd.proccalloption) then
-          pdef:=getpointerdef(pdef);
+          pdef:=cpointerdef.getreusable_no_free(pdef);
         cgpara.reset;
         cgpara.size:=def_cgsize(pdef);
         cgpara.intsize:=tcgsize2size[cgpara.size];
@@ -274,7 +301,7 @@ unit cpupara;
       end;
 
 
-    function  ti8086paramanager.get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): TCGPara;
+    function  tcpuparamanager.get_funcretloc(p : tabstractprocdef; side: tcallercallee; forcetempdef: tdef): TCGPara;
       var
         retcgsize  : tcgsize;
         paraloc : pcgparalocation;
@@ -295,19 +322,6 @@ unit cpupara;
         result.temporary:=assigned(forcetempdef);
         if handled then
           exit;
-
-        { darwin/x86 requires that results < sizeof(aint) are sign/zero
-          extended to sizeof(aint) }
-        if (target_info.system in [system_i386_darwin,system_i386_iphonesim]) and
-           (side=calleeside) and
-           (result.intsize>0) and
-           (result.intsize<sizeof(aint)) then
-          begin
-            result.def:=sinttype;
-            result.intsize:=sizeof(aint);
-            retcgsize:=OS_SINT;
-            result.size:=retcgsize;
-          end;
 
         { Return in FPU register? }
         if result.def.typ=floatdef then
@@ -396,7 +410,7 @@ unit cpupara;
       end;
 
 
-    procedure ti8086paramanager.create_stdcall_paraloc_info(p : tabstractprocdef; side: tcallercallee;paras:tparalist;var parasize:longint);
+    procedure tcpuparamanager.create_stdcall_paraloc_info(p : tabstractprocdef; side: tcallercallee;paras:tparalist;var parasize:longint);
       var
         i  : integer;
         hp : tparavarsym;
@@ -442,24 +456,12 @@ unit cpupara;
               begin
                 paralen:=voidpointertype.size;
                 paracgsize:=int_cgsize(voidpointertype.size);
-                paradef:=getpointerdef(paradef);
+                paradef:=cpointerdef.getreusable_no_free(paradef);
               end
             else
               begin
                 paralen:=push_size(hp.varspez,paradef,p.proccalloption);
-                { darwin/x86 requires that parameters < sizeof(aint) are sign/ }
-                { zero extended to sizeof(aint)                                }
-                if (target_info.system in [system_i386_darwin,system_i386_iphonesim]) and
-                   (side = callerside) and
-                   (paralen > 0) and
-                   (paralen < sizeof(aint)) then
-                  begin
-                    paralen:=sizeof(aint);
-                    paracgsize:=OS_SINT;
-                    paradef:=sinttype;
-                  end
-                else
-                  paracgsize:=def_cgsize(paradef);
+                paracgsize:=def_cgsize(paradef);
               end;
             hp.paraloc[side].reset;
             hp.paraloc[side].size:=paracgsize;
@@ -479,13 +481,6 @@ unit cpupara;
                 else
                   paraloc^.reference.index:=NR_FRAME_POINTER_REG;
                 varalign:=used_align(size_2_align(paralen),paraalign,paraalign);
-
-                { don't let push_size return 16, because then we can    }
-                { read past the end of the heap since the value is only }
-                { 10 bytes long (JM)                                    }
-                if (paracgsize = OS_F80) and
-                   (target_info.system in [system_i386_darwin,system_i386_iphonesim]) then
-                  paralen:=16;
                 paraloc^.reference.offset:=parasize;
                 if side=calleeside then
                   begin
@@ -556,7 +551,7 @@ unit cpupara;
       end;
 
 
-    procedure ti8086paramanager.create_register_paraloc_info(p : tabstractprocdef; side: tcallercallee;paras:tparalist;
+    procedure tcpuparamanager.create_register_paraloc_info(p : tabstractprocdef; side: tcallercallee;paras:tparalist;
                                                             var parareg,parasize:longint);
       var
         hp : tparavarsym;
@@ -602,7 +597,7 @@ unit cpupara;
                       begin
                         paralen:=voidpointertype.size;
                         paracgsize:=int_cgsize(voidpointertype.size);
-                        paradef:=getpointerdef(paradef);
+                        paradef:=cpointerdef.getreusable_no_free(paradef);
                       end
                     else
                       begin
@@ -614,22 +609,45 @@ unit cpupara;
                     hp.paraloc[side].Alignment:=paraalign;
                     hp.paraloc[side].def:=paradef;
                     {
-                      EAX
-                      EDX
-                      ECX
+                      AX
+                      DX
+                      BX
                       Stack
                       Stack
 
-                      64bit values,floats,arrays and records are always
-                      on the stack.
+                      32/64bit values,far pointers,floats,arrays and records are
+                      always on the stack. The only exception is that Longints
+                      (but not far pointers) can be passed in DX:AX if these
+                      registers are unallocated.
 
                       In case of po_delphi_nested_cc, the parent frame pointer
                       is also always passed on the stack.
                     }
-                    if (parareg<=high(parasupregs)) and
+                    if (parareg=low(parasupregs)) and
+                       (paralen=4) and
+                       (hp.vardef.typ=orddef) then
+                      begin
+                        if pass=1 then
+                          begin
+                            paraloc:=hp.paraloc[side].add_location;
+                            paraloc^.size:=OS_16;
+                            paraloc^.def:=paradef;
+                            paraloc^.loc:=LOC_REGISTER;
+                            paraloc^.register:=newreg(R_INTREGISTER,parasupregs[parareg],R_SUBW);
+                            inc(parareg);
+                            paraloc:=hp.paraloc[side].add_location;
+                            paraloc^.size:=OS_16;
+                            paraloc^.def:=paradef;
+                            paraloc^.loc:=LOC_REGISTER;
+                            paraloc^.register:=newreg(R_INTREGISTER,parasupregs[parareg],R_SUBW);
+                            inc(parareg);
+                          end;
+                      end
+                    else if (parareg<=high(parasupregs)) and
                        (paralen<=sizeof(aint)) and
                        (not(hp.vardef.typ in [floatdef,recorddef,arraydef]) or
-                        pushaddr) and
+                        pushaddr or
+                        is_dynamic_array(hp.vardef)) and
                        (not(vo_is_parentfp in hp.varoptions) or
                         not(po_delphi_nested_cc in p.procoptions)) then
                       begin
@@ -737,7 +755,7 @@ unit cpupara;
       end;
 
 
-    function ti8086paramanager.create_paraloc_info(p : tabstractprocdef; side: tcallercallee):longint;
+    function tcpuparamanager.create_paraloc_info(p : tabstractprocdef; side: tcallercallee):longint;
       var
         parasize,
         parareg : longint;
@@ -765,7 +783,7 @@ unit cpupara;
       end;
 
 
-    function ti8086paramanager.create_varargs_paraloc_info(p : tabstractprocdef; varargspara:tvarargsparalist):longint;
+    function tcpuparamanager.create_varargs_paraloc_info(p : tabstractprocdef; varargspara:tvarargsparalist):longint;
       var
         parasize : longint;
       begin
@@ -778,7 +796,7 @@ unit cpupara;
       end;
 
 
-    procedure ti8086paramanager.createtempparaloc(list: TAsmList;calloption : tproccalloption;parasym : tparavarsym;can_use_final_stack_loc : boolean;var cgpara:TCGPara);
+    procedure tcpuparamanager.createtempparaloc(list: TAsmList;calloption : tproccalloption;parasym : tparavarsym;can_use_final_stack_loc : boolean;var cgpara:TCGPara);
       begin
         { Never a need for temps when value is pushed (calls inside parameters
           will simply allocate even more stack space for their parameters) }
@@ -789,5 +807,5 @@ unit cpupara;
 
 
 begin
-   paramanager:=ti8086paramanager.create;
+   paramanager:=tcpuparamanager.create;
 end.

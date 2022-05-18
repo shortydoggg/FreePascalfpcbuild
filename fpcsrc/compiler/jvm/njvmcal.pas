@@ -33,6 +33,8 @@ interface
     type
        tjvmcallparanode = class(tcgcallparanode)
         protected
+         function push_zero_sized_value_para: boolean; override;
+
          procedure push_formal_para; override;
          procedure push_copyout_para; override;
 
@@ -50,6 +52,7 @@ interface
          procedure extra_post_call_code; override;
          function dispatch_procvar: tnode;
          procedure remove_hidden_paras;
+         procedure gen_vmt_entry_load; override;
         public
          function pass_typecheck: tnode; override;
          function pass_1: tnode; override;
@@ -59,10 +62,10 @@ interface
 implementation
 
     uses
-      verbose,globals,globtype,constexp,cutils,
+      verbose,globals,globtype,constexp,cutils,compinnr,
       symconst,symtable,symsym,symcpu,defutil,
       cgutils,tgobj,procinfo,htypechk,
-      cpubase,aasmdata,aasmcpu,
+      cpubase,aasmbase,aasmdata,aasmcpu,
       hlcgobj,hlcgcpu,
       pass_1,nutils,nadd,nbas,ncnv,ncon,nflw,ninl,nld,nmem,
       jvmdef;
@@ -70,6 +73,13 @@ implementation
 {*****************************************************************************
                            TJVMCALLPARANODE
 *****************************************************************************}
+
+    function tjvmcallparanode.push_zero_sized_value_para: boolean;
+      begin
+        { part of the signature -> need to be pushed }
+        result:=true;
+      end;
+
 
     procedure tjvmcallparanode.push_formal_para;
       begin
@@ -170,6 +180,9 @@ implementation
         implicitptrpara,
         verifyout: boolean;
       begin
+        { the original version doesn't do anything for garbage collected
+          platforms, but who knows in the future }
+        inherited;
         { implicit pointer types are already pointers -> no need to stuff them
           in an array to pass them by reference (except in case of a formal
           parameter, in which case everything is passed in an array since the
@@ -224,10 +237,10 @@ implementation
         if parasym.vardef.typ=formaldef then
           arreledef:=java_jlobject
         else if implicitptrpara then
-          arreledef:=getpointerdef(orgparadef)
+          arreledef:=cpointerdef.getreusable(orgparadef)
         else
           arreledef:=parasym.vardef;
-        arrdef:=getarraydef(arreledef,1+ord(cs_check_var_copyout in current_settings.localswitches));
+        arrdef:=carraydef.getreusable(arreledef,1+ord(cs_check_var_copyout in current_settings.localswitches));
         { the -1 means "use the array's element count to determine the number
           of elements" in the JVM temp generator }
         arraytemp:=ctempcreatenode.create(arrdef,-1,tt_persistent,true);
@@ -254,7 +267,7 @@ implementation
               begin
                 { pass pointer to the struct }
                 left:=caddrnode.create_internal(left);
-                include(left.flags,nf_typedaddr);
+                include(taddrnode(left).addrnodeflags,anf_typedaddr);
                 typecheckpass(left);
               end;
             { wrap the primitive type in an object container
@@ -308,7 +321,7 @@ implementation
                   tempn:=cinlinenode.create(in_unbox_x_y,false,ccallparanode.create(
                     ctypenode.create(orgparadef),ccallparanode.create(tempn,nil)))
                 else if implicitptrpara then
-                  tempn:=ctypeconvnode.create_explicit(tempn,getpointerdef(orgparadef))
+                  tempn:=ctypeconvnode.create_explicit(tempn,cpointerdef.getreusable(orgparadef))
               end;
             if implicitptrpara then
               tempn:=cderefnode.create(tempn)
@@ -374,7 +387,7 @@ implementation
         para.left:=ctemprefnode.create(tempnode);
         { inherit addr_taken flag }
         if (tabstractvarsym(para.parasym).addr_taken) then
-          include(tempnode.tempinfo^.flags,ti_addr_taken);
+          tempnode.includetempflag(ti_addr_taken);
       end;
 
 
@@ -393,7 +406,7 @@ implementation
         if (current_procinfo.procdef.proctypeoption=potype_constructor) and
            (cnf_inherited in callnodeflags) then
           exit;
-        current_asmdata.CurrAsmList.concat(taicpu.op_sym(a_new,current_asmdata.RefAsmSymbol(tabstractrecorddef(procdefinition.owner.defowner).jvm_full_typename(true))));
+        current_asmdata.CurrAsmList.concat(taicpu.op_sym(a_new,current_asmdata.RefAsmSymbol(tabstractrecorddef(procdefinition.owner.defowner).jvm_full_typename(true),AT_METADATA)));
         { the constructor doesn't return anything, so put a duplicate of the
           self pointer on the evaluation stack for use as function result
           after the constructor has run }
@@ -404,7 +417,7 @@ implementation
 
     procedure tjvmcallnode.set_result_location(realresdef: tstoreddef);
       begin
-        location_reset_ref(location,LOC_REFERENCE,def_cgsize(realresdef),1);
+        location_reset_ref(location,LOC_REFERENCE,def_cgsize(realresdef),1,[]);
         { in case of jvmimplicitpointertype(), the function will have allocated
           it already and we don't have to allocate it again here }
         if not jvmimplicitpointertype(realresdef) then
@@ -492,6 +505,12 @@ implementation
     end;
 
 
+  procedure tjvmcallnode.gen_vmt_entry_load;
+    begin
+      { nothing to do }
+    end;
+
+
   function tjvmcallnode.pass_typecheck: tnode;
     begin
       result:=inherited pass_typecheck;
@@ -532,7 +551,7 @@ implementation
       if not tprocvardef(right.resultdef).is_addressonly then
         begin
           right:=caddrnode.create_internal(right);
-          include(right.flags,nf_typedaddr);
+          include(taddrnode(right).addrnodeflags,anf_typedaddr);
         end;
       right:=ctypeconvnode.create_explicit(right,pdclass);
       include(right.flags,nf_load_procvar);
@@ -581,7 +600,7 @@ implementation
                   in theory do that, because the parameter nodes have already
                   been bound to the current procdef's parasyms }
                 remove_hidden_paras;
-                result:=ccallnode.create(left,tprocsym(sym),symtableproc,methodpointer,callnodeflags);
+                result:=ccallnode.create(left,tprocsym(sym),symtableproc,methodpointer,callnodeflags,nil);
                 result.flags:=flags;
                 left:=nil;
                 methodpointer:=nil;

@@ -15,7 +15,7 @@
 
 [package]
 name=fpdocs
-version=3.0.2
+version=3.2.0
 
 [require]
 nortl=y
@@ -137,6 +137,8 @@ ifndef (ipf,$(HTMLFMT)
 endif
 endif
 
+# inUnix is used in subdirectories to test execution of generated examples
+export inUnix
 
 #######################################################################
 # LaTeX Program definitions
@@ -161,6 +163,11 @@ endif
 # Makeindex programma
 ifndef MAKEINDEX
 MAKEINDEX=makeindex
+endif
+
+ifneq ($(LATEXOPT),)
+  override LATEX+= $(LATEXOPT)
+  override PDFLATEX+= $(LATEXOPT)
 endif
 
 # Required Latex settings
@@ -272,11 +279,11 @@ endif
 .tex.pdf:
         -rm -f $*.aux $*.idx  $*.ilg  $*.ind  $*.log  $*.out  $*.toc $*.tmp $*.xref $*.4ht
         cp -f preamble.$(PREAMBLETYPE) preamble.inc
-        $(PDFLATEX) $*
+        $(PDFLATEX) $* $(LATEXPOSTOPT)
         -$(MAKEINDEX) $*.idx
-        $(PDFLATEX) $*
+        $(PDFLATEX) $* $(LATEXPOSTOPT)
         -$(MAKEINDEX) $*.idx
-        $(PDFLATEX) $*
+        $(PDFLATEX) $* $(LATEXPOSTOPT)
 
 ifndef USEELINKS
 $(TXT) : %.txt: %.dvi
@@ -325,7 +332,8 @@ clean: fpc_clean
         -rm -f $(notdir $(wildcard styles/*.sty))
 
 distclean: fpc_distclean clean cleanexamples
-        -rm -f *.tar.gz *.zip
+	-rm -f *.haux *.htoc *.hind *.htex *.chk
+	-rm -f *.tar.gz *.zip
 
 #####################################################################
 # Include files
@@ -334,23 +342,33 @@ distclean: fpc_distclean clean cleanexamples
 # the following assumes "gdate" in the path on windwows
 
 date.inc:
-        @$(ECHO) \\date\{`date +'%B %Y'`\} > date.inc
+	@$(ECHO) \\date\{`date +'%B %Y'`\} > date.inc
 
 $(FPCSRCDIR)/compiler/utils/msg2inc$(EXEEXT):
-        $(MAKE) -C $(FPCSRCDIR)/compiler/utils msg2inc$(EXEEXT)
+	$(MAKE) -C $(FPCSRCDIR)/compiler/utils msg2inc$(EXEEXT)
 #        $(MAKE) -C $(FPCSRCDIR)/compiler msg2inc
 
 messages.inc: $(FPCSRCDIR)/compiler/utils/msg2inc$(EXEEXT) $(FPCSRCDIR)/compiler/msg/errore.msg
         $(FPCSRCDIR)/compiler/utils/msg2inc -TE $(FPCSRCDIR)/compiler/msg/errore.msg messages.inc
 
-comphelp.inc:
-ifneq (,$(findstring win,$(OS_SOURCE)))
-	$(ECHO) % Automatically generated. Do not edit > comphelp.inc
-	$(ECHO) -n \\begin{verbatim} >> comphelp.inc
-	$(FPC) -h >>comphelp.inc
-	$(ECHO) \end{verbatim} >> comphelp.inc
+ifdef inUnix
+USE_UNIX_ECHO=1
 else
-	$(ECHO) "% Automatically generated. Do not edit" > comphelp.inc
+ifdef inCygWin
+USE_UNIX_ECHO=1
+else
+USE_UNIX_ECHO=
+endif
+endif
+
+comphelp.inc:
+ifdef USE_UNIX_ECHO
+	$(ECHO) % Automatically generated Unix version. Do not edit > comphelp.inc
+	$(ECHO) -n "\\begin{verbatim}" >> comphelp.inc
+	$(FPC) -h | sed 's;\\;\\\\;g' >> comphelp.inc
+	$(ECHO) "\\end{verbatim}" >> comphelp.inc
+else
+	$(ECHO) "% Automatically generated Win version. Do not edit" > comphelp.inc
 	$(ECHO) -n '\' >> comphelp.inc
 	$(ECHO) 'begin{verbatim}' >> comphelp.inc
 	$(FPC) -h >>comphelp.inc
@@ -453,7 +471,7 @@ FCLUNITS=iostream pipes streamio process dbugintf contnrs zstream idea bufstream
          base64 gettext pooledmm dbugmsg streamex inicol streamcoll cachecls \
          eventlog syncobjs custapp blowfish simpleipc inifiles rttiutils uriparser \
          daemonapp libtar ascii85 fptimer db avl_tree ibconnection mssqlconn zipper sqldb \
-         fpjson sqltypes
+         fpjson sqltypes bufdataset fpmimetypes
 FCLUNITS+= ezcgi
 
 FCLXML=$(addsuffix .xml,$(FCLUNITS))
@@ -467,7 +485,7 @@ FCLBUFSTREAM= --descr=bufstream.xml --input="$(FCLBASEDIR)/bufstream.pp"
 FCLBASE64= --descr=base64.xml --input="$(FCLBASEDIR)/base64.pp"
 FCLGETTEXT= --descr=gettext.xml --input="$(FCLBASEDIR)/gettext.pp"
 FCLPOOLEDMM= --descr=pooledmm.xml --input="$(FCLBASEDIR)/pooledmm.pp"
-FCLSTREAMEX= --descr=streamex.xml --input="$(FCLBASEDIR)/streamex.pp"
+FCLSTREAMEX= --descr=streamex.xml --input="-dFPC $(FCLBASEDIR)/streamex.pp"
 FCLINICOL= --descr=inicol.xml --input="$(FCLBASEDIR)/inicol.pp"
 FCLSTREAMCOL= --descr=streamcoll.xml --input="$(FCLBASEDIR)/streamcoll.pp"
 FCLCACHECLS= --descr=cachecls.xml --input="$(FCLBASEDIR)/cachecls.pp"
@@ -491,12 +509,14 @@ FCLLIBTAR= --descr=libtar.xml --input="$(FPCSRCDIR)/packages/libtar/src/libtar.p
 FCLASCII85= --descr=ascii85.xml --input="$(FCLBASEDIR)/ascii85.pp"
 FCLFPTIMER= --descr=fptimer.xml --input="$(FCLBASEDIR)/fptimer.pp"
 FCLDB= --descr=db.xml --input="$(FCLDBDIR)/base/db.pas"
-FCLSQLTYPES= --descr=db.xml --input="$(FCLDBDIR)/base/sqltypes.pp"
+FCLSQLTYPES= --descr=sqltypes.xml --input="$(FCLDBDIR)/base/sqltypes.pp"
 FCLSQLDB= --descr=sqldb.xml --input="$(FCLDBDIR)/sqldb/sqldb.pp"
 FCLIBCONNECTION=  --descr=ibconnection.xml --input="$(FCLDBDIR)/sqldb/interbase/ibconnection.pp"
 FCLMSSQLCONN=  --descr=mssqlconn.xml --input="$(FCLDBDIR)/sqldb/mssql/mssqlconn.pp"
 FCLZIPPER=  --descr=zipper.xml --input="$(FCLZLIBDIR)/zipper.pp"
 FCLJSON= --descr=fpjson.xml --input="$(FCLJSONDIR)/fpjson.pp"
+FCLBUFDATASET= --descr=bufdataset.xml --input="$(FCLDBDIR)/base/bufdataset.pas"
+FCLMIMETYPES= --descr=fpmimetypes.xml --input="$(FCLWEBDIR)/base/fpmimetypes.pp"
 
 # Now add to the FCL fpdoc opts.
 FCLUNITOPTS+= $(FCLIOSTREAM) $(FCLPIPES) $(FCLSTREAMIO) $(FCLPROCESS) $(FCLDBUGINTF)
@@ -509,7 +529,8 @@ FCLUNITOPTS+= $(FCLCUSTAPP) $(FCLBLOWFISH) $(FCLSIMPLEIPC) $(FCLINIFILES) $(FCLR
 FCLUNITOPTS+= $(FCLAVLTREE) $(FCLURIPARSER) $(FCLDAEMONAPP) $(FCLLIBTAR) $(FCLASCII85)
 FCLUNITOPTS+= $(FCLFPTIMER) $(FCLDB) $(FCLZIPPER) $(FCLSQLTYPES)
 #FCLUNITOPTS+= $(FCLFPVECTORIAL) 
-FCLUNITOPTS+= $(FCLSQLDB) $(FCLIBCONNECTION) $(FCLMSSQLCONN) $(FCLJSON)
+FCLUNITOPTS+= $(FCLSQLDB) $(FCLIBCONNECTION) $(FCLMSSQLCONN) $(FCLJSON) $(FCLBUFDATASET)
+FCLUNITOPTS+= $(FCLMIMETYPES)
 
 updatefclxml: fpc_all
 	$(FCLMAKESKEL) $(FCLIOSTREAM) --output=iostream.new.xml
@@ -543,6 +564,7 @@ updatefclxml: fpc_all
         $(FCLMAKESKEL) $(FCLSQLDB) --output=sqldb.new.xml
 	$(FCLMAKESKEL) $(FCLZIPPER) --output=zipper.new.xml
 	$(FCLMAKESKEL) $(FCLJSON) --output=fpjson.new.xml
+	$(FCLMAKESKEL) $(FCLMIMETYPES) --output=fpmimetypes.new.xml
 	./cleanxml $(FCLNEWXML)
 
 #
@@ -604,35 +626,35 @@ FCLOPTS+= --hide-protected
 endif
 
 updatefclresxml: fpc_all
-	$(RTLMAKESKEL) $(FCLRESRESOURCE) --output=resource.new.xml
-	$(RTLMAKESKEL) $(FCLRESRESOURCETREE) --output=resourcetree.new.xml
-	$(RTLMAKESKEL) $(FCLRESDATASTREAM) --output=datastream.new.xml
-	$(RTLMAKESKEL) $(FCLRESRESFACTORY) --output=resfactory.new.xml
-	$(RTLMAKESKEL) $(FCLRESRESREADER) --output=resreader.new.xml
-	$(RTLMAKESKEL) $(FCLRESRESWRITER) --output=reswriter.new.xml
-	$(RTLMAKESKEL) $(FCLRESBITMAPRESOURCE) --output=resbitmapresource.new.xml
-	$(RTLMAKESKEL) $(FCLRESACCELLERATORRESOURCE) --output=resaccelleratorresource.new.xml
-	$(RTLMAKESKEL) $(FCLRESGROUPRESOURCE) --output=groupresource.new.xml
-	$(RTLMAKESKEL) $(FCLRESICONRESOURCE) --output=iconresource.new.xml
-	$(RTLMAKESKEL) $(FCLRESGROUPCURSORRESOURCE) --output=groupcursorresource.new.xml
-	$(RTLMAKESKEL) $(FCLRESSTRINGTABLERESOURCE) --output=stringtableresource.new.xml
-	$(RTLMAKESKEL) $(FCLRESVERSIONCONSTS) --output=versionconsts.new.xml
-	$(RTLMAKESKEL) $(FCLRESVERSIONTYPES) --output=versiontypes.new.xml
-	$(RTLMAKESKEL) $(FCLRESVERSIONRESOURCE) --output=versionresource.new.xml
-	$(RTLMAKESKEL) $(FCLRESCOFFTYPES) --output=cofftypes.new.xml
-	$(RTLMAKESKEL) $(FCLRESCOFFREADER) --output=coffreader.new.xml
-	$(RTLMAKESKEL) $(FCLRESCOFFWRITER) --output=coffwriter.new.xml
-	$(RTLMAKESKEL) $(FCLRESWINPEIMAGEREADER) --output=winpeimagereader.new.xml
-	$(RTLMAKESKEL) $(FCLRESELFCONST) --output=elfconst.new.xml
-	$(RTLMAKESKEL) $(FCLRESELFREADER) --output=elfreader.new.xml
-	$(RTLMAKESKEL) $(FCLRESELFWRITER) --output=elfwriter.new.xml
-	$(RTLMAKESKEL) $(FCLRESMACHOTYPES) --output=machotypes.new.xml
-	$(RTLMAKESKEL) $(FCLRESMACHOREADER) --output=machoreader.new.xml
-	$(RTLMAKESKEL) $(FCLRESMACHOWRITER) --output=machowriter.new.xml
-	$(RTLMAKESKEL) $(FCLRESEXTERNALTYPES) --output=externaltypes.new.xml
-	$(RTLMAKESKEL) $(FCLRESEXTERNALREADER) --output=externalreader.new.xml
-	$(RTLMAKESKEL) $(FCLRESEXTERNALWRITER) --output=externalwriter.new.xml
-	$(RTLMAKESKEL) $(FCLRESDFMREADER) --output=dfmreader.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESRESOURCE) --output=resource.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESRESOURCETREE) --output=resourcetree.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESDATASTREAM) --output=resdatastream.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESRESFACTORY) --output=resfactory.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESRESREADER) --output=resreader.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESRESWRITER) --output=reswriter.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESBITMAPRESOURCE) --output=resbitmapresource.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESACCELLERATORRESOURCE) --output=resaccelleratorresource.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESGROUPRESOURCE) --output=groupresource.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESICONRESOURCE) --output=iconresource.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESGROUPCURSORRESOURCE) --output=groupcursorresource.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESSTRINGTABLERESOURCE) --output=stringtableresource.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESVERSIONCONSTS) --output=versionconsts.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESVERSIONTYPES) --output=versiontypes.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESVERSIONRESOURCE) --output=versionresource.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESCOFFTYPES) --output=cofftypes.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESCOFFREADER) --output=coffreader.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESCOFFWRITER) --output=coffwriter.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESWINPEIMAGEREADER) --output=winpeimagereader.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESELFCONST) --output=elfconst.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESELFREADER) --output=elfreader.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESELFWRITER) --output=elfwriter.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESMACHOTYPES) --output=machotypes.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESMACHOREADER) --output=machoreader.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESMACHOWRITER) --output=machowriter.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESEXTERNALTYPES) --output=externaltypes.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESEXTERNALREADER) --output=externalreader.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESEXTERNALWRITER) --output=externalwriter.new.xml
+	$(FCLRESMAKESKEL) $(FCLRESDFMREADER) --output=dfmreader.new.xml
 	./cleanxml $(FCLRESNEWXML)
 
 #
@@ -661,8 +683,8 @@ RTLUNITS=system objpas types sysutils strutils dateutils strings mouse keyboard 
 RTLXML=$(addsuffix .xml,$(RTLUNITS)) rtl-project.xml
 RTLNEWXML=$(addsuffix .new.xml,$(RTLUNITS))
 RTLTYPES= --descr=types.xml --input="$(FPCSRCDIR)/rtl/objpas/types.pp $(OSDIRINCLUDES)"
-RTLSTRUTILS= --descr=strutils.xml --input="$(FPCSRCDIR)/packages/rtl-objpas/src/inc/strutils.pp $(OSDIRINCLUDES)"
-RTLSYSUTILS= --descr=sysutils.xml --input="-dFPC_HAS_TYPE_SINGLE -dFPC_HAS_TYPE_DOUBLE -dFPC_HAS_TYPE_EXTENDED $(FPCSRCDIR)/rtl/unix/sysutils.pp -Fi$(FPCSRCDIR)/rtl/objpas/sysutils -Fi$(FPCSRCDIR)/rtl/inc $(OSDIRINCLUDES)"
+RTLSTRUTILS= --descr=strutils.xml --input="-dFPC_LITTLE_ENDIAN $(FPCSRCDIR)/packages/rtl-objpas/src/inc/strutils.pp $(OSDIRINCLUDES)"
+RTLSYSUTILS= --descr=sysutils.xml --input="-dFPC_HAS_TYPE_SINGLE -dFPC_HAS_TYPE_DOUBLE -dFPC_HAS_TYPE_EXTENDED -dFPC_HAS_UNICODESTRING -dFPC_LITTLE_ENDIAN $(FPCSRCDIR)/rtl/unix/sysutils.pp -Fi$(FPCSRCDIR)/rtl/objpas/sysutils -Fi$(FPCSRCDIR)/rtl/inc $(OSDIRINCLUDES)"
 RTLSTRINGS= --descr=strings.xml --input="$(FPCSRCDIR)/rtl/inc/strings.pp -Fi$(FPCSRCDIR)/rtl/i386 -Fi$(FPCSRCDIR)/rtl/inc $(OSDIRINCLUDES)"
 RTLMOUSE= --descr=mouse.xml --input="$(FPCSRCDIR)/packages/rtl-console/src/unix/mouse.pp -Fi$(FPCSRCDIR)/packages/rtl-console/src/inc $(OSDIRINCLUDES)"
 RTLKEYBOARD= --descr=keyboard.xml --input="$(FPCSRCDIR)/packages/rtl-console/src/unix/keyboard.pp -Fi$(FPCSRCDIR)/packages/rtl-console/src/inc $(OSDIRINCLUDES)"
@@ -694,7 +716,7 @@ RTLDYNLIBS= --descr=dynlibs.xml --input="$(FPCSRCDIR)/rtl/inc/dynlibs.pas -Fi$(F
 RTLLINUX= --descr=linux.xml --input="-dclone_implemented $(FPCSRCDIR)/rtl/linux/linux.pp -Fi$(FPCSRCDIR)/rtl/linux -Fi$(FPCSRCDIR)/rtl/unix $(OSDIRINCLUDES)"
 RTLMATH= --descr=math.xml --input="-dFPDOC_MATH $(FPCSRCDIR)/rtl/objpas/math.pp -Fi$(FPCSRCDIR)/rtl/i386 -dFPC_HAS_TYPE_EXTENDED $(OSDIRINCLUDES)"
 RTLMATRIX= --descr=matrix.xml --input="$(FPCSRCDIR)/packages/rtl-extra/src/inc/matrix.pp -Fi$(FPCSRCDIR)/packages/rtl-extra/src/inc $(OSDIRINCLUDES)"
-RTLSYSTEM= --descr=system.xml --input="-Sd -dfpdocsystem -dHASGETHEAPSTATUS -dSUPPORT_DOUBLE $(FPCSRCDIR)/rtl/$(SYSTEMUNITDIR)/system.pp -Fi$(FPCSRCDIR)/rtl/$(OS_SOURCE) -Fi$(FPCSRCDIR)/rtl/unix -Fi$(FPCSRCDIR)/rtl/inc -Fi$(FPCSRCDIR)/rtl/i386 -dCPU32 -dHASVARIANT -dFPC_HAS_TYPE_EXTENDED -dHASWIDECHAR $(OSDIRINCLUDES)"
+RTLSYSTEM= --descr=system.xml --input="-Sd -dFPC_LITTLE_ENDIAN  -dfpdocsystem -dHASGETHEAPSTATUS -dSUPPORT_DOUBLE $(FPCSRCDIR)/rtl/$(SYSTEMUNITDIR)/system.pp -Fi$(FPCSRCDIR)/rtl/$(OS_SOURCE) -Fi$(FPCSRCDIR)/rtl/unix -Fi$(FPCSRCDIR)/rtl/inc -Fi$(FPCSRCDIR)/rtl/i386 -dCPU32 -dHASVARIANT -dFPC_HAS_TYPE_EXTENDED -dHASWIDECHAR $(OSDIRINCLUDES)"
 RTLOBJPAS= --descr=objpas.xml --input="-dHASINTF $(FPCSRCDIR)/rtl/objpas/objpas.pp $(OSDIRINCLUDES)"
 RTLDATEUTILS= --descr=dateutils.xml --input="$(FPCSRCDIR)/packages/rtl-objpas/src/inc/dateutils.pp -Fi$(FPCSRCDIR)/rtl/objpas $(OSDIRINCLUDES)"
 RTLCLOCALE= --descr=clocale.xml --input="$(FPCSRCDIR)/packages/rtl-extra/src/unix/clocale.pp $(OSDIRINCLUDES)"
@@ -713,8 +735,8 @@ RTLCHARACTER= --descr=character.xml --input="$(FPCSRCDIR)/rtl/objpas/character.p
 #
 # Put all together.
 #
-RTLOPTS+= $(RTLSYSTEM) $(RTLOBJPAS) $(RTLTYPES) 
-RTLOPTS+= $(RTLSTRUTILS) $(RTLSYSUTILS) $(RTLSTRINGS) $(RTLMOUSE) $(RTLKEYBOARD)
+RTLOPTS+= $(RTLSYSTEM) $(RTLOBJPAS) $(RTLTYPES) $(RTLSYSUTILS)
+RTLOPTS+= $(RTLSTRUTILS)  $(RTLSTRINGS) $(RTLMOUSE) $(RTLKEYBOARD)
 RTLOPTS+= $(RTLCRT) $(RTLVIDEO) $(RTLDOS) $(RTLSOCKETS) $(RTLOBJECTS)
 RTLOPTS+= $(RTLHEAPTRC) $(RTLMMX) $(RTLIPC) $(RTLPRINTER) $(RTLTYPINFO) 
 RTLOPTS+= $(RTLPORTS) $(RTLGETOPTS) $(RTLEMU387) $(RTLDXELOAD) $(RTLGO32)
@@ -912,7 +934,7 @@ endif  # USEL2H
 endif  # USEPLASTEX
 endif  # USEHEVEA
 
-fcl.chk: $(FCLXML) fcl-project.xml
+fcl.chk: $(FCLXML) fcl-project.xml rtl.chk
         $(FPDOC) $(FPDOCOPTS) --project=fcl-project.xml --format=$(HTMLFMT) --output=fcl$(HTMLSUFFIX) $(FPDOCHTMLOPTS) $(FCLCHMOPTS)
 ifndef CSSFILE
         cp fpdoc.cst fcl/fpdoc.css
@@ -920,7 +942,7 @@ endif
         @$(ECHO) '' > fcl.chk
 
 fclres.chk: $(FCLRESXML)
-        $(FPDOC) $(FPDOCOPTS) $(FCLRESOPTS) --format=$(HTMLFMT) --output=fclres$(HTMLSUFFIX) $(FPDOCHTMLOPTS) $(FCLRESCHMOPTS) 
+        $(FPDOC) $(FPDOCOPTS) $(FCLRESOPTS)  --format=$(HTMLFMT) --output=fclres$(HTMLSUFFIX) $(FPDOCHTMLOPTS) $(FCLRESCHMOPTS) 
 ifndef CSSFILE
         cp fpdoc.cst fclres/fpdoc.css
 endif
@@ -1090,6 +1112,11 @@ cleanexamples:
         $(MAKE) -C sysutex clean
         $(MAKE) -C typinfex clean
         $(MAKE) -C kbdex clean
+        $(MAKE) -C go32ex clean
+        $(MAKE) -C mouseex clean
+        $(MAKE) -C linuxex clean
+        $(MAKE) -C sockex clean
+        $(MAKE) -C ipcex clean
 
 dosexamples: examples
         $(MAKE) -C go32ex

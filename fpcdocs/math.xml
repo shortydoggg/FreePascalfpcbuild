@@ -91,7 +91,7 @@ Routines to convert angles between different angle units.
 </topic>
 
 <topic name="TrigoniometricRoutines">
-<short>Trigoniometric functions</short>
+<short>Trigonometric functions</short>
 <descr>
 <table>
 <th><td>Name</td><td>Description</td></th>
@@ -110,9 +110,9 @@ Routines to convert angles between different angle units.
 <descr>
 <table>
 <th><td>Name</td><td>Description</td></th>
-<tr><td><link id="arcosh"/></td><td>caculate reverse hyperbolic cosine</td></tr>
-<tr><td><link id="arsinh"/></td><td>caculate reverse hyperbolic sine</td></tr>
-<tr><td><link id="artanh"/></td><td>caculate reverse hyperbolic tangent</td></tr>
+<tr><td><link id="arcosh"/></td><td>calculate reverse hyperbolic cosine</td></tr>
+<tr><td><link id="arsinh"/></td><td>calculate reverse hyperbolic sine</td></tr>
+<tr><td><link id="artanh"/></td><td>calculate reverse hyperbolic tangent</td></tr>
 <tr><td><link id="cosh"/></td><td>calculate hyperbolic cosine</td></tr>
 <tr><td><link id="sinh"/></td><td>calculate hyperbolic sine</td></tr>
 <tr><td><link id="tanh"/></td><td>calculate hyperbolic tangent</td></tr>
@@ -156,9 +156,9 @@ Routines to convert angles between different angle units.
 <tr><td><link id="mean"/></td><td>Mean of values</td></tr>
 <tr><td><link id="meanandstddev"/></td><td>Mean and standard deviation of values</td></tr>
 <tr><td><link id="momentskewkurtosis"/></td><td>Moments, skew and kurtosis</td></tr>
-<tr><td><link id="popnstddev"/></td><td>Population standarddeviation</td></tr>
+<tr><td><link id="popnstddev"/></td><td>Population standard deviation</td></tr>
 <tr><td><link id="popnvariance"/></td><td>Population variance</td></tr>
-<tr><td><link id="randg"/></td><td>Gaussian distributed randum value</td></tr>
+<tr><td><link id="randg"/></td><td>Gaussian distributed random value</td></tr>
 <tr><td><link id="stddev"/></td><td>Standard deviation</td></tr>
 <tr><td><link id="sum"/></td><td>Sum of values</td></tr>
 <tr><td><link id="sumofsquares"/></td><td>Sum of squared values</td></tr>
@@ -175,7 +175,7 @@ Routines to convert angles between different angle units.
 <table>
 <th><td>Name</td><td>Description</td></th>
 <tr><td><link id="hypot"/></td><td>Hypotenuse of triangle</td></tr>
-<tr><td><link id="norm"/></td><td>Euclidian norm</td></tr>
+<tr><td><link id="norm"/></td><td>Euclidean norm</td></tr>
 </table>
 </descr>
 </topic>
@@ -379,7 +379,7 @@ exception is raised.
 The absolute value of <var>x</var> should be less than <var>maxint</var>.
 </descr>
 <errors>
-If the asolute value of <var>x</var> is larger than maxint, an overflow error will
+If the absolute value of <var>x</var> is larger than maxint, an overflow error will
 occur.
 </errors>
 <seealso>
@@ -861,7 +861,7 @@ None.
 <short>Return 4 first moments of distribution</short>
 <descr>
 <var>momentskewkurtosis</var> calculates the 4 first moments of the distribution
-of valuesin <var>data</var> and returns them in <var>m1</var>,<var>m2</var>,<var>m3</var> and
+of value in <var>data</var> and returns them in <var>m1</var>,<var>m2</var>,<var>m3</var> and
 <var>m4</var>, as well as the <var>skew</var> and <var>kurtosis</var>.
 </descr>
 <errors>
@@ -875,10 +875,10 @@ None.
 </element>
 
 <element name="norm">
-<short>Return Euclidian norm</short>
+<short>Return Euclidean norm</short>
 <descr>
 <p>
-<var>Norm</var> calculates the Euclidian norm of the array of data.
+<var>Norm</var> calculates the Euclidean norm of the array of data.
 This equals <var>sqrt(sumofsquares(data))</var>.
 </p>
 <p>
@@ -896,7 +896,7 @@ None.
 
 
 <element name="popnstddev">
-<short>Return population variance</short>
+<short>Return Population standard deviation</short>
 <descr>
 <p>
 <var>Popnstddev</var> returns the square root of the population variance of
@@ -1232,7 +1232,7 @@ None.
 
 
 <element name="totalvariance">
-<short>Return total varians of values</short>
+<short>Return total variance of values</short>
 <descr>
 <p>
 <var>TotalVariance</var> returns the total variance of the values in the 
@@ -1276,6 +1276,7 @@ None.
 <link id="mean"/>
 </seealso>
 <example file="mathex/ex50"/>
+<example file="mathex/ex51"/>
 </element>
 
 <!-- unresolved type reference Visibility: default -->
@@ -1381,7 +1382,7 @@ larger than <var>AMax</var>.
 
 <!-- range type Visibility: default -->
 <element name="TValueSign">
-<short>Type indicating sign of a valuea</short>
+<short>Type indicating sign of a value</short>
 </element>
 
 <!-- constant Visibility: default -->
@@ -1538,12 +1539,12 @@ compatibility.
 
 <!-- enumeration value Visibility: default -->
 <element name="TFPURoundingMode.rmNearest">
-<short>Round to nearest integer value</short>
+<short>Round to nearest integer value, using banker's rounding in case of a tie.</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
 <element name="TFPURoundingMode.rmDown">
-<short>Round to biggest integer smaller than value.</short>
+<short>Round to biggest integer less than value.</short>
 </element>
 
 <!-- enumeration value Visibility: default -->
@@ -1553,7 +1554,7 @@ compatibility.
 
 <!-- enumeration value Visibility: default -->
 <element name="TFPURoundingMode.rmTruncate">
-<short>Cut off fractional part.</short>
+<short>Round towards zero, i.e. cut off fractional part.</short>
 </element>
 
 <!-- enumeration type Visibility: default -->
@@ -1637,13 +1638,13 @@ compatibility.
 </p>
 <dl>
 <dt>rmNearest</dt>
-<dd><printshort id="#rtl.system.TFPURoundingMode.TFPURoundingMode.rmNearest"/></dd>
+<dd><printshort id="#rtl.system.TFPURoundingMode.rmNearest"/></dd>
 <dt>rmDown</dt>
-<dd><printshort id="#rtl.system.TFPURoundingMode.TFPURoundingMode.rmDown"/></dd>
+<dd><printshort id="#rtl.system.TFPURoundingMode.rmDown"/></dd>
 <dt>rmUp</dt>
-<dd><printshort id="#rtl.system.TFPURoundingMode.TFPURoundingMode.rmUp"/></dd>
+<dd><printshort id="#rtl.system.TFPURoundingMode.rmUp"/></dd>
 <dt>rmTruncate</dt>
-<dd><printshort id="#rtl.system.TFPURoundingMode.TFPURoundingMode.rmTruncate"/></dd>
+<dd><printshort id="#rtl.system.TFPURoundingMode.rmTruncate"/></dd>
 </dl>
 </descr>
 <seealso>
@@ -1786,8 +1787,8 @@ An exception may occur if the value <var>AValue</var> is not inside a valid inte
 <short>Round to the specified number of digits (rounding up if needed)</short>
 <descr>
 <var>SimpleRoundTo</var> rounds the specified float <var>AValue</var> to the
-specified number of digits, but rounds up, and returns the result. This result is accurate
-to "10 to the power Digits". It uses the standard <var>Round</var> function
+specified number of <var>digits</var> using symmetric arithmetic rounding (rounding up for positive or down for negative) and returns the result. 
+This result is accurate to "10 to the power <var>Digits</var>". It uses the standard <var>Round</var> function
 for this.
 </descr>
 <errors>
@@ -1986,7 +1987,7 @@ at a rate <var>ARate</var> (<var>q</var>).
 <p> 
 The <var>APaymentTime</var> parameter determines whether the investment
 (payment) is an ordinary annuity or an annuity due: <var>ptEndOfPeriod</var>
-NumberOfPeriodsmust be used if payments are at the end of each period. If the payments are
+NumberOfPeriods must be used if payments are at the end of each period. If the payments are
 at the beginning
 of the periode, <var>ptStartOfPeriod</var> must be used.
 </p>
@@ -2019,7 +2020,7 @@ future value <var>AFutureValue</var> for an investment of a start value
 <p>
 The <var>APaymentTime</var> parameter determines whether the investment
 (payment) is an ordinary annuity or an annuity due: <var>ptEndOfPeriod</var>
-NumberOfPeriodsmust be used if payments are at the end of each period. If
+NumberOfPeriods must be used if payments are at the end of each period. If
 the payments are
 at the beginning
 of the periode, <var>ptStartOfPeriod</var> must be used.
@@ -2194,6 +2195,46 @@ None.
 <seealso>
 <link id="floor"/>
 <link id="ceil64"/>
+</seealso>
+</element>
+
+<element name="FMod">
+<short>Floatin point modulo</short>
+<descr>
+<p>
+<var>FMod</var> is the floating-point equivalent of the modulo operation <var>a mod b</var>.
+It returns the result of
+</p>
+<p>
+<var>
+a-b * Int(a/b)
+</var>
+</p>
+</descr>
+<errors>
+<var>b</var> may not be zero, but no check is performed.
+</errors>
+</element>
+
+<!-- operator Visibility: default -->
+<element name="modulus(Float,Float):Float">
+<short>Floating point modulo</short>
+<descr>
+<p>
+<var>Modulus</var> is the floating-point equivalent of the modulo operation <var>a mod b</var>.
+It returns the result of
+</p>
+<p>
+<var>
+a-b * Int(a/b)
+</var>
+</p>
+</descr>
+<errors>
+<var>b</var> may not be zero, but no check is performed.
+</errors>
+<seealso>
+<link id="FMod"/>
 </seealso>
 </element>
 

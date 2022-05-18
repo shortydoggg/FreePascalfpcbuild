@@ -17,11 +17,12 @@ begin
 {$ifdef ALLPACKAGES}
     P.Directory:=ADirectory;
 {$endif ALLPACKAGES}
-    P.Version:='3.0.2';
+    P.Version:='3.2.0';
     P.SourcePath.Add('src');
     P.OSes:=[darwin,iphonesim];
 
     T:=P.Targets.AddUnit('iosxlocale.pp');
+    T:=P.Targets.AddUnit('iosxwstr.pp');
 
 {$ifndef ALLPACKAGES}
     Run;
